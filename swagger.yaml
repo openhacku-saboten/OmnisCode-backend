@@ -33,7 +33,7 @@ paths:
         name: "body"
         required: true
         schema:
-          $ref: "#/definitions/User"
+          $ref: "#/definitions/UserRequest"
       responses:
         "204":
           description: "successful operation"
@@ -63,7 +63,7 @@ paths:
         name: "body"
         required: true
         schema:
-          $ref: "#/definitions/User"
+          $ref: "#/definitions/UserRequest"
       responses:
         "200":
           description: "successful operation"
@@ -158,7 +158,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/User"
+            $ref: "#/definitions/UserResponse"
         "404":
           description: "User not found"
           schema:
@@ -186,7 +186,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Code"
+              $ref: "#/definitions/CodeResponse"
         "404":
           description: "User not found"
           schema:
@@ -214,7 +214,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Comment"
+              $ref: "#/definitions/CommentResponse"
         "404":
           description: "User not found"
           schema:
@@ -235,7 +235,7 @@ paths:
         name: "body"
         required: true
         schema:
-          $ref: "#/definitions/Code"
+          $ref: "#/definitions/CodeRequest"
       responses:
         "204":
           description: "successful operation"
@@ -259,7 +259,7 @@ paths:
         "200":
           description: "successful operation"
           schema:
-            $ref: "#/definitions/Code"
+            $ref: "#/definitions/CodeResponse"
         "404":
           description: "Code not found"
           schema:
@@ -284,7 +284,7 @@ paths:
         name: "body"
         required: true
         schema:
-          $ref: "#/definitions/Code"
+          $ref: "#/definitions/CodeRequest"
       responses:
         "200":
           description: "successful operation"
@@ -333,7 +333,7 @@ paths:
           schema:
             type: array
             items:
-              $ref: "#/definitions/Comment"
+              $ref: "#/definitions/CommentResponse"
     post:
       tags:
       - "comment"
@@ -354,7 +354,7 @@ paths:
         name: "body"
         required: true
         schema:
-          $ref: "#/definitions/Comment"
+          $ref: "#/definitions/CommentRequest"
       responses:
         "200":
           description: "successful operation"
@@ -397,7 +397,16 @@ securityDefinitions:
     in: "header"
 
 definitions:
-  User:
+  UserRequest:
+    type: "object"
+    properties:
+      username:
+        type: "string"
+      twitter_id:
+        type: "string"
+      profile:
+        type: "string"
+  UserResponse:
     type: "object"
     properties:
       id:
@@ -409,7 +418,21 @@ definitions:
         type: "string"
       profile:
         type: "string"
-  Code:
+  CodeRequest:
+    type: "object"
+    properties:
+      title:
+        type: "string"
+      code:
+        type: "string"
+      language:
+        type: "string"
+      description:
+        type: "string"
+      source:
+        type: "string"
+        description: "codeの引用元(urlなど)"
+  CodeResponse:
     type: "object"
     properties:
       id:
@@ -429,7 +452,16 @@ definitions:
       source:
         type: "string"
         description: "codeの引用元(urlなど)"
-  Comment:
+  CommentRequest:
+    type: "object"
+    properties:
+      line:
+        type: "integer"
+        format: "int32"
+        description: "レビュー時に指定した行数"
+      description:
+        type: "string"  
+  CommentResponse:
     type: "object"
     properties:
       id:
