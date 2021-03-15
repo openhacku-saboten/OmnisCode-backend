@@ -1,4 +1,5 @@
-
+ENV_TEST_FILE := .env.test
+ENV_TEST := $(shell cat $(ENV_TEST_FILE))
 
 .PHONY:run
 run:
@@ -6,11 +7,11 @@ run:
 
 .PHONY:test
 test:
-	go test -count=1 ./...
+	$(ENV_TEST) go test -count=1 ./...
 
 .PHONY:test-with-coverage
 test-with-coverage:
-	go test -covermode=atomic -coverprofile=coverage.out ./...
+	$(ENV_TEST) go test -covermode=atomic -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o ./cover.html
 
 .PHONY:gen
