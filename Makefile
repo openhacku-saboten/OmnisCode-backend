@@ -1,9 +1,12 @@
+ENV_FILE := .env
+ENV := $(shell cat $(ENV_FILE))
+
 ENV_TEST_FILE := .env.test
 ENV_TEST := $(shell cat $(ENV_TEST_FILE))
 
 .PHONY:run
 run:
-	go run main.go
+	$(ENV) go run main.go
 
 .PHONY:test
 test:
