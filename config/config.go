@@ -22,11 +22,6 @@ func DSN() string {
 	) + "?parseTime=true&collation=utf8mb4_bin"
 }
 
-func Firebase() map[string]string {
-	return map[string]string{
-		"DatabaseURL":      os.Getenv("FIREBASE_URL"),
-		"ProjectID":        os.Getenv("FIREBASE_PROJECT_ID"),
-		"ServiceAccountID": os.Getenv("FIREBASE_SB_ID"),
-		"StorageBucket":    os.Getenv("FIREBASE_STORAGE_BUCKET"),
-	}
+func GoogleAppCredentials() string {
+	return os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 }

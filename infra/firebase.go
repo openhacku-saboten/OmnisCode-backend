@@ -6,6 +6,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/openhacku-saboten/OmnisCode-backend/config"
+	"google.golang.org/api/option"
 )
 
 type Firebase struct {
@@ -13,16 +14,11 @@ type Firebase struct {
 }
 
 func NewFirebase() *Firebase {
-	// Configが入っていればerrになりえないので無視
-	app, _ := firebase.NewApp(
-		context.Background(),
-		&firebase.Config{
-			DatabaseURL:      config.Firebase()["DatabaseURL"],
-			ProjectID:        config.Firebase()["ProjectID"],
-			ServiceAccountID: config.Firebase()["ServiceAccountID"],
-			StorageBucket:    config.Firebase()["StorageBucket"],
-		},
-	)
+	opt := option.WithCredentialsFile(config.GoogleAppCredentials())
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		// configが正しければ起こり得ないので，エラーログを出す
+	}
 	return &Firebase{app: app}
 }
 
