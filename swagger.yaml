@@ -36,7 +36,7 @@ paths:
         schema:
           $ref: "#/definitions/UserRequest"
       responses:
-        "204":
+        "201":
           description: "successful operation"
       security:
       - Bearer: []
@@ -176,7 +176,7 @@ paths:
         schema:
           $ref: "#/definitions/PostRequest"
       responses:
-        "204":
+        "201":
           description: "successful operation"
       security:
       - Bearer: []
