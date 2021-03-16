@@ -1,10 +1,8 @@
 package log
 
-import (
-	"github.com/labstack/gommon/log"
-)
+import "github.com/labstack/gommon/log"
 
-// New はロガーを生成します
+// New はecho用のロガーを生成します
 func New() *log.Logger {
 	logger := log.New("api")
 	logger.SetLevel(log.INFO)
