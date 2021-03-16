@@ -443,12 +443,15 @@ definitions:
     properties:
       title:
         type: "string"
-      post:
+      code:
         type: "string"
+        description: "ソースコード"
       language:
         type: "string"
-      description:
+        description: "ソースコードの言語"
+      content:
         type: "string"
+        description: "説明の内容"
       source:
         type: "string"
         description: "postの引用元(urlなど)"
@@ -462,12 +465,15 @@ definitions:
         type: "string"
       title:
         type: "string"
-      post:
+      code:
         type: "string"
+        description: "ソースコード"
       language:
         type: "string"
-      description:
+        description: "ソースコードの言語"
+      content:
         type: "string"
+        description: "説明の内容"
       source:
         type: "string"
         description: "postの引用元(urlなど)"
@@ -481,7 +487,7 @@ definitions:
           - "highlight"
           - "commit"
           - "none"
-      description:
+      content:
         type: "string"
         description: "コメントの内容(すべてのtypeに含まれる)"
       first_line:
@@ -513,7 +519,7 @@ definitions:
           - "highlight"
           - "commit"
           - "none"
-      description:
+      content:
         type: "string"
         description: "コメントの内容(すべてのtypeに含まれる)"
       first_line:
