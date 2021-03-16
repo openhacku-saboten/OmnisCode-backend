@@ -20,3 +20,11 @@ test-with-coverage:
 .PHONY:gen
 gen:
 	go generate ./...
+
+.PHONY:docker-up
+docker-up:
+	docker-compose -f docker/docker-compose.dev.yml up --build
+
+.PHONY:docker-down
+docker-down:
+	docker-compose -f docker/docker-compose.dev.yml down
