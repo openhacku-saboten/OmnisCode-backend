@@ -8,5 +8,6 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/golang/mock v1.5.0
 	github.com/labstack/echo/v4 v4.2.1
-	google.golang.org/api v0.42.0 // indirect
+	github.com/labstack/gommon v0.3.0
+	google.golang.org/api v0.42.0
 )
