@@ -6,6 +6,7 @@ import (
 
 	firebase "firebase.google.com/go"
 	"github.com/openhacku-saboten/OmnisCode-backend/config"
+	"github.com/openhacku-saboten/OmnisCode-backend/log"
 	"google.golang.org/api/option"
 )
 
@@ -14,10 +15,11 @@ type Firebase struct {
 }
 
 func NewFirebase() *Firebase {
+	logger := log.New()
 	opt := option.WithCredentialsFile(config.GoogleAppCredentials())
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		// configが正しければ起こり得ないので，エラーログを出す
+		logger.Errorf("error initializing app: %v\n", err)
 	}
 	return &Firebase{app: app}
 }
