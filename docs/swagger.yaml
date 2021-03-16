@@ -328,6 +328,41 @@ paths:
           description: "Comment not found"
           schema:
             $ref: "#/definitions/errorResponse"
+    put:
+      tags:
+      - "comment"
+      summary: "Update comment"
+      description: "事前にloginが必要"
+      operationId: "updateComment"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "postID"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "body"
+        in: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/CommentRequest"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Comment not found"
+          schema:
+            $ref: "#/definitions/errorResponse"
+      security:
+      - Bearer: []
     delete:
       tags:
       - "comment"
