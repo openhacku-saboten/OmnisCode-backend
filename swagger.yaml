@@ -11,7 +11,7 @@ tags:
 - name: "post"
   description: "スレッドのメインとなる投稿"
 - name: "comment"
-  description: "スレッドにつくコメント"
+  description: "スレッドにつくコメント．コードに対するハイライトor変更が含まれる場合がある"
 - name: "user"
   description: "ユーザー"
 schemes:
@@ -82,7 +82,7 @@ paths:
       - "user"
       summary: "Get user by user id"
       description: "User情報を取得"
-      operationId: "getUserById"
+      operationId: "getUserByID"
       consumes:
       - "application/json"
       produces:
@@ -108,7 +108,7 @@ paths:
       - "user"
       summary: "Get posts by user id"
       description: "Userが投稿したPost一覧を取得"
-      operationId: "getPostsByuserID"
+      operationId: "getPostsByUserID"
       consumes:
       - "application/json"
       produces:
@@ -136,7 +136,7 @@ paths:
       - "user"
       summary: "Get comments by user id"
       description: "Userが投稿したComment一覧を取得"
-      operationId: "getCommentsByuserID"
+      operationId: "getCommentsByUserID"
       consumes:
       - "application/json"
       produces:
@@ -185,7 +185,7 @@ paths:
       tags:
       - "post"
       summary: "Find post by post id"
-      operationId: "getPostById"
+      operationId: "getPostByID"
       produces:
       - "application/json"
       parameters:
@@ -255,7 +255,8 @@ paths:
       tags:
       - "comment"
       summary: "Get comments by post id"
-      operationId: "getCommentsBypostID"
+      description: "Postに関連付けられるcommentの一覧を取得"
+      operationId: "getCommentsByPostID"
       consumes:
       - "application/json"
       produces:
@@ -300,6 +301,33 @@ paths:
       security:
       - Bearer: []
   /post/{postID}/comment/{commentID}:
+    get:
+      tags:
+      - "comment"
+      summary: "Get comment by ID"
+      operationId: "GetCommentByID"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "postID"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      - name: "commentID"
+        in: "path"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        "200":
+          description: "successful operation"
+        "404":
+          description: "Comment not found"
+          schema:
+            $ref: "#/definitions/errorResponse"
     delete:
       tags:
       - "comment"
@@ -322,13 +350,15 @@ paths:
         type: "integer"
         format: "int64"
       responses:
+        "200":
+          description: "successful operation"
         "404":
           description: "Comment not found"
           schema:
             $ref: "#/definitions/errorResponse"
       security:
       - Bearer: []
-  
+
 securityDefinitions:
   Bearer:
     type: "apiKey"
@@ -395,12 +425,27 @@ definitions:
   CommentRequest:
     type: "object"
     properties:
-      line:
+      type:
+        type: "string"
+        description: "highlight:コードのハイライトを含む commit:コードの変更を含む none:コメントのみ"
+        enum:
+          - "highlight"
+          - "commit"
+          - "none"
+      description:
+        type: "string"
+        description: "コメントの内容(すべてのtypeに含まれる)"
+      first_line:
         type: "integer"
         format: "int32"
-        description: "レビュー時に指定した行数"
-      description:
-        type: "string"  
+        description: "ハイライトする行の開始行数(type:highlightのみ)"
+      last_line:
+        type: "integer"
+        format: "int32"
+        description: "ハイライトする行の終了行数(type:highlightのみ)"
+      code:
+        type: "string"
+        description: "変更後のコードすべてを含む(type:commitのみ)"
   CommentResponse:
     type: "object"
     properties:
@@ -413,12 +458,27 @@ definitions:
       post_id:
         type: "integer"
         format: "int64"
-      line:
-        type: "integer"
-        format: "int32"
-        description: "レビュー時に指定した行数"
+      type:
+        type: "string"
+        description: "highlight:コードのハイライトを含む commit:コードの変更を含む none:コメントのみ"
+        enum:
+          - "highlight"
+          - "commit"
+          - "none"
       description:
         type: "string"
+        description: "コメントの内容(すべてのtypeに含まれる)"
+      first_line:
+        type: "integer"
+        format: "int32"
+        description: "ハイライトする行の開始行数(type:highlightのみ)"
+      last_line:
+        type: "integer"
+        format: "int32"
+        description: "ハイライトする行の終了行数(type:highlightのみ)"
+      code:
+        type: "string"
+        description: "変更後のコードすべてを含む(type:commitのみ)"
   errorResponse:
     type: "object"
     properties:
