@@ -159,6 +159,25 @@ paths:
           schema:
             $ref: "#/definitions/errorResponse"
   /post:
+    get:
+      tags:
+      - "post"
+      summary: "Get posts"
+      description: "Post一覧を取得"
+      operationId: "getPosts"
+      produces:
+      - "application/json"
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/PostResponse"
+        "404":
+          description: "Post not found"
+          schema:
+            $ref: "#/definitions/errorResponse"
     post:
       tags:
       - "post"
