@@ -445,10 +445,13 @@ definitions:
         type: "string"
       code:
         type: "string"
+        description: "ソースコード"
       language:
         type: "string"
+        description: "ソースコードの言語"
       content:
         type: "string"
+        description: "説明の内容"
       source:
         type: "string"
         description: "postの引用元(urlなど)"
@@ -464,10 +467,13 @@ definitions:
         type: "string"
       code:
         type: "string"
+        description: "ソースコード"
       language:
         type: "string"
+        description: "ソースコードの言語"
       content:
         type: "string"
+        description: "説明の内容"
       source:
         type: "string"
         description: "postの引用元(urlなど)"
