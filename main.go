@@ -15,7 +15,7 @@ func main() {
 
 	e := echo.New()
 	e.GET("/", func(c echo.Context) error {
-		logger.Infof("Access from %s", c.Request().URL)
+		logger.Infof("Access from %s", c.Request().RemoteAddr)
 		return c.String(http.StatusOK, "Hello, World!")
 	})
 
