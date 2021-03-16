@@ -23,6 +23,7 @@ paths:
       tags:
       - "user"
       summary: "Create user"
+      description: "事前にloginが必要"
       operationId: "createUser"
       consumes:
       - "application/json"
@@ -37,17 +38,8 @@ paths:
       responses:
         "204":
           description: "successful operation"
-          schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
+      security:
+      - Bearer: []
     put:
       tags:
       - "user"
@@ -68,7 +60,7 @@ paths:
         "200":
           description: "successful operation"
       security:
-      - tokenAuth: []
+      - Bearer: []
     delete:
       tags:
       - "user"
@@ -83,60 +75,7 @@ paths:
         "200":
           description: "successful operation"
       security:
-      - tokenAuth: []
-  /user/login:
-    get:
-      tags:
-      - "user"
-      summary: "Logs user into the system"
-      description: "仕様は未定"
-      operationId: "loginUser"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
-      responses:
-        "200":
-          description: "successful operation"
-          schema:
-            type: "string"
-          headers:
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-        "400":
-          description: "Invalid username/password supplied"
-          schema:
-            $ref: "#/definitions/errorResponse"
-  /user/logout:
-    get:
-      tags:
-      - "user"
-      summary: "Logs out current logged in user session"
-      description: "事前にloginが必要"
-      operationId: "logoutUser"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        "200":
-          description: "successful operation"
-      security:
-      - tokenAuth: []
+      - Bearer: []
   /user/{userID}:
     get:
       tags:
@@ -240,7 +179,7 @@ paths:
         "204":
           description: "successful operation"
       security:
-      - tokenAuth: []
+      - Bearer: []
   /code/{codeID}:
     get:
       tags:
@@ -289,7 +228,7 @@ paths:
         "200":
           description: "successful operation"
       security:
-      - tokenAuth: []
+      - Bearer: []
     delete:
       tags:
       - "code"
@@ -310,7 +249,7 @@ paths:
         "200":
           description: "successful operation"
       security:
-      - tokenAuth: []
+      - Bearer: []
   /code/{codeID}/comment:
     get:
       tags:
@@ -359,7 +298,7 @@ paths:
         "200":
           description: "successful operation"
       security:
-      - tokenAuth: []
+      - Bearer: []
   /code/{codeID}/comment/{commentID}:
     delete:
       tags:
@@ -388,19 +327,20 @@ paths:
           schema:
             $ref: "#/definitions/errorResponse"
       security:
-      - tokenAuth: []
+      - Bearer: []
   
 securityDefinitions:
-  tokenAuth:
+  Bearer:
     type: "apiKey"
     name: "Authorization"
     in: "header"
+    description: "'Authorization: Bearer $TOKEN'の形式でheaderにTokenを付与"
 
 definitions:
   UserRequest:
     type: "object"
     properties:
-      username:
+      name:
         type: "string"
       twitter_id:
         type: "string"
@@ -412,7 +352,7 @@ definitions:
       id:
         type: "integer"
         format: "int64"
-      username:
+      name:
         type: "string"
       twitter_id:
         type: "string"
