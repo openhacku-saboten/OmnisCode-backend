@@ -7,6 +7,7 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
+
 type AuthMiddleware struct {
 	uc *usecase.AuthUseCase
 }
@@ -16,7 +17,7 @@ func NewAuthMiddleware(f repository.Firebase) *AuthMiddleware {
 }
 
 func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
-    return func(c echo.Context) error {
+	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get(echo.HeaderAuthorization)
 		authScheme := "Bearer"
 
@@ -29,10 +30,10 @@ func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userID, err := m.uc.Authenticate(token)
 		if err != nil {
-	        return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
 
 		c.Set("userID", userID)
-        return next(c)
-    }
+		return next(c)
+	}
 }
