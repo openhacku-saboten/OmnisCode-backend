@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/labstack/echo/v4"
 	"github.com/openhacku-saboten/OmnisCode-backend/config"
+	"github.com/openhacku-saboten/OmnisCode-backend/controller"
 	"github.com/openhacku-saboten/OmnisCode-backend/infra"
 	"github.com/openhacku-saboten/OmnisCode-backend/log"
+	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
 func main() {
@@ -26,11 +27,12 @@ func main() {
 		}
 	}()
 
+	postRepo := infra.NewPostRepository(dbMap)
+	postUC := usecase.NewPostUsecase(postRepo)
+	post := controller.NewPost(postUC)
+
 	e := echo.New()
-	e.GET("/", func(c echo.Context) error {
-		logger.Infof("Access from %s", c.Request().RemoteAddr)
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	e.GET("/post", post.GetAll)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
