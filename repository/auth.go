@@ -2,6 +2,6 @@
 
 package repository
 
-type Firebase interface {
+type Auth interface {
 	Authenticate(token string) (uid string, err error)
 }

@@ -17,7 +17,8 @@ func main() {
 	logger := log.New()
 
 	firebase := infra.NewFirebase()
-	authUseCase := usecase.NewAuthUseCase(firebase)
+	authRepo := infra.NewAuthRepository(firebase)
+	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
 
 	e := echo.New()
