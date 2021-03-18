@@ -10,6 +10,7 @@ import (
 	"google.golang.org/api/option"
 )
 
+// NewFirebase はFirebase Authorization に接続するための構造体*auth.Clientを返す
 func NewFirebase() (*auth.Client, error) {
 	opt := option.WithCredentialsFile(config.GoogleAppCredentials())
 	app, err := firebase.NewApp(context.Background(), nil, opt)

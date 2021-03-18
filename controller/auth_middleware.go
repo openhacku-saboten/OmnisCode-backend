@@ -16,6 +16,7 @@ func NewAuthMiddleware(uc *usecase.AuthUseCase) *AuthMiddleware {
 	return &AuthMiddleware{uc: uc}
 }
 
+// Authenticate はAuthorizationヘッダーを検証し，userIDをcontextにセットする(c.Get("userID")で取得可能)
 func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 	logger := log.New()
 	return func(c echo.Context) error {
