@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
@@ -12,8 +11,8 @@ type AuthMiddleware struct {
 	uc *usecase.AuthUseCase
 }
 
-func NewAuthMiddleware(f repository.Firebase) *AuthMiddleware {
-	return &AuthMiddleware{uc: usecase.NewAuthUseCase(f)}
+func NewAuthMiddleware(uc *usecase.AuthUseCase) *AuthMiddleware {
+	return &AuthMiddleware{uc: uc}
 }
 
 func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
