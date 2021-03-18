@@ -4,4 +4,4 @@ WORKDIR /go/src/github.com/openhacku-saboten/OmnisCode-backend/
 
 COPY . .
 
-CMD [ "go", "run", "main.go" ]
+CMD [ "make", "run" ]
