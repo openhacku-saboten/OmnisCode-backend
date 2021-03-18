@@ -16,12 +16,13 @@ func main() {
 
 	dbMap, err := infra.NewDB()
 	if err != nil {
-		logger.Fatal(err)
+		logger.Errorf("failed NewDB: %s", err.Error())
+		os.Exit(1)
 	}
 	defer func() {
 		err := dbMap.Db.Close()
 		if err != nil {
-			logger.Fatal(err)
+			logger.Errorf("failed to close DB: %s", err.Error())
 		}
 	}()
 
