@@ -56,7 +56,7 @@ func TestGoogleAppCredentials(t *testing.T) {
 	}{
 		{
 			name: "正しくGoogleAppCredentialsを取得できる",
-			want: "test.json",
+			want: "firebaseCredentials.json",
 		},
 	}
 
