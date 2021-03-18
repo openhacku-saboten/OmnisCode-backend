@@ -16,11 +16,24 @@ import (
 func main() {
 	logger := log.New()
 
+	dbMap, err := infra.NewDB()
+	if err != nil {
+		logger.Errorf("failed NewDB: %s", err.Error())
+		os.Exit(1)
+	}
+	defer func() {
+		err := dbMap.Db.Close()
+		if err != nil {
+			logger.Errorf("failed to close DB: %s", err.Error())
+		}
+	}()
+
 	firebase, err := infra.NewFirebase()
 	if err != nil {
 		logger.Errorf("failed NewFirebase: %s", err.Error())
 		os.Exit(1)
 	}
+
 	authRepo := infra.NewAuthRepository(firebase)
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
