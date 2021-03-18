@@ -16,15 +16,6 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile.backend
-    environment:
-      - ENV=test
-      - PORT=8080
-      - DB_DATABASE=test
-      - DB_USER=test
-      - DB_PASSWORD=test
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_ROOT_PASSWORD=testpass
     ports:
       - 8080:8080
     restart: always
