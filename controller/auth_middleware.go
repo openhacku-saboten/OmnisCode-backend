@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/openhacku-saboten/OmnisCode-backend/log"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
@@ -16,6 +17,7 @@ func NewAuthMiddleware(uc *usecase.AuthUseCase) *AuthMiddleware {
 }
 
 func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
+	logger := log.New()
 	return func(c echo.Context) error {
 		authHeader := c.Request().Header.Get(echo.HeaderAuthorization)
 		authScheme := "Bearer"
@@ -29,6 +31,7 @@ func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userID, err := m.uc.Authenticate(token)
 		if err != nil {
+			logger.Infof("error Unauthorized: %v", err)
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
 
