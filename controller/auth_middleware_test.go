@@ -17,7 +17,7 @@ func TestAuthenticate(t *testing.T) {
 	tests := []struct {
 		name            string
 		prepareRequest  func(req *http.Request)
-		prepareFirebase func(f *mock.MockFirebase)
+		prepareAuthRepo func(f *mock.MockAuth)
 		next            echo.HandlerFunc
 		wantErr         bool
 		wantCode        int
@@ -27,7 +27,7 @@ func TestAuthenticate(t *testing.T) {
 			prepareRequest: func(req *http.Request) {
 				req.Header.Set("Authorization", "Bearer token")
 			},
-			prepareFirebase: func(f *mock.MockFirebase) {
+			prepareAuthRepo: func(f *mock.MockAuth) {
 				f.EXPECT().Authenticate("token").Return("currentUserID", nil)
 			},
 			next: func(c echo.Context) error {
@@ -48,7 +48,7 @@ func TestAuthenticate(t *testing.T) {
 			name: "HeaderがなければBadRequest",
 			prepareRequest: func(req *http.Request) {
 			},
-			prepareFirebase: func(f *mock.MockFirebase) {
+			prepareAuthRepo: func(f *mock.MockAuth) {
 			},
 			next:     nil,
 			wantErr:  true,
@@ -59,7 +59,7 @@ func TestAuthenticate(t *testing.T) {
 			prepareRequest: func(req *http.Request) {
 				req.Header.Set("Authorization", "Token token")
 			},
-			prepareFirebase: func(f *mock.MockFirebase) {
+			prepareAuthRepo: func(f *mock.MockAuth) {
 			},
 			next:     nil,
 			wantErr:  true,
@@ -70,7 +70,7 @@ func TestAuthenticate(t *testing.T) {
 			prepareRequest: func(req *http.Request) {
 				req.Header.Set("Authorization", "Bearer invalidToken")
 			},
-			prepareFirebase: func(f *mock.MockFirebase) {
+			prepareAuthRepo: func(f *mock.MockAuth) {
 				f.EXPECT().Authenticate("invalidToken").Return("error verifying ID token", errors.New("error verifying ID token"))
 			},
 			next:     nil,
@@ -88,10 +88,10 @@ func TestAuthenticate(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			firebase := mock.NewMockFirebase(ctrl)
-			tt.prepareFirebase(firebase)
+			AuthRepo := mock.NewMockAuth(ctrl)
+			tt.prepareAuthRepo(AuthRepo)
 
-			m := NewAuthMiddleware(usecase.NewAuthUseCase(firebase))
+			m := NewAuthMiddleware(usecase.NewAuthUseCase(AuthRepo))
 			err := m.Authenticate(tt.next)(c)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
