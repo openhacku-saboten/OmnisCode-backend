@@ -16,7 +16,11 @@ import (
 func main() {
 	logger := log.New()
 
-	firebase := infra.NewFirebase()
+	firebase, err := infra.NewFirebase()
+	if err != nil {
+		logger.Errorf("failed NewFirebase: %s", err.Error())
+		os.Exit(1)
+	}
 	authRepo := infra.NewAuthRepository(firebase)
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)

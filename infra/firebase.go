@@ -2,19 +2,23 @@ package infra
 
 import (
 	"context"
+	"fmt"
 
 	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
 	"github.com/openhacku-saboten/OmnisCode-backend/config"
-	"github.com/openhacku-saboten/OmnisCode-backend/log"
 	"google.golang.org/api/option"
 )
 
-func NewFirebase() *firebase.App {
-	logger := log.New()
+func NewFirebase() (*auth.Client, error) {
 	opt := option.WithCredentialsFile(config.GoogleAppCredentials())
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
-		logger.Errorf("error initializing app: %v\n", err)
+		return nil, fmt.Errorf("error initializing app: %w", err)
 	}
-	return app
+	client, err := app.Auth(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("error getting Auth client: %w", err)
+	}
+	return client, nil
 }

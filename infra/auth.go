@@ -4,23 +4,19 @@ import (
 	"context"
 	"fmt"
 
-	firebase "firebase.google.com/go"
+	"firebase.google.com/go/auth"
 )
 
 type AuthRepository struct {
-	fb *firebase.App
+	firebase *auth.Client
 }
 
-func NewAuthRepository(fb *firebase.App) *AuthRepository {
-	return &AuthRepository{fb: fb}
+func NewAuthRepository(firebase *auth.Client) *AuthRepository {
+	return &AuthRepository{firebase: firebase}
 }
 
 func (a *AuthRepository) Authenticate(token string) (uid string, err error) {
-	client, err := a.fb.Auth(context.Background())
-	if err != nil {
-		return "", fmt.Errorf("error getting Auth client: %w", err)
-	}
-	authToken, err := client.VerifyIDTokenAndCheckRevoked(context.Background(), token)
+	authToken, err := a.firebase.VerifyIDTokenAndCheckRevoked(context.Background(), token)
 	if err != nil {
 		return "", fmt.Errorf("error verifying ID token: %w", err)
 	}
