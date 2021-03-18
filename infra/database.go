@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/go-gorp/gorp"
+	"github.com/openhacku-saboten/OmnisCode-backend/config"
 	"github.com/openhacku-saboten/OmnisCode-backend/log"
-	"github.com/task4233/techtrain-mission/gameapi/config"
 
 	_ "github.com/go-sql-driver/mysql"
 )
