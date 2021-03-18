@@ -1,0 +1,38 @@
+/*
+Package controllers is Interface Adapters.
+routerから要求された処理をusecaseにつなぐ
+
+*/
+package controller
+
+import (
+	"net/http"
+
+	"github.com/labstack/echo/v4"
+	"github.com/openhacku-saboten/OmnisCode-backend/log"
+	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
+)
+
+type UserController struct {
+	uc *usecase.UserUseCase
+}
+
+func NewUserController(uc *usecase.UserUseCase) *UserController {
+	return &UserController{uc: uc}
+}
+
+// Create は GET /user/{userID} のHandler
+func (ctrl *UserController) Get(c echo.Context) error {
+	logger := log.New()
+	userID := c.Param("userID")
+
+	logger.Debug("debug")
+	user, err := ctrl.uc.Get(userID)
+
+	if err != nil {
+		logger.Errorf("Unexpected error GET/user/{userID}: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, user)
+}
