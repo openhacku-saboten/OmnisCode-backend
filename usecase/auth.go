@@ -10,7 +10,7 @@ func NewAuthUseCase(authRepo repository.Auth) *AuthUseCase {
 	return &AuthUseCase{authRepo: authRepo}
 }
 
-func (u *AuthUseCase) Authenticate(token string) (uid string, err error) {
-	uid, err = u.authRepo.Authenticate(token)
+func (a *AuthUseCase) Authenticate(token string) (uid string, err error) {
+	uid, err = a.authRepo.Authenticate(token)
 	return
 }
