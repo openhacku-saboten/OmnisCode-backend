@@ -2,6 +2,8 @@
 
 package repository
 
+import "context"
+
 type Auth interface {
-	Authenticate(token string) (uid string, err error)
+	Authenticate(ctx context.Context, token string) (uid string, err error)
 }

@@ -30,7 +30,7 @@ func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 		token := authHeader[l+1:]
 
-		userID, err := m.uc.Authenticate(token)
+		userID, err := m.uc.Authenticate(c.Request().Context(), token)
 		if err != nil {
 			logger.Infof("Unauthorized: %v", err)
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")

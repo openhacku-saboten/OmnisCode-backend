@@ -28,7 +28,7 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 				req.Header.Set("Authorization", "Bearer token")
 			},
 			prepareMockAuth: func(f *mock.MockAuth) {
-				f.EXPECT().Authenticate("token").Return("currentUserID", nil)
+				f.EXPECT().Authenticate(gomock.Any(), "token").Return("currentUserID", nil)
 			},
 			next: func(c echo.Context) error {
 				got, ok := c.Get("userID").(string)
@@ -71,7 +71,7 @@ func TestAuthMiddleware_Authenticate(t *testing.T) {
 				req.Header.Set("Authorization", "Bearer invalidToken")
 			},
 			prepareMockAuth: func(f *mock.MockAuth) {
-				f.EXPECT().Authenticate("invalidToken").Return("error verifying ID token", errors.New("error verifying ID token"))
+				f.EXPECT().Authenticate(gomock.Any(), "invalidToken").Return("error verifying ID token", errors.New("error verifying ID token"))
 			},
 			next:     nil,
 			wantErr:  true,

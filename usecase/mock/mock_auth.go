@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -34,16 +35,16 @@ func (m *MockAuth) EXPECT() *MockAuthMockRecorder {
 }
 
 // Authenticate mocks base method.
-func (m *MockAuth) Authenticate(token string) (string, error) {
+func (m *MockAuth) Authenticate(ctx context.Context, token string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Authenticate", token)
+	ret := m.ctrl.Call(m, "Authenticate", ctx, token)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Authenticate indicates an expected call of Authenticate.
-func (mr *MockAuthMockRecorder) Authenticate(token interface{}) *gomock.Call {
+func (mr *MockAuthMockRecorder) Authenticate(ctx, token interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuth)(nil).Authenticate), token)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuth)(nil).Authenticate), ctx, token)
 }

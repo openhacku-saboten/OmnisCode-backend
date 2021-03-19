@@ -16,7 +16,7 @@ func NewAuthRepository(firebase *auth.Client) *AuthRepository {
 }
 
 // Authenticate はTokenをfirebaseに照合してuserIDを返す
-func (a *AuthRepository) Authenticate(token string) (uid string, err error) {
+func (a *AuthRepository) Authenticate(ctx context.Context, token string) (uid string, err error) {
 	authToken, err := a.firebase.VerifyIDTokenAndCheckRevoked(context.Background(), token)
 	if err != nil {
 		return "", fmt.Errorf("error verifying ID token: %w", err)
