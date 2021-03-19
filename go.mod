@@ -12,6 +12,8 @@ require (
 	github.com/google/go-cmp v0.5.5
 	github.com/labstack/echo/v4 v4.2.1
 	github.com/labstack/gommon v0.3.0
+	github.com/rubenv/sql-migrate v0.0.0-20210215143335-f84234893558 // indirect
+	gopkg.in/yaml.v2 v2.2.5 // indirect
 	github.com/lib/pq v1.10.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/poy/onpar v1.1.2 // indirect
