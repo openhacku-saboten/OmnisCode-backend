@@ -10,12 +10,27 @@ type UserRepository struct {
 }
 
 func NewUserRepository(dbMap *gorp.DbMap) *UserRepository {
-	dbMap.AddTableWithName(entity.User{}, "users").SetKeys(false, "ID")
+	dbMap.AddTableWithName(UserDTO{}, "users").SetKeys(false, "ID")
 	return &UserRepository{dbMap: dbMap}
 }
 
 func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
-	user = &entity.User{}
-	err = r.dbMap.SelectOne(user, "SELECT * FROM users WHERE id = ?", uid)
+	var userDTO UserDTO
+	err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
+	user = entity.NewUser(
+		userDTO.ID,
+		userDTO.Name,
+		userDTO.Profile,
+		userDTO.TwitterID,
+		"",
+	)
 	return
+}
+
+// UserDTO はDBとやり取りするためのDataTransferObject
+type UserDTO struct {
+	ID        string `db:"id"`
+	Name      string `db:"name"`
+	Profile   string `db:"profile"`
+	TwitterID string `db:"twitter_id"`
 }
