@@ -4,13 +4,6 @@ set -ue
 go get -v github.com/rubenv/sql-migrate/...
 
 export $(cat .env)
-while :
-do
-    sql-migrate up
-    if [ $? -eq 0 ]; then
-        break
-    fi
-    sleep 2
-done
+timeout 30 sh -c "until nc -vz db 3306; do sleep 1; done" && sql-migrate up
 
 go run main.go
