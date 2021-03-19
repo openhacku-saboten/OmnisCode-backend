@@ -21,3 +21,7 @@ func DSN() string {
 		os.Getenv("DB_DATABASE"),
 	) + "?parseTime=true&collation=utf8mb4_bin"
 }
+
+func GoogleAppCredentials() string {
+	return os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
+}
