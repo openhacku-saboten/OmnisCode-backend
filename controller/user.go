@@ -22,7 +22,7 @@ func (ctrl *UserController) Get(c echo.Context) error {
 	userID := c.Param("userID")
 
 	logger.Debug("debug")
-	user, err := ctrl.uc.Get(userID)
+	user, err := ctrl.uc.Get(c.Request().Context(), userID)
 
 	if err != nil {
 		logger.Errorf("Unexpected error GET/user/{userID}: %s", err.Error())
