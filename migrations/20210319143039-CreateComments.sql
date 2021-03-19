@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS comments (
     content    TEXT,
     first_line INTEGER,
     last_line  INTEGER,
-    code       TEXT         NOT NULL,
+    code       TEXT,
     created_at DATETIME     NOT NULL,
     updated_at DATETIME     NOT NULL,
     PRIMARY KEY (id, post_id),
