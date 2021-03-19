@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -28,7 +29,8 @@ func main() {
 		}
 	}()
 
-	firebase, err := infra.NewFirebase()
+	ctx := context.Background()
+	firebase, err := infra.NewFirebase(ctx)
 	if err != nil {
 		logger.Errorf("failed NewFirebase: %s", err.Error())
 		os.Exit(1)
