@@ -15,6 +15,7 @@ require (
 	github.com/lib/pq v1.10.0 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6 // indirect
 	github.com/poy/onpar v1.1.2 // indirect
+	github.com/rubenv/sql-migrate v0.0.0-20210215143335-f84234893558 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
 	google.golang.org/api v0.42.0
 )
