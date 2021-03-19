@@ -6,14 +6,14 @@ import (
 )
 
 type UserUseCase struct {
-	User repository.User
+	userRepo repository.User
 }
 
 func NewUserUseCase(user repository.User) *UserUseCase {
-	return &UserUseCase{User: user}
+	return &UserUseCase{userRepo: user}
 }
 
 func (u *UserUseCase) Get(uid string) (user *entity.User, err error) {
-	user, err = u.User.FindByID(uid)
+	user, err = u.userRepo.FindByID(uid)
 	return
 }
