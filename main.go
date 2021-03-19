@@ -37,11 +37,12 @@ func main() {
 	}
 
 	authRepo := infra.NewAuthRepository(firebase)
+	userRepo := infra.NewUserRepository(dbMap)
+
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
 
-	userRepo := infra.NewUserRepository(dbMap)
-	userUseCase := usecase.NewUserUseCase(userRepo)
+	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
 	userController := controller.NewUserController(userUseCase)
 
 	e := echo.New()
