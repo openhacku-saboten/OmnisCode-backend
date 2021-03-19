@@ -32,7 +32,7 @@ func (m *AuthMiddleware) Authenticate(next echo.HandlerFunc) echo.HandlerFunc {
 
 		userID, err := m.uc.Authenticate(token)
 		if err != nil {
-			logger.Infof("error Unauthorized: %v", err)
+			logger.Infof("Unauthorized: %v", err)
 			return echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
 		}
 
