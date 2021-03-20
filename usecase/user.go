@@ -20,12 +20,12 @@ func NewUserUseCase(user repository.User, auth repository.Auth) *UserUseCase {
 func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, err error) {
 	user, err = u.userRepo.FindByID(uid)
 	if err != nil {
-		return nil, fmt.Errorf("failed to Get: %w", err)
+		return nil, fmt.Errorf("failed to Get User from DB: %w", err)
 	}
 
 	user.IconURL, err = u.authRepo.GetIconURL(ctx, uid)
 	if err != nil {
-		return nil, fmt.Errorf("failed to Get: %w", err)
+		return nil, fmt.Errorf("failed to Get User from Firebase: %w", err)
 	}
 	return
 }
