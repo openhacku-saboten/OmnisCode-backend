@@ -80,7 +80,7 @@ func TestUserController_Get(t *testing.T) {
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
-				t.Errorf("error = %v, wantErr %v", err, tt.wantErr)
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
 			}
 
 			if he, ok := err.(*echo.HTTPError); ok {
