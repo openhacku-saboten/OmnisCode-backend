@@ -17,6 +17,7 @@ func NewUserRepository(dbMap *gorp.DbMap) *UserRepository {
 	return &UserRepository{dbMap: dbMap}
 }
 
+// FindByID は該当IDのユーザーの情報をDBから取得して返す
 func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
 	var userDTO UserDTO
 	err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)

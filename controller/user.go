@@ -18,12 +18,11 @@ func NewUserController(uc *usecase.UserUseCase) *UserController {
 	return &UserController{uc: uc}
 }
 
-// Create は GET /user/{userID} のHandler
+// Get は GET /user/{userID} のHandler
 func (ctrl *UserController) Get(c echo.Context) error {
 	logger := log.New()
 	userID := c.Param("userID")
 
-	logger.Debug("debug")
 	user, err := ctrl.uc.Get(c.Request().Context(), userID)
 
 	if err != nil {
