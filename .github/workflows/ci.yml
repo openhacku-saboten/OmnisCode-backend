@@ -31,5 +31,15 @@ jobs:
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
+      - name: Set up mysql
+        run: |
+          make local-db-up
+          export $(cat .env.test)
+          timeout 20 sh -c "until nc -vz $DB_HOST $DB_PORT; do sleep 1; done"
+      - name: Migrate
+        run: |
+          go get -v github.com/rubenv/sql-migrate/...
+          export $(cat .env.test)
+          sql-migrate up
       - name: Test Go Code
         run: make test
