@@ -6,7 +6,7 @@ ENV_TEST := $(shell cat $(ENV_TEST_FILE))
 
 .PHONY:run
 run:
-	$(ENV) go run main.go
+	$(ENV_TEST) go run main.go
 
 .PHONY:test
 test:
