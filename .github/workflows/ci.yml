@@ -35,7 +35,7 @@ jobs:
         run: |
           make local-db-up
           export $(cat .env.test)
-          until mysql -u${DB_USER} -p${DB_PASSWORD} -h${DB_HOST} -P${DB_PORT} -e "SELECT 1"; do sleep 1; done
+          timeout 20 sh -c "until nc -vz $DB_HOST $DB_PORT; do sleep 1; done"
       - name: Migrate
         run: |
           go get -v github.com/rubenv/sql-migrate/...
