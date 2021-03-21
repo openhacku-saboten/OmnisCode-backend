@@ -66,6 +66,53 @@ func TestUserRepository_FindByID(t *testing.T) {
 	}
 }
 
+func TestUserRepository_Insert(t *testing.T) {
+	dbMap, err := NewDB()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateUser(t, dbMap)
+	if err := dbMap.Insert(&UserDTO{
+		ID:        "existing-id",
+		Name:      "existingUser",
+		Profile:   "existing",
+		TwitterID: "@existing",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	userRepo := NewUserRepository(dbMap)
+
+	tests := []struct {
+		name    string
+		user    *entity.User
+		wantErr error
+	}{
+		{
+			name:    "正しくユーザーを作成できる",
+			user:    entity.NewUser("new-id", "newUser", "new", "@new", ""),
+			wantErr: nil,
+		},
+		{
+			name:    "すでに存在するユーザーIDならErrDuplicatedUser",
+			user:    entity.NewUser("existing-id", "newUser", "new", "@new", ""),
+			wantErr: entity.ErrDuplicatedUser,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := userRepo.Insert(tt.user)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}
+
 func truncateUser(t *testing.T, dbMap *gorp.DbMap) {
 	t.Helper()
 
