@@ -37,6 +37,21 @@ func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
 	return
 }
 
+// Insert は該当ユーザーをDBに保存する
+func (r *UserRepository) Insert(user *entity.User) error {
+	userDTO := &UserDTO{
+		ID:        user.ID,
+		Name:      user.Name,
+		Profile:   user.Profile,
+		TwitterID: user.TwitterID,
+	}
+
+	if err := r.dbMap.Insert(userDTO); err != nil {
+		return err
+	}
+	return nil
+}
+
 // UserDTO はDBとやり取りするためのDataTransferObject
 type UserDTO struct {
 	ID        string `db:"id"`
