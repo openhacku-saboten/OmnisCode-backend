@@ -35,7 +35,7 @@ func TestDSN(t *testing.T) {
 	}{
 		{
 			name: "正しくDSNを取得できる",
-			want: "test:test@tcp(db:3306)/test?parseTime=true&collation=utf8mb4_bin",
+			want: "test:test@tcp(localhost:3306)/test?parseTime=true&collation=utf8mb4_bin",
 		},
 	}
 
