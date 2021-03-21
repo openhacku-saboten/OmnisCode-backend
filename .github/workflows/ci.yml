@@ -35,7 +35,7 @@ jobs:
         run: export $(cat .env.test)
       - name: set up mysql
         run: |
-          make run-db-local
+          make local-db-up
           until mysql -u${DB_USER} -p${DB_PASSWORD} -h${DB_HOST} -P${DB_PORT} -e "SELECT 1"; do sleep 1; done
       - name: migrate
         run: |
