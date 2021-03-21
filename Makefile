@@ -32,3 +32,7 @@ docker-down:
 .PHONY:local-db-up
 local-db-up:
 	docker-compose -f docker/docker-compose.test.yml up --build
+
+.PHONY:migrate-up
+migrate-up:
+	$(ENV_TEST) sql-migrate up
