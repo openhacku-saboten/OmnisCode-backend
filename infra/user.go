@@ -3,8 +3,10 @@ package infra
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/go-gorp/gorp"
+	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
@@ -47,6 +49,14 @@ func (r *UserRepository) Insert(user *entity.User) error {
 	}
 
 	if err := r.dbMap.Insert(userDTO); err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			if sqlerr.Number == 1062 && strings.Contains(sqlerr.Message, "users.PRIMARY") {
+				return entity.ErrDuplicatedUser
+			}
+			if sqlerr.Number == 1062 && strings.Contains(sqlerr.Message, "twitter_id") {
+				return entity.ErrDuplicatedTwitterID
+			}
+		}
 		return err
 	}
 	return nil

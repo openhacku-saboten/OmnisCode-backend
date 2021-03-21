@@ -54,8 +54,11 @@ func (ctrl *UserController) Create(c echo.Context) error {
 	user.ID = userID
 
 	if err := ctrl.uc.Create(user); err != nil {
-		if errors.Is(err, entity.ErrUserNotFound) {
-			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
+		if errors.Is(err, entity.ErrDuplicatedUser) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedUser.Error())
+		}
+		if errors.Is(err, entity.ErrDuplicatedTwitterID) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedTwitterID.Error())
 		}
 
 		logger.Errorf("Unexpected error POST/user: %s", err.Error())
