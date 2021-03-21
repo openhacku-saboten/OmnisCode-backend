@@ -28,3 +28,7 @@ docker-up:
 .PHONY:docker-down
 docker-down:
 	docker-compose -f docker/docker-compose.dev.yml down
+
+.PHONY:local-db-up
+local-db-up:
+	docker-compose -f docker/docker-compose.test.yml up --build
