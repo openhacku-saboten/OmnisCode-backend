@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -102,6 +103,69 @@ func TestUserController_Get(t *testing.T) {
 
 				if diff := cmp.Diff(tt.wantBody, gotBody); diff != "" {
 					t.Errorf("body (-want +got) =\n%s\n", diff)
+				}
+			}
+		})
+	}
+}
+
+func TestUserController_Create(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		body            string
+		prepareMockUser func(user *mock.MockUser)
+		prepareMockAuth func(auth *mock.MockAuth)
+		wantErr         bool
+		wantCode        int
+		wantBody        map[string]interface{}
+	}{
+		{
+			name:   "正しくユーザーを作成できる",
+			userID: "user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
+				"twitter_id":"@twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Insert(
+					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+				).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("POST", "/", strings.NewReader(tt.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.Set("userID", tt.userID)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			userRepo := mock.NewMockUser(ctrl)
+			tt.prepareMockUser(userRepo)
+			authRepo := mock.NewMockAuth(ctrl)
+
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			err := con.Create(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
 				}
 			}
 		})
