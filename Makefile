@@ -36,3 +36,7 @@ local-db-up:
 .PHONY:migrate-up
 migrate-up:
 	$(ENV_TEST) sql-migrate up
+
+.PHONY:ping
+ping:
+	mysql -u${DB_USER} -p${DB_PASSWORD} -h${DB_HOST} -P${DB_PORT} -e "SELECT 1"
