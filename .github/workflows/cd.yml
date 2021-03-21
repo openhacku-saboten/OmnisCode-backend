@@ -20,6 +20,6 @@ jobs:
     - name: Configure docker
       run: gcloud auth configure-docker --quiet
     - name: Build
-      run: docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend:${GITHUB_SHA::7} -f ./docker/Dockerfile.prod.backend
+      run: docker build -t asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend:$GITHUB_SHA -f ./docker/Dockerfile.prod.backend .
     - name: Push
-      run: docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend:${GITHUB_SHA::7}
+      run: docker push asia.gcr.io/${{ secrets.GCP_PROJECT_ID }}/backend:$GITHUB_SHA
