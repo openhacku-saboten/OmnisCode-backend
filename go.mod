@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/firestore v1.5.0 // indirect
 	cloud.google.com/go/storage v1.14.0 // indirect
 	firebase.google.com/go v3.13.0+incompatible
+	github.com/VividCortex/mysqlerr v0.0.0-20201215173831-4c396ae82aac
 	github.com/go-gorp/gorp v2.2.0+incompatible
 	github.com/go-sql-driver/mysql v1.5.0
 	github.com/golang/mock v1.5.0
