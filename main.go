@@ -38,6 +38,7 @@ func main() {
 
 	authRepo := infra.NewAuthRepository(firebase)
 	userRepo := infra.NewUserRepository(dbMap)
+	commentRepo := infra.NewCommentRepository(dbMap)
 
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
@@ -45,11 +46,18 @@ func main() {
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
 	userController := controller.NewUserController(userUseCase)
 
+	commentUseCase := usecase.NewCommentUseCase(commentRepo)
+	commentController := controller.NewCommentController(commentUseCase)
+
 	e := echo.New()
 	v1 := e.Group("/api/v1")
 
 	user := v1.Group("/user")
 	user.GET("/:userID", userController.Get)
+
+	post := v1.Group("/post")
+
+	post.GET("/:postID/comment", commentController.GetByPostID)
 
 	e.GET("", func(c echo.Context) error {
 		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
