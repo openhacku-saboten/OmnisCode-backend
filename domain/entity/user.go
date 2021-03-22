@@ -1,6 +1,8 @@
 package entity
 
-import "errors"
+import (
+	"errors"
+)
 
 type User struct {
 	ID        string `json:"id"`
@@ -23,10 +25,11 @@ func NewUser(id, name, profile, twitterID, iconURL string) *User {
 // IsValid は各エンティティに問題がある場合はerrorを返すメソッドです
 func (u *User) IsValid() error {
 	if len(u.ID) == 0 {
+		// Authenticate時にuser IDを確認しているので想定しないエラー
 		return errors.New("user ID must not be empty")
 	}
 	if len(u.Name) == 0 {
-		return errors.New("user name must not be empty")
+		return ErrEmptyUserName
 	}
 	return nil
 }
