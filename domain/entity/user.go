@@ -28,8 +28,5 @@ func (u *User) IsValid() error {
 	if len(u.Name) == 0 {
 		return errors.New("user name must not be empty")
 	}
-	if len(u.IconURL) != 0 {
-		return errors.New("user iconURL must be empty")
-	}
 	return nil
 }
