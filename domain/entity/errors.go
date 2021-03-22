@@ -16,3 +16,17 @@ var (
 	// ErrTooLong はフィールドの内容が長すぎるときのエラー
 	ErrTooLong = errors.New("too long")
 )
+
+// ErrEmptyField はフィールド名が空のときのエラー
+type ErrEmpty struct {
+	error
+	FieldName string
+}
+
+// NewErrorEmpty はフィールド名が空のときのエラーを生成します
+func NewErrorEmpty(fieldName string) error {
+	return ErrEmpty{
+		error:     errors.New("empty"),
+		FieldName: fieldName,
+	}
+}
