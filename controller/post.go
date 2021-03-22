@@ -12,7 +12,7 @@ type Post struct {
 	uc *usecase.Post
 }
 
-func NewPost(uc *usecase.Post) *Post {
+func NewPostController(uc *usecase.Post) *Post {
 	return &Post{uc: uc}
 }
 

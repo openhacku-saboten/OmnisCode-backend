@@ -35,7 +35,7 @@ func TestDSN(t *testing.T) {
 	}{
 		{
 			name: "正しくDSNを取得できる",
-			want: "test:test@tcp(db:3306)/test?parseTime=true&collation=utf8mb4_bin",
+			want: "test:test@tcp(localhost:3306)/test?parseTime=true&collation=utf8mb4_bin",
 		},
 	}
 
@@ -43,6 +43,27 @@ func TestDSN(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := config.DSN(); got != tc.want {
 				t.Errorf("DSN() = %s, want = %s", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestGoogleAppCredentials(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		name string
+		want string
+	}{
+		{
+			name: "正しくGoogleAppCredentialsを取得できる",
+			want: "firebaseCredentials.json",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := config.GoogleAppCredentials(); got != tc.want {
+				t.Errorf("GoogleAppCredentials() = %s, want = %s", got, tc.want)
 			}
 		})
 	}

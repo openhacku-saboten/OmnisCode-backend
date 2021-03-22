@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"net/http"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -27,12 +29,39 @@ func main() {
 		}
 	}()
 
+	ctx := context.Background()
+	firebase, err := infra.NewFirebase(ctx)
+	if err != nil {
+		logger.Errorf("failed NewFirebase: %s", err.Error())
+		os.Exit(1)
+	}
+
+	authRepo := infra.NewAuthRepository(firebase)
+	userRepo := infra.NewUserRepository(dbMap)
 	postRepo := infra.NewPostRepository(dbMap)
+
+	authUseCase := usecase.NewAuthUseCase(authRepo)
+	authMiddleware := controller.NewAuthMiddleware(authUseCase)
+
+	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
+	userController := controller.NewUserController(userUseCase)
+
 	postUC := usecase.NewPostUsecase(postRepo)
-	post := controller.NewPost(postUC)
+	postController := controller.NewPostController(postUC)
 
 	e := echo.New()
-	e.GET("/post", post.GetAll)
+	v1 := e.Group("/api/v1")
+
+	user := v1.Group("/user")
+	user.GET("/:userID", userController.Get)
+
+	post := v1.Group("/post")
+	post.GET("", postController.GetAll)
+
+	e.GET("", func(c echo.Context) error {
+		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
+		return c.String(http.StatusOK, c.Get("userID").(string))
+	}, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
