@@ -13,9 +13,21 @@ var (
 	ErrDuplicatedTwitterID = errors.New("twitter id is already used")
 	// ErrEmptyUserName はユーザー名が空だったときのエラー
 	ErrEmptyUserName = errors.New("user name must not be empty")
-	// ErrTooLong はフィールドの内容が長すぎるときのエラー
-	ErrTooLong = errors.New("too long")
 )
+
+// ErrTooLong はフィールドの内容が長すぎるときのエラー
+type ErrTooLong struct {
+	error
+	FieldName string
+}
+
+// NewErrorTooLong はフィールド名が空のときのエラーを生成します
+func NewErrorTooLong(fieldName string) error {
+	return ErrEmpty{
+		error:     errors.New("too long"),
+		FieldName: fieldName,
+	}
+}
 
 // ErrEmptyField はフィールド名が空のときのエラー
 type ErrEmpty struct {
