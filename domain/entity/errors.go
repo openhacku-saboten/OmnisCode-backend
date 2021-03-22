@@ -11,6 +11,6 @@ var (
 	// ErrDuplicatedUser はユーザーが既にDBに存在するときのエラー
 	ErrDuplicatedUser = errors.New("user already exists")
 
-	// ErrDuplicatedUser は入力したTwitterIDが既に使われているときのエラー
+	// ErrDuplicatedTwitterID は入力したTwitterIDが既に使われているときのエラー
 	ErrDuplicatedTwitterID = errors.New("twitter id is already used")
 )
