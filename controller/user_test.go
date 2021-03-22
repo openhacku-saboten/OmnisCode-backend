@@ -118,7 +118,6 @@ func TestUserController_Create(t *testing.T) {
 		prepareMockAuth func(auth *mock.MockAuth)
 		wantErr         bool
 		wantCode        int
-		wantBody        map[string]interface{}
 	}{
 		{
 			name:   "正しくユーザーを作成できる",
@@ -135,6 +134,48 @@ func TestUserController_Create(t *testing.T) {
 			},
 			wantErr:  false,
 			wantCode: 200,
+		},
+		{
+			name:   "不正なbodyならBadRequest",
+			userID: "user-id",
+			body: `{
+				"aaa":"test"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {},
+			wantErr:         true,
+			wantCode:        400,
+		},
+		{
+			name:   "userIDが重複しているならBadRequest",
+			userID: "user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
+				"twitter_id":"@twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Insert(
+					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+				).Return(entity.ErrDuplicatedUser)
+			},
+			wantErr:  true,
+			wantCode: 400,
+		},
+		{
+			name:   "TwitterIDが重複しているならBadRequest",
+			userID: "user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
+				"twitter_id":"@twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Insert(
+					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+				).Return(entity.ErrDuplicatedTwitterID)
+			},
+			wantErr:  true,
+			wantCode: 400,
 		},
 	}
 	for _, tt := range tests {
