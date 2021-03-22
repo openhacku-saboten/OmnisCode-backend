@@ -62,6 +62,33 @@ func (r *UserRepository) Insert(user *entity.User) error {
 	return nil
 }
 
+// Update は該当ユーザーをDBに保存する
+func (r *UserRepository) Update(user *entity.User) error {
+	userDTO := &UserDTO{
+		ID:        user.ID,
+		Name:      user.Name,
+		Profile:   user.Profile,
+		TwitterID: user.TwitterID,
+	}
+	rows, err := r.dbMap.Update(userDTO)
+	if rows == 0 {
+
+	}
+
+	if err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			if sqlerr.Number == 1062 && strings.Contains(sqlerr.Message, "users.PRIMARY") {
+				return entity.ErrDuplicatedUser
+			}
+			if sqlerr.Number == 1062 && strings.Contains(sqlerr.Message, "twitter_id") {
+				return entity.ErrDuplicatedTwitterID
+			}
+		}
+		return err
+	}
+	return nil
+}
+
 // UserDTO はDBとやり取りするためのDataTransferObject
 type UserDTO struct {
 	ID        string `db:"id"`
