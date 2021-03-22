@@ -32,9 +32,16 @@ func (u *User) IsValid() error {
 		return ErrEmptyUserName
 	}
 	// MySQLのVARCHARはマルチバイト文字も１と数えるので，それに合わせてバイト数ではなく文字数を数える
-	if len([]rune(u.ID)) > 128 || len([]rune(u.Name)) > 128 || len([]rune(u.TwitterID)) > 15 {
-		return ErrTooLong
+	if len([]rune(u.ID)) > 128 {
+		return NewErrorTooLong("user ID")
 	}
+	if len([]rune(u.Name)) > 128 {
+		return NewErrorTooLong("user Name")
+	}
+	if len([]rune(u.TwitterID)) > 15 {
+		return NewErrorTooLong("user TwitterID")
+	}
+
 	return nil
 }
 
