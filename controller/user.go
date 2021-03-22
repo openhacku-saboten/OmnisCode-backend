@@ -85,8 +85,8 @@ func (ctrl *UserController) Update(c echo.Context) error {
 	user.ID = userID
 
 	if err := ctrl.uc.Update(user); err != nil {
-		if errors.Is(err, entity.ErrDuplicatedUser) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedUser.Error())
+		if errors.Is(err, entity.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
 		}
 		if errors.Is(err, entity.ErrDuplicatedTwitterID) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedTwitterID.Error())

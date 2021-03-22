@@ -46,6 +46,12 @@ func (u *UserUseCase) Update(user *entity.User) error {
 		return fmt.Errorf("invalid user fields: %w", err)
 	}
 	user.Format()
+
+	// Updateは存在しないユーザーの更新をしてもエラーにならないので，ここでユーザーの存在確認をする
+	if _, err := u.userRepo.FindByID(user.ID); err != nil {
+		return fmt.Errorf("failed to Update User into DB: %w", err)
+	}
+
 	if err := u.userRepo.Update(user); err != nil {
 		return fmt.Errorf("failed to Update User into DB: %w", err)
 	}
