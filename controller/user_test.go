@@ -260,7 +260,7 @@ func TestUserController_Update(t *testing.T) {
 			wantCode: 200,
 		},
 		{
-			name:   "正しくユーザーを更新できる",
+			name:   "TwitterIDに@が含まれていれば取り除いてユーザーを更新できる",
 			userID: "user-id",
 			body: `{
 				"name":"newname",
