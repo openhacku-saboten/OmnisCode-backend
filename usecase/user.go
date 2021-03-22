@@ -49,7 +49,7 @@ func (u *UserUseCase) Update(user *entity.User) error {
 
 	// Updateは存在しないユーザーの更新をしてもエラーにならないので，ここでユーザーの存在確認をする
 	if _, err := u.userRepo.FindByID(user.ID); err != nil {
-		return fmt.Errorf("failed to Update User into DB: %w", err)
+		return fmt.Errorf("not found user %s in DB: %w", user.ID, err)
 	}
 
 	if err := u.userRepo.Update(user); err != nil {
