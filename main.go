@@ -55,8 +55,8 @@ func main() {
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 
-	post := v1.Group("/post")
-	post.GET("/:postID/comment", commentController.GetByPostID)
+	comment := v1.Group("/post/:postID/comment")
+	comment.GET("", commentController.GetByPostID)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
