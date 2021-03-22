@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -54,15 +53,10 @@ func main() {
 
 	user := v1.Group("/user")
 	user.GET("/:userID", userController.Get)
+	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	post := v1.Group("/post")
-
 	post.GET("/:postID/comment", commentController.GetByPostID)
-
-	e.GET("", func(c echo.Context) error {
-		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
-		return c.String(http.StatusOK, c.Get("userID").(string))
-	}, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
