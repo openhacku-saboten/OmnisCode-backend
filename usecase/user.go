@@ -34,6 +34,7 @@ func (u *UserUseCase) Create(user *entity.User) error {
 	if err := user.IsValid(); err != nil {
 		return fmt.Errorf("invalid user fields: %w", err)
 	}
+	user.Format()
 	if err := u.userRepo.Insert(user); err != nil {
 		return fmt.Errorf("failed to Insert User into DB: %w", err)
 	}

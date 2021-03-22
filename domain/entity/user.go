@@ -33,3 +33,11 @@ func (u *User) IsValid() error {
 	}
 	return nil
 }
+
+// Format は各エンティティの表記ゆれを整形するメソッドです
+func (u *User) Format() {
+	// TwitterIDに@が含まれていたら取りのぞく
+	if len(u.TwitterID) > 0 && u.TwitterID[0] == '@' {
+		u.TwitterID = u.TwitterID[1:]
+	}
+}
