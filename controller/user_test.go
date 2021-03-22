@@ -60,6 +60,16 @@ func TestUserController_Get(t *testing.T) {
 			wantCode:        404,
 			wantBody:        nil,
 		},
+		{
+			name:   "ユーザーIDが空ならBadRequest",
+			userID: "",
+			prepareMockUser: func(user *mock.MockUser) {
+			},
+			prepareMockAuth: func(auth *mock.MockAuth) {},
+			wantErr:         true,
+			wantCode:        400,
+			wantBody:        nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -157,6 +167,14 @@ func TestUserController_Create(t *testing.T) {
 			body: `{
 				"aaa":"test"
 			}`,
+			prepareMockUser: func(user *mock.MockUser) {},
+			wantErr:         true,
+			wantCode:        400,
+		},
+		{
+			name:            "bodyがJSON形式でないならBadRequest",
+			userID:          "user-id",
+			body:            `aaaaa`,
 			prepareMockUser: func(user *mock.MockUser) {},
 			wantErr:         true,
 			wantCode:        400,

@@ -22,6 +22,9 @@ func NewUserController(uc *usecase.UserUseCase) *UserController {
 func (ctrl *UserController) Get(c echo.Context) error {
 	logger := log.New()
 	userID := c.Param("userID")
+	if len(userID) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 
 	user, err := ctrl.uc.Get(c.Request().Context(), userID)
 

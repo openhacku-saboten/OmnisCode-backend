@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"strings"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -27,6 +28,26 @@ func TestUser_IsValid(t *testing.T) {
 			name:    "Nameが空ならエラー",
 			user:    NewUser("id", "", "profile", "twitter", "url"),
 			wantErr: ErrEmptyUserName,
+		},
+		{
+			name:    "IDが129文字以上ならエラー",
+			user:    NewUser(strings.Repeat("a", 129), "name", "profile", "twitter", "url"),
+			wantErr: ErrTooLong,
+		},
+		{
+			name:    "Nameが129文字以上ならエラー",
+			user:    NewUser("id", strings.Repeat("a", 129), "profile", "twitter", "url"),
+			wantErr: ErrTooLong,
+		},
+		{
+			name:    "TwitterIDが16文字以上ならエラー",
+			user:    NewUser("id", "name", "profile", strings.Repeat("a", 16), "url"),
+			wantErr: ErrTooLong,
+		},
+		{
+			name:    "マルチバイト文字列は１文字とカウント",
+			user:    NewUser("id", strings.Repeat("あ", 128), "profile", "twitter", "url"),
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
