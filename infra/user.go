@@ -76,7 +76,8 @@ func (r *UserRepository) Update(user *entity.User) error {
 
 	if _, err := r.dbMap.Update(userDTO); err != nil {
 		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			if sqlerr.Number == 1062 && strings.Contains(sqlerr.Message, "twitter_id") {
+			// twitterIDが重複したときのエラー
+			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
 				return entity.ErrDuplicatedTwitterID
 			}
 		}
