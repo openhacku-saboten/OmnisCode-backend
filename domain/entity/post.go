@@ -1,11 +1,12 @@
 package entity
 
 import (
+	"errors"
 	"time"
 )
 
 type Post struct {
-	ID        string
+	ID        int
 	UserID    string
 	Title     string
 	Code      string
@@ -18,8 +19,8 @@ type Post struct {
 
 // IsValid は各エンティティに問題がある場合はerrorを返すメソッドです
 func (p *Post) IsValid() error {
-	if len(p.ID) == 0 {
-		return NewErrorEmpty("post ID")
+	if p.ID < 0 {
+		return errors.New("ID must not be a negative value")
 	}
 	if len(p.UserID) == 0 {
 		return NewErrorEmpty("post userID")

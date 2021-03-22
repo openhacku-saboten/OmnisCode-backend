@@ -1,6 +1,7 @@
 package entity_test
 
 import (
+	"errors"
 	"strings"
 	"testing"
 	"time"
@@ -17,7 +18,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "正常なentity",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "testID",
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -30,10 +31,10 @@ func TestIsValid(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "empty ID",
+			name: "negative value for ID",
 			postE: &entity.Post{
-				ID:        "", // empty
-				UserID:    "testID",
+				ID:        -1,
+				UserID:    "", // empty
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				Language:  "Go",
@@ -42,12 +43,12 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			},
-			wantErr: entity.NewErrorEmpty("post ID"),
+			wantErr: errors.New("ID must not be a negative value"),
 		},
 		{
 			name: "empty userID",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "", // empty
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -62,7 +63,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "too long userID",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    strings.Repeat("a", 129), // too long
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -77,7 +78,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "empty title",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     "", // empty
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -92,7 +93,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "too long title",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     strings.Repeat("a", 129), // too long
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -107,7 +108,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "empty code",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     "test title",
 				Code:      "", // empty
@@ -122,7 +123,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "empty language",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -137,7 +138,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "too long language",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -152,7 +153,7 @@ func TestIsValid(t *testing.T) {
 		{
 			name: "too long source",
 			postE: &entity.Post{
-				ID:        "test",
+				ID:        0,
 				UserID:    "test",
 				Title:     "test title",
 				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
