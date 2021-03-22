@@ -43,7 +43,6 @@ func (ctrl *UserController) Create(c echo.Context) error {
 
 	user := &entity.User{}
 	if err := c.Bind(user); err != nil {
-		logger.Infof("%s", err)
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 	userID, ok := c.Get("userID").(string)
