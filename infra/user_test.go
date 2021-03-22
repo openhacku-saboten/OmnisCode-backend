@@ -90,14 +90,19 @@ func TestUserRepository_Insert(t *testing.T) {
 		wantErr error
 	}{
 		{
-			name:    "正しくユーザーを作成できる",
-			user:    entity.NewUser("new-id", "newUser", "new", "@new", ""),
-			wantErr: nil,
-		},
-		{
 			name:    "すでに存在するユーザーIDならErrDuplicatedUser",
 			user:    entity.NewUser("existing-id", "newUser", "new", "@new", ""),
 			wantErr: entity.ErrDuplicatedUser,
+		},
+		{
+			name:    "すでに存在するTwitterIDならErrDuplicatedTwitterID",
+			user:    entity.NewUser("new-id", "newUser", "new", "@existing", ""),
+			wantErr: entity.ErrDuplicatedTwitterID,
+		},
+		{
+			name:    "正しくユーザーを作成できる",
+			user:    entity.NewUser("new-id", "newUser", "new", "@new", ""),
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
