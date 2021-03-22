@@ -228,3 +228,145 @@ func TestUserController_Create(t *testing.T) {
 		})
 	}
 }
+
+func TestUserController_Update(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		body            string
+		prepareMockUser func(user *mock.MockUser)
+		prepareMockAuth func(auth *mock.MockAuth)
+		wantErr         bool
+		wantCode        int
+	}{
+		{
+			name:   "正しくユーザーを更新できる",
+			userID: "user-id",
+			body: `{
+				"name":"newname",
+				"profile":"newprofile",
+				"twitter_id":"newtwitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id").Return(
+					entity.NewUser("user-id", "name", "profile", "twitter", ""),
+					nil,
+				)
+				user.EXPECT().Update(
+					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
+				).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "正しくユーザーを更新できる",
+			userID: "user-id",
+			body: `{
+				"name":"newname",
+				"profile":"newprofile",
+				"twitter_id":"@newtwitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id").Return(
+					entity.NewUser("user-id", "name", "profile", "twitter", ""),
+					nil,
+				)
+				user.EXPECT().Update(
+					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
+				).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "不正なbodyならBadRequest",
+			userID: "user-id",
+			body: `{
+				"aaa":"test"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {},
+			wantErr:         true,
+			wantCode:        400,
+		},
+		{
+			name:            "bodyがJSON形式でないならBadRequest",
+			userID:          "user-id",
+			body:            `aaaaa`,
+			prepareMockUser: func(user *mock.MockUser) {},
+			wantErr:         true,
+			wantCode:        400,
+		},
+		{
+			name:   "存在しないユーザーIDならErrUserNotFound",
+			userID: "invalid-user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
+				"twitter_id":"twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("invalid-user-id").Return(
+					nil,
+					entity.ErrUserNotFound,
+				)
+			},
+			prepareMockAuth: func(auth *mock.MockAuth) {},
+			wantErr:         true,
+			wantCode:        404,
+		},
+		{
+			name:   "TwitterIDが重複しているならBadRequest",
+			userID: "user-id",
+			body: `{
+				"name":"newname",
+				"profile":"newprofile",
+				"twitter_id":"newtwitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id").Return(
+					entity.NewUser("user-id", "name", "profile", "twitter", ""),
+					nil,
+				)
+				user.EXPECT().Update(
+					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
+				).Return(entity.ErrDuplicatedTwitterID)
+			},
+			wantErr:  true,
+			wantCode: 400,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("POST", "/", strings.NewReader(tt.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.Set("userID", tt.userID)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			userRepo := mock.NewMockUser(ctrl)
+			tt.prepareMockUser(userRepo)
+			authRepo := mock.NewMockAuth(ctrl)
+
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			err := con.Update(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+		})
+	}
+}
