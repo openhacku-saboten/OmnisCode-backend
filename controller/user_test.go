@@ -29,7 +29,7 @@ func TestUserController_Get(t *testing.T) {
 			userID: "user-id",
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().FindByID("user-id").Return(
-					entity.NewUser("user-id", "name", "profile", "@twitter", ""),
+					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 			},
@@ -42,7 +42,7 @@ func TestUserController_Get(t *testing.T) {
 				"id":         "user-id",
 				"name":       "name",
 				"profile":    "profile",
-				"twitter_id": "@twitter",
+				"twitter_id": "twitter",
 				"icon_url":   "icon-url",
 			},
 		},
@@ -125,11 +125,27 @@ func TestUserController_Create(t *testing.T) {
 			body: `{
 				"name":"username",
 				"profile":"profile",
+				"twitter_id":"twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Insert(
+					entity.NewUser("user-id", "username", "profile", "twitter", ""),
+				).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "TwitterIDに@が含まれていれば取り除いてユーザーを作成できる",
+			userID: "user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
 				"twitter_id":"@twitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
-					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(nil)
 			},
 			wantErr:  false,
@@ -151,11 +167,11 @@ func TestUserController_Create(t *testing.T) {
 			body: `{
 				"name":"username",
 				"profile":"profile",
-				"twitter_id":"@twitter"
+				"twitter_id":"twitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
-					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedUser)
 			},
 			wantErr:  true,
@@ -167,11 +183,11 @@ func TestUserController_Create(t *testing.T) {
 			body: `{
 				"name":"username",
 				"profile":"profile",
-				"twitter_id":"@twitter"
+				"twitter_id":"twitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
-					entity.NewUser("user-id", "username", "profile", "@twitter", ""),
+					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedTwitterID)
 			},
 			wantErr:  true,

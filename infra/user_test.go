@@ -21,7 +21,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 		ID:        "existing-id",
 		Name:      "existingUser",
 		Profile:   "existing",
-		TwitterID: "@existing",
+		TwitterID: "existing",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -37,7 +37,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 		{
 			name:     "正しくユーザーを取得できる",
 			userID:   "existing-id",
-			wantUser: entity.NewUser("existing-id", "existingUser", "existing", "@existing", ""),
+			wantUser: entity.NewUser("existing-id", "existingUser", "existing", "existing", ""),
 			wantErr:  nil,
 		},
 		{
@@ -77,7 +77,7 @@ func TestUserRepository_Insert(t *testing.T) {
 		ID:        "existing-id",
 		Name:      "existingUser",
 		Profile:   "existing",
-		TwitterID: "@existing",
+		TwitterID: "existing",
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -91,17 +91,17 @@ func TestUserRepository_Insert(t *testing.T) {
 	}{
 		{
 			name:    "すでに存在するユーザーIDならErrDuplicatedUser",
-			user:    entity.NewUser("existing-id", "newUser", "new", "@new", ""),
+			user:    entity.NewUser("existing-id", "newUser", "new", "new", ""),
 			wantErr: entity.ErrDuplicatedUser,
 		},
 		{
 			name:    "すでに存在するTwitterIDならErrDuplicatedTwitterID",
-			user:    entity.NewUser("new-id", "newUser", "new", "@existing", ""),
+			user:    entity.NewUser("new-id", "newUser", "new", "existing", ""),
 			wantErr: entity.ErrDuplicatedTwitterID,
 		},
 		{
 			name:    "正しくユーザーを作成できる",
-			user:    entity.NewUser("new-id", "newUser", "new", "@new", ""),
+			user:    entity.NewUser("new-id", "newUser", "new", "new", ""),
 			wantErr: nil,
 		},
 	}
