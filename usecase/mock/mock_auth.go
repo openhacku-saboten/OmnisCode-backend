@@ -48,3 +48,18 @@ func (mr *MockAuthMockRecorder) Authenticate(ctx, token interface{}) *gomock.Cal
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Authenticate", reflect.TypeOf((*MockAuth)(nil).Authenticate), ctx, token)
 }
+
+// GetIconURL mocks base method.
+func (m *MockAuth) GetIconURL(ctx context.Context, uid string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetIconURL", ctx, uid)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetIconURL indicates an expected call of GetIconURL.
+func (mr *MockAuthMockRecorder) GetIconURL(ctx, uid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetIconURL", reflect.TypeOf((*MockAuth)(nil).GetIconURL), ctx, uid)
+}

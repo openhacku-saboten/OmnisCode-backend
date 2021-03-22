@@ -37,22 +37,24 @@ func main() {
 	}
 
 	authRepo := infra.NewAuthRepository(firebase)
+	userRepo := infra.NewUserRepository(dbMap)
+
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
 
+	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
+	userController := controller.NewUserController(userUseCase)
+
 	e := echo.New()
+	v1 := e.Group("/api/v1")
 
-	e.GET("/", func(c echo.Context) error {
-		logger.Infof("Access from %s", c.Request().RemoteAddr)
-		return c.String(http.StatusOK, "Hello, World!")
-	})
+	user := v1.Group("/user")
+	user.GET("/:userID", userController.Get)
 
-	authed := e.Group("/secret", authMiddleware.Authenticate)
-
-	authed.GET("", func(c echo.Context) error {
+	e.GET("", func(c echo.Context) error {
 		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
 		return c.String(http.StatusOK, c.Get("userID").(string))
-	})
+	}, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
