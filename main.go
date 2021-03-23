@@ -57,7 +57,7 @@ func main() {
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	post := v1.Group("/post")
-	post.GET("", postController.GetAll, authMiddleware.Authenticate)
+	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
 	post.POST("", postController.Create, authMiddleware.Authenticate)
 
 	e.GET("", func(c echo.Context) error {

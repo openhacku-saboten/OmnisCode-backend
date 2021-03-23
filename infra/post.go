@@ -50,13 +50,15 @@ func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
 			return nil, fmt.Errorf("failed dbMap.Scan: %w", err)
 		}
 		resDTO = append(resDTO, &entity.Post{
-			ID:       postDTO.ID,
-			UserID:   postDTO.UserID,
-			Title:    postDTO.Title,
-			Code:     postDTO.Code,
-			Language: postDTO.Language,
-			Content:  postDTO.Content,
-			Source:   postDTO.Source,
+			ID:        postDTO.ID,
+			UserID:    postDTO.UserID,
+			Title:     postDTO.Title,
+			Code:      postDTO.Code,
+			Language:  postDTO.Language,
+			Content:   postDTO.Content,
+			Source:    postDTO.Source,
+			CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
 		})
 	}
 
