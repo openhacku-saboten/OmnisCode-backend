@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-gorp/gorp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
 
 // PostRepository は投稿情報の永続化と再構築のためのリポジトリです
@@ -21,6 +22,15 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Store(ctx context.Context, post *entity.Post) error {
+	createdAt, err := service.ConvertStrToTime(post.CreatedAt)
+	if err != nil {
+		return err
+	}
+	updatedAt, err := service.ConvertStrToTime(post.UpdatedAt)
+	if err != nil {
+		return err
+	}
+
 	postDTO := &PostDTO{
 		ID:        post.ID,
 		UserID:    post.UserID,
@@ -29,8 +39,8 @@ func (p *PostRepository) Store(ctx context.Context, post *entity.Post) error {
 		Language:  post.Language,
 		Content:   post.Content,
 		Source:    post.Source,
-		CreatedAt: post.CreatedAt,
-		UpdatedAt: post.UpdatedAt,
+		CreatedAt: createdAt,
+		UpdatedAt: updatedAt,
 	}
 
 	// if err := p.dbMap.In

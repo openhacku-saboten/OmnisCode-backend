@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
@@ -22,8 +21,8 @@ func TestPost_Create_With_Mock(t *testing.T) {
 		Language:  "Go",
 		Content:   "Test code",
 		Source:    "github.com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: "2021-03-23T11:42:56+09:00",
+		UpdatedAt: "2021-03-23T11:42:56+09:00",
 	}
 
 	ctx := context.Background()
