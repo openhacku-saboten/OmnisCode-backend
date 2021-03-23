@@ -52,9 +52,9 @@ func main() {
 	e := echo.New()
 	v1 := e.Group("/api/v1")
 
-	/* 	user := v1.Group("/user")
-	   	user.GET("/:userID", userController.Get)
-	   	user.POST("", userController.Create, authMiddleware.Authenticate) */
+	user := v1.Group("/user")
+	user.GET("/:userID", userController.Get)
+	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	post := v1.Group("/post")
 	post.POST("", postController.Create, authMiddleware.Authenticate)
