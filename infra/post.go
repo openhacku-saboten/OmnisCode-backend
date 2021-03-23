@@ -43,9 +43,10 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 		UpdatedAt: updatedAt,
 	}
 
-	// if err := p.dbMap.In
+	if err := p.dbMap.Insert(postDTO); err != nil {
+		return err
+	}
 
-	_ = postDTO
 	return nil
 }
 
