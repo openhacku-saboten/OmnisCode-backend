@@ -24,7 +24,7 @@ func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 		return fmt.Errorf("invalid post field: %w", err)
 	}
 
-	if err := p.postRepo.Store(ctx, post); err != nil {
+	if err := p.postRepo.Insert(ctx, post); err != nil {
 		return fmt.Errorf("failed Store Post entity: %w", err)
 	}
 	return nil

@@ -10,5 +10,5 @@ import (
 
 // Post は永続化と再構築のためのリポジトリです
 type Post interface {
-	Store(ctx context.Context, post *entity.Post) error
+	Insert(ctx context.Context, post *entity.Post) error
 }

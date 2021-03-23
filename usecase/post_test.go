@@ -27,7 +27,7 @@ func TestPost_Create_With_Mock(t *testing.T) {
 
 	ctx := context.Background()
 	postMock := mock.NewMockPost(ctrl)
-	postMock.EXPECT().Store(ctx, validPost).Return(nil)
+	postMock.EXPECT().Insert(ctx, validPost).Return(nil)
 
 	sut := NewPostUsecase(postMock)
 	if err := sut.Create(ctx, validPost); err != nil {

@@ -36,7 +36,7 @@ func TestPostController_Create(t *testing.T) {
 				"updated_at":"2021-03-23T11:42:56+09:00"
 				}`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
-				post.EXPECT().Store(ctx, &entity.Post{
+				post.EXPECT().Insert(ctx, &entity.Post{
 					ID:        0,
 					UserID:    "user-id",
 					Title:     "test title",

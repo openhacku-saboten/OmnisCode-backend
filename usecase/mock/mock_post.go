@@ -35,16 +35,16 @@ func (m *MockPost) EXPECT() *MockPostMockRecorder {
 	return m.recorder
 }
 
-// Store mocks base method.
-func (m *MockPost) Store(ctx context.Context, post *entity.Post) error {
+// Insert mocks base method.
+func (m *MockPost) Insert(ctx context.Context, post *entity.Post) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", ctx, post)
+	ret := m.ctrl.Call(m, "Insert", ctx, post)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Store indicates an expected call of Store.
-func (mr *MockPostMockRecorder) Store(ctx, post interface{}) *gomock.Call {
+// Insert indicates an expected call of Insert.
+func (mr *MockPostMockRecorder) Insert(ctx, post interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockPost)(nil).Store), ctx, post)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockPost)(nil).Insert), ctx, post)
 }

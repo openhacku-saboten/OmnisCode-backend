@@ -21,7 +21,7 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 }
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
-func (p *PostRepository) Store(ctx context.Context, post *entity.Post) error {
+func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	createdAt, err := service.ConvertStrToTime(post.CreatedAt)
 	if err != nil {
 		return err
