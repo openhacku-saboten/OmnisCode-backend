@@ -21,8 +21,13 @@ type ErrTooLong struct {
 	fieldName string
 }
 
-// ErrEmptyField はフィールド名が空のときのエラー
+// ErrEmptyField はフィールドの内容が空のときのエラー
 type ErrEmpty struct {
+	fieldName string
+}
+
+// ErrNegativeValue はフィールドの内容が負のときのエラー
+type ErrNegativeValue struct {
 	fieldName string
 }
 
@@ -56,6 +61,17 @@ func NewErrorEmpty(fieldName string) error {
 
 func (e ErrEmpty) Error() string {
 	return fmt.Sprintf("%s is empty", e.fieldName)
+}
+
+// NewErrorNegativeValue はフィールドが負の値の時のエラーを生成します
+func NewErrorNegativeValue(fieldName string) error {
+	return ErrNegativeValue{
+		fieldName: fieldName,
+	}
+}
+
+func (e ErrNegativeValue) Error() string {
+	return fmt.Sprintf("%s is negative value", e.fieldName)
 }
 
 // NewErrorNotFound はフィールド名が存在しないときのエラーを生成します
