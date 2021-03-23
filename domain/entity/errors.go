@@ -21,6 +21,21 @@ type ErrTooLong struct {
 	fieldName string
 }
 
+// ErrEmptyField はフィールド名が空のときのエラー
+type ErrEmpty struct {
+	fieldName string
+}
+
+// ErrNotFound はエンティティが存在しないときのエラー
+type ErrNotFound struct {
+	entityName string
+}
+
+// ErrDuplicated はエンティティが重複したときのエラー
+type ErrDuplicated struct {
+	entityName string
+}
+
 // NewErrorTooLong はフィールド名が空のときのエラーを生成します
 func NewErrorTooLong(fieldName string) error {
 	return ErrTooLong{
@@ -30,11 +45,6 @@ func NewErrorTooLong(fieldName string) error {
 
 func (e ErrTooLong) Error() string {
 	return fmt.Sprintf("%s is too long", e.fieldName)
-}
-
-// ErrEmptyField はフィールド名が空のときのエラー
-type ErrEmpty struct {
-	fieldName string
 }
 
 // NewErrorEmpty はフィールド名が空のときのエラーを生成します
@@ -48,11 +58,6 @@ func (e ErrEmpty) Error() string {
 	return fmt.Sprintf("%s is empty", e.fieldName)
 }
 
-// ErrNotFound はエンティティが存在しないときのエラー
-type ErrNotFound struct {
-	entityName string
-}
-
 // NewErrorNotFound はフィールド名が存在しないときのエラーを生成します
 func NewErrorNotFound(entityName string) error {
 	return ErrNotFound{
@@ -64,13 +69,8 @@ func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("%s is not found", e.entityName)
 }
 
-// ErrDuplicated はエンティティが重複したときのエラー
-type ErrDuplicated struct {
-	entityName string
-}
-
 // NewDuplicated はフィールド名が重複したときのエラーを生成します
-func NewErrorAlreadyExists(entityName string) error {
+func NewErrorDuplicated(entityName string) error {
 	return ErrDuplicated{
 		entityName: entityName,
 	}
