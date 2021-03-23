@@ -104,9 +104,14 @@ func TestPostRepository_Insert(t *testing.T) {
 			ctx := context.Background()
 			err := postRepo.Insert(ctx, tt.post)
 
-			if !errors.Is(err, tt.wantErr) {
+			if err == nil || tt.wantErr == nil {
+				if err == tt.wantErr {
+					return
+				}
+				// どちらかがnilの場合は%vを使う
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
-				return
+			} else if err.Error() != tt.wantErr.Error() {
+				t.Errorf("error = %s, wantErr = %s", err.Error(), tt.wantErr.Error())
 			}
 		})
 	}
