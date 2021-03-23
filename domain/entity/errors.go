@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 )
 
 var (
@@ -17,28 +18,32 @@ var (
 
 // ErrTooLong はフィールドの内容が長すぎるときのエラー
 type ErrTooLong struct {
-	error
-	FieldName string
+	fieldName string
 }
 
 // NewErrorTooLong はフィールド名が空のときのエラーを生成します
 func NewErrorTooLong(fieldName string) error {
-	return ErrEmpty{
-		error:     errors.New("too long"),
-		FieldName: fieldName,
+	return ErrTooLong{
+		fieldName: fieldName,
 	}
+}
+
+func (e ErrTooLong) Error() string {
+	return fmt.Sprintf("%s is too long", e.fieldName)
 }
 
 // ErrEmptyField はフィールド名が空のときのエラー
 type ErrEmpty struct {
-	error
-	FieldName string
+	fieldName string
 }
 
 // NewErrorEmpty はフィールド名が空のときのエラーを生成します
 func NewErrorEmpty(fieldName string) error {
 	return ErrEmpty{
-		error:     errors.New("empty"),
-		FieldName: fieldName,
+		fieldName: fieldName,
 	}
+}
+
+func (e ErrEmpty) Error() string {
+	return fmt.Sprintf("%s is empty", e.fieldName)
 }
