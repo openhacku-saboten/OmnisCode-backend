@@ -1,86 +1,67 @@
 package infra
 
 import (
+	"context"
 	"errors"
 	"testing"
-	"time"
 
-	"github.com/go-gorp/gorp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
-func TestPostInfra_Insert(t *testing.T) {
+func TestPostRepository_Insert(t *testing.T) {
 	dbMap, err := NewDB()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	dbMap.AddTableWithName(PostDTO{}, "posts")
-	truncateUser(t, dbMap)
-	// TODO:
-	if err := dbMap.Insert(&PostDTO{
-		ID:        "existing-id",
-		Name:      "existingUser",
-		Profile:   "existing",
-		TwitterID: "existing",
+
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateTable(t, dbMap, "users")
+
+	if err := dbMap.Insert(&UserDTO{
+		ID:        "user-id",
+		Name:      "test user",
+		Profile:   "test profile",
+		TwitterID: "twitter",
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	userRepo := NewUserRepository(dbMap)
+	dbMap.AddTableWithName(PostDTO{}, "posts")
+	truncateTable(t, dbMap, "posts")
+
+	postRepo := NewPostRepository(dbMap)
 
 	tests := []struct {
 		name    string
-		user    *entity.User
+		post    *entity.Post
 		wantErr error
 	}{
 		{
-			name:    "すでに存在するユーザーIDならErrDuplicatedUser",
-			user:    entity.NewUser("existing-id", "newUser", "new", "new", ""),
-			wantErr: entity.ErrDuplicatedUser,
-		},
-		{
-			name:    "すでに存在するTwitterIDならErrDuplicatedTwitterID",
-			user:    entity.NewUser("new-id", "newUser", "new", "existing", ""),
-			wantErr: entity.ErrDuplicatedTwitterID,
-		},
-		{
-			name:    "正しくユーザーを作成できる",
-			user:    entity.NewUser("new-id", "newUser", "new", "new", ""),
+			name: "正常に追加できる",
+			post: &entity.Post{
+				ID:        0,
+				UserID:    "user-id",
+				Title:     "test title",
+				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language:  "Go",
+				Content:   "Test code",
+				Source:    "github.com",
+				CreatedAt: "2021-03-23T11:42:56+09:00",
+				UpdatedAt: "2021-03-23T11:42:56+09:00",
+			},
 			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := userRepo.Insert(tt.user)
+			ctx := context.Background()
+			err := postRepo.Insert(ctx, tt.post)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
 				return
 			}
 		})
-	}
-}
-
-func truncateUser(t *testing.T, dbMap *gorp.DbMap) {
-	t.Helper()
-
-	// databaseを初期化する
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 0"); err != nil {
-		t.Fatal(err)
-	}
-	// タイミングの問題でTruncateが失敗することがあるので成功するまで試みる
-	for i := 0; i < 5; i++ {
-		_, err := dbMap.Exec("TRUNCATE TABLE users")
-		if err == nil {
-			break
-		}
-		if i == 4 {
-			t.Fatal(err)
-		}
-		time.Sleep(time.Second * 1)
-	}
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 1"); err != nil {
-		t.Fatal(err)
 	}
 }
