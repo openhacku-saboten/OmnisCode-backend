@@ -1,11 +1,10 @@
 package controller
 
 import (
-	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/log"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
@@ -21,8 +20,8 @@ func NewCommentController(uc *usecase.CommentUseCase) *CommentController {
 // GetByPostID は GET /post/{postID}/comment のHandler
 func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 	logger := log.New()
-	postID := c.Param("postID")
-	if len(postID) == 0 {
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
