@@ -32,7 +32,7 @@ func (p *PostRepository) Insert(post *entity.Post) error {
 		UpdatedAt: post.UpdatedAt,
 	}
 
-	if err := p.dbMap.In
+	// if err := p.dbMap.In
 
 	_ = postDTO
 	return nil
