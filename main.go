@@ -62,6 +62,7 @@ func main() {
 		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
 		return c.String(http.StatusOK, c.Get("userID").(string))
 	}, authMiddleware.Authenticate)
+	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())

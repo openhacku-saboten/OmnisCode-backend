@@ -3,8 +3,11 @@ package infra
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/go-gorp/gorp"
+	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
@@ -35,6 +38,31 @@ func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
 		"",
 	)
 	return
+}
+
+// Insert は該当ユーザーをDBに保存する
+func (r *UserRepository) Insert(user *entity.User) error {
+	userDTO := &UserDTO{
+		ID:        user.ID,
+		Name:      user.Name,
+		Profile:   user.Profile,
+		TwitterID: user.TwitterID,
+	}
+
+	if err := r.dbMap.Insert(userDTO); err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			// userIDが重複したときのエラー
+			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "users.PRIMARY") {
+				return entity.ErrDuplicatedUser
+			}
+			// twitterIDが重複したときのエラー
+			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
+				return entity.ErrDuplicatedTwitterID
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject
