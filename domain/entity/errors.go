@@ -48,11 +48,12 @@ func (e ErrEmpty) Error() string {
 	return fmt.Sprintf("%s is empty", e.fieldName)
 }
 
-// ErrNotFound はエンティティが存在しない時のエラー
+// ErrNotFound はエンティティが存在しないときのエラー
 type ErrNotFound struct {
 	entityName string
 }
 
+// NewErrorNotFound はフィールド名が存在しないときのエラーを生成します
 func NewErrorNotFound(entityName string) error {
 	return ErrNotFound{
 		entityName: entityName,
@@ -61,4 +62,20 @@ func NewErrorNotFound(entityName string) error {
 
 func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("%s is not found", e.entityName)
+}
+
+// ErrDuplicated はエンティティが重複したときのエラー
+type ErrDuplicated struct {
+	entityName string
+}
+
+// NewDuplicated はフィールド名が重複したときのエラーを生成します
+func NewErrorAlreadyExists(entityName string) error {
+	return ErrDuplicated{
+		entityName: entityName,
+	}
+}
+
+func (e ErrDuplicated) Error() string {
+	return fmt.Sprintf("%s is duplicated", e.entityName)
 }
