@@ -11,7 +11,10 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
+	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
+
+var _ repository.Post = (*PostRepository)(nil)
 
 // PostRepository は投稿情報の永続化と再構築のためのリポジトリです
 type PostRepository struct {
