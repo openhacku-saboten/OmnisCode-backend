@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"errors"
-)
-
 type User struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
@@ -26,15 +22,22 @@ func NewUser(id, name, profile, twitterID, iconURL string) *User {
 func (u *User) IsValid() error {
 	if len(u.ID) == 0 {
 		// Authenticate時にuser IDを確認しているので想定しないエラー
-		return errors.New("user ID must not be empty")
+		return NewErrorEmpty("user ID")
 	}
 	if len(u.Name) == 0 {
 		return ErrEmptyUserName
 	}
 	// MySQLのVARCHARはマルチバイト文字も１と数えるので，それに合わせてバイト数ではなく文字数を数える
-	if len([]rune(u.ID)) > 128 || len([]rune(u.Name)) > 128 || len([]rune(u.TwitterID)) > 15 {
-		return ErrTooLong
+	if len([]rune(u.ID)) > 128 {
+		return NewErrorTooLong("user ID")
 	}
+	if len([]rune(u.Name)) > 128 {
+		return NewErrorTooLong("user Name")
+	}
+	if len([]rune(u.TwitterID)) > 15 {
+		return NewErrorTooLong("user TwitterID")
+	}
+
 	return nil
 }
 
