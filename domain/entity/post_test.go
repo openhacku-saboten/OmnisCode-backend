@@ -10,6 +10,7 @@ import (
 )
 
 func TestIsValid(t *testing.T) {
+	t.Parallel()
 	tests := []struct {
 		name    string
 		postE   *entity.Post
@@ -169,6 +170,7 @@ func TestIsValid(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			got := tc.postE.IsValid()
 			if got == nil && tc.wantErr == nil {
 				return

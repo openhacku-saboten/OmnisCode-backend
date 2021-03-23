@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,15 +36,15 @@ func (m *MockPost) EXPECT() *MockPostMockRecorder {
 }
 
 // Store mocks base method.
-func (m *MockPost) Store(post *entity.Post) error {
+func (m *MockPost) Store(ctx context.Context, post *entity.Post) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Store", post)
+	ret := m.ctrl.Call(m, "Store", ctx, post)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Store indicates an expected call of Store.
-func (mr *MockPostMockRecorder) Store(post interface{}) *gomock.Call {
+func (mr *MockPostMockRecorder) Store(ctx, post interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockPost)(nil).Store), post)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Store", reflect.TypeOf((*MockPost)(nil).Store), ctx, post)
 }

@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-gorp/gorp"
@@ -19,7 +20,7 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 }
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
-func (p *PostRepository) Insert(post *entity.Post) error {
+func (p *PostRepository) Store(ctx context.Context, post *entity.Post) error {
 	postDTO := &PostDTO{
 		ID:        post.ID,
 		UserID:    post.UserID,
