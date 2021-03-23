@@ -47,3 +47,18 @@ func NewErrorEmpty(fieldName string) error {
 func (e ErrEmpty) Error() string {
 	return fmt.Sprintf("%s is empty", e.fieldName)
 }
+
+// ErrNotFound はエンティティが存在しない時のエラー
+type ErrNotFound struct {
+	entityName string
+}
+
+func NewErrorNotFound(entityName string) error {
+	return ErrNotFound{
+		entityName: entityName,
+	}
+}
+
+func (e ErrNotFound) Error() string {
+	return fmt.Sprintf("%s is not found", e.entityName)
+}
