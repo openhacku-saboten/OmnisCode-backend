@@ -8,12 +8,12 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 basePath: "/api/v1"
 tags:
+- name: "user"
+  description: "ユーザー"
 - name: "post"
   description: "スレッドのメインとなる投稿"
 - name: "comment"
   description: "スレッドにつくコメント．コードに対するハイライトor変更が含まれる場合がある"
-- name: "user"
-  description: "ユーザー"
 schemes:
 - "https"
 - "http"
@@ -479,6 +479,14 @@ definitions:
       source:
         type: "string"
         description: "postの引用元(urlなど)"
+      created_at:
+        type: "string"
+        description: "YYYY-mm-ddTHH:MM:SS+0900形式の投稿作成日時"
+        example: "2006-01-02T15:04:05+09:00"
+      updated_at:
+        type: "string"
+        description: "YYYY-mm-ddTHH:MM:SS+0900形式の投稿最終更新日時"
+        example: "2006-01-02T15:04:05+09:00"
   CommentRequest:
     type: "object"
     properties:
@@ -535,6 +543,14 @@ definitions:
       code:
         type: "string"
         description: "変更後のコードすべてを含む(type:commitのみ)"
+      created_at:
+        type: "string"
+        description: "YYYY-mm-ddTHH:MM:SS+0900形式の投稿作成日時"
+        example: "2006-01-02T15:04:05+09:00"
+      updated_at:
+        type: "string"
+        description: "YYYY-mm-ddTHH:MM:SS+0900形式の投稿最終更新日時"
+        example: "2006-01-02T15:04:05+09:00"
   errorResponse:
     type: "object"
     properties:
