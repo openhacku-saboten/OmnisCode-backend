@@ -1,7 +1,6 @@
 package entity
 
 import (
-	"errors"
 	"strings"
 	"testing"
 
@@ -22,7 +21,7 @@ func TestUser_IsValid(t *testing.T) {
 		{
 			name:    "IDが空ならエラー",
 			user:    NewUser("", "name", "profile", "twitter", "url"),
-			wantErr: errors.New("user ID must not be empty"),
+			wantErr: NewErrorEmpty("user ID"),
 		},
 		{
 			name:    "Nameが空ならエラー",
@@ -32,17 +31,17 @@ func TestUser_IsValid(t *testing.T) {
 		{
 			name:    "IDが129文字以上ならエラー",
 			user:    NewUser(strings.Repeat("a", 129), "name", "profile", "twitter", "url"),
-			wantErr: ErrTooLong,
+			wantErr: NewErrorTooLong("user ID"),
 		},
 		{
 			name:    "Nameが129文字以上ならエラー",
 			user:    NewUser("id", strings.Repeat("a", 129), "profile", "twitter", "url"),
-			wantErr: ErrTooLong,
+			wantErr: NewErrorTooLong("user Name"),
 		},
 		{
 			name:    "TwitterIDが16文字以上ならエラー",
 			user:    NewUser("id", "name", "profile", strings.Repeat("a", 16), "url"),
-			wantErr: ErrTooLong,
+			wantErr: NewErrorTooLong("user TwitterID"),
 		},
 		{
 			name:    "マルチバイト文字列は１文字とカウント",

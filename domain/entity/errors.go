@@ -2,6 +2,7 @@ package entity
 
 import (
 	"errors"
+	"fmt"
 )
 
 var (
@@ -13,20 +14,36 @@ var (
 	ErrDuplicatedTwitterID = errors.New("twitter id is already used")
 	// ErrEmptyUserName はユーザー名が空だったときのエラー
 	ErrEmptyUserName = errors.New("user name must not be empty")
-
-	// ErrTooLong はフィールドの内容が長すぎるときのエラー
-	ErrTooLong = errors.New("too long")
 )
 
-// ErrEmptyField はフィールド名が空の時のエラー
-type ErrEmpty struct {
-	error
-	FieldName string
+// ErrTooLong はフィールドの内容が長すぎるときのエラー
+type ErrTooLong struct {
+	fieldName string
 }
 
+// NewErrorTooLong はフィールド名が空のときのエラーを生成します
+func NewErrorTooLong(fieldName string) error {
+	return ErrTooLong{
+		fieldName: fieldName,
+	}
+}
+
+func (e ErrTooLong) Error() string {
+	return fmt.Sprintf("%s is too long", e.fieldName)
+}
+
+// ErrEmptyField はフィールド名が空のときのエラー
+type ErrEmpty struct {
+	fieldName string
+}
+
+// NewErrorEmpty はフィールド名が空のときのエラーを生成します
 func NewErrorEmpty(fieldName string) error {
 	return ErrEmpty{
-		error:     errors.New("empty"),
-		FieldName: fieldName,
+		fieldName: fieldName,
 	}
+}
+
+func (e ErrEmpty) Error() string {
+	return fmt.Sprintf("%s is empty", e.fieldName)
 }
