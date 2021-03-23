@@ -2,19 +2,18 @@ package entity
 
 import (
 	"errors"
-	"time"
 )
 
 type Post struct {
-	ID        int
-	UserID    string
-	Title     string
-	Code      string
-	Language  string
-	Content   string
-	Source    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int    `json:"id"`
+	UserID    string `json:"user_id"`
+	Title     string `json:"title"`
+	Code      string `json:"code"`
+	Language  string `json:"language"`
+	Content   string `json:"content"`
+	Source    string `json:"source"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 // IsValid は各エンティティに問題がある場合はerrorを返すメソッドです
