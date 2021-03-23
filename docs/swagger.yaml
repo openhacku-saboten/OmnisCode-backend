@@ -8,12 +8,12 @@ info:
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
 basePath: "/api/v1"
 tags:
+- name: "user"
+  description: "ユーザー"
 - name: "post"
   description: "スレッドのメインとなる投稿"
 - name: "comment"
   description: "スレッドにつくコメント．コードに対するハイライトor変更が含まれる場合がある"
-- name: "user"
-  description: "ユーザー"
 schemes:
 - "https"
 - "http"
