@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"errors"
@@ -36,6 +37,9 @@ func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
 	const query = `SELECT * FROM posts`
 	rows, err := p.dbMap.Query(query)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, entity.NewErrorNotFound("post")
+		}
 		return nil, fmt.Errorf("failed dbMap.Query: %w", err)
 	}
 	defer rows.Close()
