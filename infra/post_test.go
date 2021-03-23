@@ -30,7 +30,7 @@ func TestPostRepository_Insert(t *testing.T) {
 	dbMap.AddTableWithName(PostDTO{}, "posts")
 	truncateTable(t, dbMap, "posts")
 
-	// デフォルトユーザの追加
+	// デフォルトの投稿追加
 	if err := dbMap.Insert(&PostDTO{
 		ID:        1,
 		UserID:    "user-id",
