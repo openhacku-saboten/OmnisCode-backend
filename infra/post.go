@@ -2,9 +2,13 @@ package infra
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/go-gorp/gorp"
+	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
@@ -44,6 +48,17 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	}
 
 	if err := p.dbMap.Insert(postDTO); err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			// 存在しないユーザIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+				return errors.New("unexisted user")
+			}
+			// postIDが重複したときのエラー
+			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "posts.PRIMARY") {
+				return errors.New("post ID is duplicated")
+			}
+		}
+
 		return err
 	}
 
