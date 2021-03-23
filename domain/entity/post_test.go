@@ -73,7 +73,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.ErrTooLong,
+			wantErr: entity.NewErrorTooLong("post UserID"),
 		},
 		{
 			name: "empty title",
@@ -88,7 +88,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.NewErrorEmpty("post title"),
+			wantErr: entity.NewErrorEmpty("post Title"),
 		},
 		{
 			name: "too long title",
@@ -103,7 +103,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.ErrTooLong,
+			wantErr: entity.NewErrorTooLong("post Title"),
 		},
 		{
 			name: "empty code",
@@ -118,7 +118,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.NewErrorEmpty("post code"),
+			wantErr: entity.NewErrorEmpty("post Code"),
 		},
 		{
 			name: "empty language",
@@ -133,7 +133,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.NewErrorEmpty("post language"),
+			wantErr: entity.NewErrorEmpty("post Language"),
 		},
 		{
 			name: "too long language",
@@ -148,7 +148,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.ErrTooLong,
+			wantErr: entity.NewErrorTooLong("post Language"),
 		},
 		{
 			name: "too long source",
@@ -163,7 +163,7 @@ func TestIsValid(t *testing.T) {
 				CreatedAt: "2021-03-23T11:42:56+09:00",
 				UpdatedAt: "2021-03-23T11:42:56+09:00",
 			},
-			wantErr: entity.ErrTooLong,
+			wantErr: entity.NewErrorTooLong("post Source"),
 		},
 	}
 

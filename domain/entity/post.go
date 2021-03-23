@@ -22,28 +22,28 @@ func (p *Post) IsValid() error {
 		return errors.New("ID must not be a negative value")
 	}
 	if len(p.UserID) == 0 {
-		return NewErrorEmpty("post userID")
+		return NewErrorEmpty("post UserID")
 	}
 	if len([]rune(p.UserID)) > 128 {
-		return ErrTooLong
+		return NewErrorTooLong("post UserID")
 	}
 	if len(p.Title) == 0 {
-		return NewErrorEmpty("post title")
+		return NewErrorEmpty("post Title")
 	}
 	if len([]rune(p.Title)) > 128 {
-		return ErrTooLong
+		return NewErrorTooLong("post Title")
 	}
 	if len(p.Code) == 0 {
-		return NewErrorEmpty("post code")
+		return NewErrorEmpty("post Code")
 	}
 	if len(p.Language) == 0 {
-		return NewErrorEmpty("post language")
+		return NewErrorEmpty("post Language")
 	}
 	if len([]rune(p.Language)) > 128 {
-		return ErrTooLong
+		return NewErrorTooLong("post Language")
 	}
 	if len([]rune(p.Source)) > 2048 {
-		return ErrTooLong
+		return NewErrorTooLong("post Source")
 	}
 
 	return nil
