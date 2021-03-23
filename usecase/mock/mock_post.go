@@ -45,3 +45,15 @@ func (_m *MockPost) GetAll(ctx context.Context) ([]*entity.Post, error) {
 func (_mr *MockPostMockRecorder) GetAll(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "GetAll", reflect.TypeOf((*MockPost)(nil).GetAll), arg0)
 }
+
+// Insert mocks base method
+func (_m *MockPost) Insert(ctx context.Context, post *entity.Post) error {
+	ret := _m.ctrl.Call(_m, "Insert", ctx, post)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Insert indicates an expected call of Insert
+func (_mr *MockPostMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockPost)(nil).Insert), arg0, arg1)
+}

@@ -46,23 +46,24 @@ func main() {
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
 	userController := controller.NewUserController(userUseCase)
 
-	postUC := usecase.NewPostUsecase(postRepo)
-	postController := controller.NewPostController(postUC)
+	postUsecase := usecase.NewPostUsecase(postRepo)
+	postController := controller.NewPostController(postUsecase)
 
 	e := echo.New()
 	v1 := e.Group("/api/v1")
 
 	user := v1.Group("/user")
 	user.GET("/:userID", userController.Get)
+	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	post := v1.Group("/post")
-	post.GET("", postController.GetAll)
+	post.GET("", postController.GetAll, authMiddleware.Authenticate)
+	post.POST("", postController.Create, authMiddleware.Authenticate)
 
 	e.GET("", func(c echo.Context) error {
 		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)
 		return c.String(http.StatusOK, c.Get("userID").(string))
 	}, authMiddleware.Authenticate)
-	user.POST("", userController.Create, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())

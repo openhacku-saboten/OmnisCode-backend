@@ -8,22 +8,34 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
 
-// PostUsecase は投稿に関するusecaseです
-type Post struct {
-	repo repository.Post
+// PostUsecase は投稿に関するユースケースの構造体です
+type PostUsecase struct {
+	postRepo repository.Post
 }
 
-// NewPostUsecase はPostUsecaseのポインタを生成する関数です
-func NewPostUsecase(repo repository.Post) *Post {
-	return &Post{repo: repo}
+// NewPostUsecase は投稿に関するユースケースのポインタを生成します
+func NewPostUsecase(postRepo repository.Post) *PostUsecase {
+	return &PostUsecase{postRepo: postRepo}
 }
 
 // GetAll は保存されている全ての投稿を取得します
-func (p *Post) GetAll(ctx context.Context) ([]*entity.Post, error) {
-	posts, err := p.repo.GetAll(ctx)
+func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
+	posts, err := p.postRepo.GetAll(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to GetAll: %w", err)
 	}
 
 	return posts, nil
+}
+
+// Create は投稿の情報を保存するというユースケースです
+func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
+	if err := post.IsValid(); err != nil {
+		return fmt.Errorf("invalid post field: %w", err)
+	}
+
+	if err := p.postRepo.Insert(ctx, post); err != nil {
+		return fmt.Errorf("failed Store Post entity: %w", err)
+	}
+	return nil
 }

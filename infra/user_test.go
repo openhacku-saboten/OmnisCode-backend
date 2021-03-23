@@ -3,9 +3,7 @@ package infra
 import (
 	"errors"
 	"testing"
-	"time"
 
-	"github.com/go-gorp/gorp"
 	"github.com/google/go-cmp/cmp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
@@ -16,7 +14,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	dbMap.AddTableWithName(UserDTO{}, "users")
-	truncateUser(t, dbMap)
+	truncateTable(t, dbMap, "users")
 	if err := dbMap.Insert(&UserDTO{
 		ID:        "existing-id",
 		Name:      "existingUser",
@@ -72,7 +70,7 @@ func TestUserRepository_Insert(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	dbMap.AddTableWithName(UserDTO{}, "users")
-	truncateUser(t, dbMap)
+	truncateTable(t, dbMap, "users")
 	if err := dbMap.Insert(&UserDTO{
 		ID:        "existing-id",
 		Name:      "existingUser",
@@ -115,28 +113,5 @@ func TestUserRepository_Insert(t *testing.T) {
 				return
 			}
 		})
-	}
-}
-
-func truncateUser(t *testing.T, dbMap *gorp.DbMap) {
-	t.Helper()
-
-	// databaseを初期化する
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 0"); err != nil {
-		t.Fatal(err)
-	}
-	// タイミングの問題でTruncateが失敗することがあるので成功するまで試みる
-	for i := 0; i < 5; i++ {
-		_, err := dbMap.Exec("TRUNCATE TABLE users")
-		if err == nil {
-			break
-		}
-		if i == 4 {
-			t.Fatal(err)
-		}
-		time.Sleep(time.Second * 1)
-	}
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 1"); err != nil {
-		t.Fatal(err)
 	}
 }
