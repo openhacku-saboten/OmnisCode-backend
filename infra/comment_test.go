@@ -88,8 +88,8 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 			ID:        3,
 			UserID:    "user-id",
 			PostID:    2,
-			Type:      "code",
-			Content:   "type code",
+			Type:      "commit",
+			Content:   "type commit",
 			Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 			CreatedAt: time.Unix(100, 0), // とりあえず入れる
 			UpdatedAt: time.Unix(100, 0),
@@ -119,8 +119,8 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 					PostID:    1,
 					Type:      "none",
 					Content:   "type none",
-					CreatedAt: "1970-01-01T09:01:40+09:00",
-					UpdatedAt: "1970-01-01T09:01:40+09:00",
+					CreatedAt: "1970-01-01T00:01:40+09:00",
+					UpdatedAt: "1970-01-01T00:01:40+09:00",
 				},
 				{
 					ID:        2,
@@ -130,11 +130,17 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 					Content:   "type highlight",
 					FirstLine: 10,
 					LastLine:  11,
-					CreatedAt: "1970-01-01T09:01:40+09:00",
-					UpdatedAt: "1970-01-01T09:01:40+09:00",
+					CreatedAt: "1970-01-01T00:01:40+09:00",
+					UpdatedAt: "1970-01-01T00:01:40+09:00",
 				},
 			},
 			wantErr: nil,
+		},
+		{
+			name:         "コメントが存在しなくてもエラーにはならない",
+			postID:       100,
+			wantComments: nil,
+			wantErr:      nil,
 		},
 	}
 	for _, tt := range tests {
