@@ -37,6 +37,7 @@ func main() {
 
 	authRepo := infra.NewAuthRepository(firebase)
 	userRepo := infra.NewUserRepository(dbMap)
+	postRepo := infra.NewPostRepository(dbMap)
 	commentRepo := infra.NewCommentRepository(dbMap)
 
 	authUseCase := usecase.NewAuthUseCase(authRepo)
@@ -44,6 +45,9 @@ func main() {
 
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
 	userController := controller.NewUserController(userUseCase)
+
+	postUsecase := usecase.NewPostUsecase(postRepo)
+	postController := controller.NewPostController(postUsecase)
 
 	commentUseCase := usecase.NewCommentUseCase(commentRepo)
 	commentController := controller.NewCommentController(commentUseCase)
@@ -55,6 +59,9 @@ func main() {
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 	user.PUT("", userController.Update, authMiddleware.Authenticate)
+
+	post := v1.Group("/post")
+	post.POST("", postController.Create, authMiddleware.Authenticate)
 
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)

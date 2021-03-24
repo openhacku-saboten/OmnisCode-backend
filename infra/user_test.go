@@ -16,7 +16,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	dbMap.AddTableWithName(UserDTO{}, "users")
-	truncateUser(t, dbMap)
+	truncateTable(t, dbMap, "users")
 	if err := dbMap.Insert(&UserDTO{
 		ID:        "existing-id",
 		Name:      "existingUser",
@@ -72,7 +72,7 @@ func TestUserRepository_Insert(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	dbMap.AddTableWithName(UserDTO{}, "users")
-	truncateUser(t, dbMap)
+	truncateTable(t, dbMap, "users")
 	if err := dbMap.Insert(&UserDTO{
 		ID:        "existing-id",
 		Name:      "existingUser",
