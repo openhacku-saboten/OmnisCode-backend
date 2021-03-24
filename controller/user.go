@@ -71,3 +71,38 @@ func (ctrl *UserController) Create(c echo.Context) error {
 
 	return nil
 }
+
+// Update は PUT /user のHandler
+func (ctrl *UserController) Update(c echo.Context) error {
+	logger := log.New()
+
+	user := &entity.User{}
+	if err := c.Bind(user); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	userID, ok := c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	user.ID = userID
+
+	if err := ctrl.uc.Update(user); err != nil {
+		if errors.Is(err, entity.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
+		}
+		if errors.Is(err, entity.ErrEmptyUserName) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
+		}
+		if errors.As(err, &entity.ErrDuplicated{}) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if errors.As(err, &entity.ErrTooLong{}) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		logger.Errorf("Unexpected error PUT/user: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return nil
+}
