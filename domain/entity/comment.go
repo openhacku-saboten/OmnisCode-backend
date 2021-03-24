@@ -1,9 +1,5 @@
 package entity
 
-import (
-	"errors"
-)
-
 type Comment struct {
 	ID        int    `json:"id"`
 	UserID    string `json:"user_id"`
@@ -27,21 +23,26 @@ func (c *Comment) IsValid() error {
 	if c.PostID == 0 {
 		return NewErrorEmpty("post ID")
 	}
+	// Typeに応じて不必要なフィールドが含まれていたらエラー
 	switch c.Type {
 	case "none":
+		// FirstLine,LastLine,Codeが空でない
 		if c.FirstLine != 0 || c.LastLine != 0 || len(c.Code) != 0 {
-			return errors.New("firstline, lastline and code must be empty if type is none")
+			return ErrInvalidCommentType
 		}
 	case "highlight":
+		// Codeが空でない
 		if len(c.Code) != 0 {
-			return errors.New("code must be empty if type is highlight")
+			return ErrInvalidCommentType
 		}
 	case "commit":
+		// FirstLine,LastLineが空でない
 		if len(c.Code) != 0 {
-			return errors.New("firstline and lastline must be empty if type is commit")
+			return ErrInvalidCommentType
 		}
 	default:
-		return errors.New("invalid comment type")
+		// none,highlight,commit以外の文字列の場合
+		return ErrInvalidCommentType
 	}
 	return nil
 }
