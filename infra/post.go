@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"strings"
 	"time"
@@ -10,6 +11,7 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
 
@@ -24,6 +26,29 @@ type PostRepository struct {
 func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(false, "ID")
 	return &PostRepository{dbMap: dbMap}
+}
+
+// FindByID はpostIDから投稿を取得します
+func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
+	var postDTO PostDTO
+	if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, entity.NewErrorNotFound("post")
+		}
+		return nil, err
+	}
+
+	return &entity.Post{
+		ID:        postDTO.ID,
+		UserID:    postDTO.UserID,
+		Title:     postDTO.Title,
+		Code:      postDTO.Title,
+		Language:  postDTO.Language,
+		Content:   postDTO.Content,
+		Source:    postDTO.Source,
+		CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
+		UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
+	}, nil
 }
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します

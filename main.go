@@ -58,6 +58,7 @@ func main() {
 
 	post := v1.Group("/post")
 	post.POST("", postController.Create, authMiddleware.Authenticate)
+	post.GET("/:postID", postController.Get)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
