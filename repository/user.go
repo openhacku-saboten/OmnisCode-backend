@@ -2,10 +2,15 @@
 
 package repository
 
-import "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+import (
+	"context"
+
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+)
 
 type User interface {
 	FindByID(uid string) (user *entity.User, err error)
+	FindCommentsByID(ctx context.Context, uid string) ([]*entity.Comment, error)
 	Insert(user *entity.User) error
 	Update(user *entity.User) error
 }
