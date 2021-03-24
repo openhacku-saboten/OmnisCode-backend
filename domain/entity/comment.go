@@ -20,13 +20,13 @@ type Comment struct {
 
 func (c *Comment) IsValid() error {
 	if c.ID == 0 {
-		return errors.New("comment ID must not be empty")
+		return NewErrorEmpty("comment ID")
 	}
 	if len(c.UserID) == 0 {
-		return errors.New("user ID must not be empty")
+		return NewErrorEmpty("user ID")
 	}
 	if c.PostID == 0 {
-		return errors.New("post ID must not be empty")
+		return NewErrorEmpty("post ID")
 	}
 	switch c.Type {
 	case "none":
