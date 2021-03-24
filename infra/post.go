@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -26,45 +25,36 @@ type PostRepository struct {
 // NewPostRepository は投稿情報のリポジトリのポインタを生成する関数です
 func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(false, "ID")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(false, "ID")
 	return &PostRepository{dbMap: dbMap}
 }
 
 // GetAll はMySQLサーバに接続して、全てのPostを取得して返すメソッドです
 func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
-	var resDTO []*entity.Post
-
-	const query = `SELECT * FROM posts`
-	rows, err := p.dbMap.Query(query)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, entity.NewErrorNotFound("post")
-		}
-		return nil, fmt.Errorf("failed dbMap.Query: %w", err)
+	var postDTOs []PostDTO
+	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts"); err != nil {
+		return nil, err
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var postDTO PostDTO
-		if err := rows.Scan(&postDTO); err != nil {
-			return nil, fmt.Errorf("failed dbMap.Scan: %w", err)
-		}
-		resDTO = append(resDTO, &entity.Post{
-			ID:        postDTO.ID,
-			UserID:    postDTO.UserID,
-			Title:     postDTO.Title,
-			Code:      postDTO.Code,
-			Language:  postDTO.Language,
-			Content:   postDTO.Content,
-			Source:    postDTO.Source,
-			CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
-			UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
+	var posts []*entity.Post
+	for _, dto := range postDTOs {
+		posts = append(posts, &entity.Post{
+			ID:        dto.ID,
+			UserID:    dto.UserID,
+			Title:     dto.Title,
+			Code:      dto.Code,
+			Language:  dto.Language,
+			Content:   dto.Content,
+			Source:    dto.Source,
+			CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
 		})
 	}
-
-	if err = rows.Err(); err != nil {
-		return nil, fmt.Errorf("failed to Err: %w", err)
+	if posts == nil {
+		return nil, entity.NewErrorNotFound("post")
 	}
-	return resDTO, nil
+
+	return posts, nil
 }
 
 // FindByID はpostIDから投稿を取得します
@@ -92,16 +82,14 @@ func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
-	postDTO := &PostDTO{
-		ID:        post.ID,
-		UserID:    post.UserID,
-		Title:     post.Title,
-		Code:      post.Code,
-		Language:  post.Language,
-		Content:   post.Content,
-		Source:    post.Source,
-		CreatedAt: time.Now(), // 空だとエラーになるので、ひとまず現在時刻を入れる
-		UpdatedAt: time.Now(),
+	postDTO := &PostInsertDTO{
+		ID:       post.ID,
+		UserID:   post.UserID,
+		Title:    post.Title,
+		Code:     post.Code,
+		Language: post.Language,
+		Content:  post.Content,
+		Source:   post.Source,
 	}
 
 	if err := p.dbMap.Insert(postDTO); err != nil {
@@ -133,4 +121,17 @@ type PostDTO struct {
 	Source    string    `db:"source"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+}
+
+// PostInsertDTO はInsert用のDataTransferObjectです
+type PostInsertDTO struct {
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	Title     string    `db:"title"`
+	Code      string    `db:"code"`
+	Language  string    `db:"language"`
+	Content   string    `db:"content"`
+	Source    string    `db:"source"`
+	CreatedAt time.Time `db:"-"`
+	UpdatedAt time.Time `db:"-"`
 }
