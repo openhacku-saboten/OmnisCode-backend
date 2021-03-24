@@ -22,3 +22,19 @@ func (u *CommentUseCase) GetByPostID(postid int) (comments []*entity.Comment, er
 	}
 	return
 }
+
+func (u *CommentUseCase) Create(comment *entity.Comment) error {
+	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のcommentIDを
+	// フロントでセットできてしまうので，ここらへんでcommentIDを初期化しておく
+	comment.ID = 0
+	if err := comment.IsValid(); err != nil {
+		return fmt.Errorf("invalid Comment fields: %w", err)
+	}
+
+	// Postの投稿者以外によるtype:commitを弾く
+
+	if err := u.commentRepo.Insert(comment); err != nil {
+		return fmt.Errorf("failed to Insert Comment into DB: %w", err)
+	}
+	return nil
+}
