@@ -30,6 +30,14 @@ func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, e
 	return
 }
 
+func (u *UserUseCase) GetPosts(ctx context.Context, uid string) ([]*entity.Post, error) {
+	posts, err := u.userRepo.FindPostsByID(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	return posts, nil
+}
+
 func (u *UserUseCase) Create(user *entity.User) error {
 	if err := user.IsValid(); err != nil {
 		return fmt.Errorf("invalid user fields: %w", err)
