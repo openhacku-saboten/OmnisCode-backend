@@ -54,6 +54,7 @@ func main() {
 	user := v1.Group("/user")
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
+	user.PUT("", userController.Update, authMiddleware.Authenticate)
 
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)
