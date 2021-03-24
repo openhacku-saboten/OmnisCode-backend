@@ -96,3 +96,16 @@ type PostDTO struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+// PostInsertDTO はInsert用のDataTransferObjectです
+type PostInsertDTO struct {
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	Title     string    `db:"title"`
+	Code      string    `db:"code"`
+	Language  string    `db:"language"`
+	Content   string    `db:"content"`
+	Source    string    `db:"source"`
+	CreatedAt time.Time `db:"-"`
+	UpdatedAt time.Time `db:"-"`
+}
