@@ -122,10 +122,6 @@ func TestUserController_Get(t *testing.T) {
 }
 
 func TestUserController_GetPosts(t *testing.T) {
-	const (
-		token = "test token"
-	)
-
 	tests := []struct {
 		name            string
 		userID          string
