@@ -137,10 +137,10 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name:         "コメントが存在しなくてもエラーにはならない",
+			name:         "コメントが存在しなければErrNotFound",
 			postID:       100,
 			wantComments: nil,
-			wantErr:      nil,
+			wantErr:      entity.NewErrorNotFound("comment"),
 		},
 	}
 	for _, tt := range tests {

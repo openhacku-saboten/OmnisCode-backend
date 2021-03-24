@@ -38,6 +38,9 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 		}
 		comments = append(comments, comment)
 	}
+	if comments == nil {
+		return nil, entity.NewErrorNotFound("comment")
+	}
 	return
 }
 

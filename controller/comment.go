@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/log"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
@@ -28,6 +30,9 @@ func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 	comments, err := ctrl.uc.GetByPostID(postID)
 
 	if err != nil {
+		if errors.As(err, &entity.ErrNotFound{}) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
 		logger.Errorf("Unexpected error GET /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

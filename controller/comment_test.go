@@ -100,6 +100,18 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			wantCode: 400,
 			wantBody: "",
 		},
+		{
+			name:   "取得したコメント数が0ならErrNotFound",
+			postID: "100",
+			prepareMockComment: func(comment *mock.MockComment) {
+				comment.EXPECT().GetByPostID(100).Return(
+					nil, entity.NewErrorNotFound("comment"),
+				)
+			},
+			wantErr:  true,
+			wantCode: 404,
+			wantBody: "",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
