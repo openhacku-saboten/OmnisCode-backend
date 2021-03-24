@@ -8,13 +8,16 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
 
-func TestPostRepository_GetAll(t *testing.T) {
+func TestPostRepository_FindByID(t *testing.T) {
 	dbMap, err := NewDB()
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+	dbMap.AddTableWithName(PostDTO{}, "posts")
+	truncateTable(t, dbMap, "posts")
 
 	dbMap.AddTableWithName(UserDTO{}, "users")
 	truncateTable(t, dbMap, "users")
@@ -31,7 +34,7 @@ func TestPostRepository_GetAll(t *testing.T) {
 	dbMap.AddTableWithName(PostDTO{}, "posts")
 	truncateTable(t, dbMap, "posts")
 
-	post1 := &entity.Post{
+	validPost := &PostDTO{
 		ID:        1,
 		UserID:    "user-id",
 		Title:     "test title",
@@ -39,56 +42,51 @@ func TestPostRepository_GetAll(t *testing.T) {
 		Language:  "Go",
 		Content:   "Test code",
 		Source:    "github.com",
-		CreatedAt: "2021-03-23T11:42:56+09:00",
-		UpdatedAt: "2021-03-23T11:42:56+09:00",
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
-
-	post2 := &entity.Post{
-		ID:        2,
-		UserID:    "user-id",
-		Title:     "test title",
-		Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-		Language:  "Go",
-		Content:   "Test code",
-		Source:    "github.com",
-		CreatedAt: "2021-03-23T11:42:56+09:00",
-		UpdatedAt: "2021-03-23T11:42:56+09:00",
+	// デフォルトの投稿追加
+	if err := dbMap.Insert(validPost); err != nil {
+		t.Fatal(err)
 	}
 
 	postRepo := NewPostRepository(dbMap)
 
 	tests := []struct {
-		name          string
-		insertedPosts []*entity.Post
-		wantPosts     []*entity.Post
-		wantErr       error
+		name     string
+		postID   int
+		wantPost *entity.Post
+		wantErr  error
 	}{
 		{
-			name:          "正常に取得できる",
-			insertedPosts: []*entity.Post{post1, post2},
-			wantPosts:     []*entity.Post{post1, post2},
-			wantErr:       nil,
+			name:   "正常に取得できる",
+			postID: 1,
+			wantPost: &entity.Post{
+				ID:        validPost.ID,
+				UserID:    validPost.UserID,
+				Title:     validPost.Title,
+				Code:      validPost.Code,
+				Language:  validPost.Language,
+				Content:   validPost.Content,
+				Source:    validPost.Source,
+				CreatedAt: service.ConvertTimeToStr(validPost.CreatedAt),
+				UpdatedAt: service.ConvertTimeToStr(validPost.UpdatedAt),
+			},
+			wantErr: nil,
 		},
 		{
-			name:          "投稿がない時はNotFound",
-			insertedPosts: []*entity.Post{post1, post2},
-			wantPosts:     []*entity.Post{post1, post2},
-			wantErr:       entity.NewErrorNotFound("post"),
+			name:     "存在しないユーザは取得できない",
+			postID:   0,
+			wantPost: nil,
+			wantErr:  entity.NewErrorNotFound("post"),
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			for _, post := range tt.insertedPosts {
-				if err := postRepo.Insert(ctx, post); err != nil {
-					posts, _ := postRepo.GetAll(ctx)
-					t.Errorf("%+v", posts)
-					t.Fatalf("failed Insert: %s", err.Error())
-				}
-			}
+			got, err := postRepo.FindByID(ctx, tt.postID)
 
-			posts, err := postRepo.GetAll(ctx)
 			if err == nil || tt.wantErr == nil {
 				if err == tt.wantErr {
 					return
@@ -99,11 +97,12 @@ func TestPostRepository_GetAll(t *testing.T) {
 				t.Errorf("error = %s, wantErr = %s", err.Error(), tt.wantErr.Error())
 			}
 
-			if diff := cmp.Diff(posts, tt.wantPosts); diff != "" {
-				t.Errorf("post GetAll():\n%s", diff)
+			if diff := cmp.Diff(got, tt.wantPost); diff != "" {
+				t.Errorf("post FindByID(%d) = %+v, want = %+v", tt.postID, got, tt.wantPost)
 			}
 		})
 	}
+
 }
 
 func TestPostRepository_Insert(t *testing.T) {
@@ -136,7 +135,7 @@ func TestPostRepository_Insert(t *testing.T) {
 		Language:  "Go",
 		Content:   "Test code",
 		Source:    "github.com",
-		CreatedAt: time.Now(),
+		CreatedAt: time.Now(), // とりあえず入れる
 		UpdatedAt: time.Now(),
 	}); err != nil {
 		t.Fatal(err)
@@ -152,45 +151,39 @@ func TestPostRepository_Insert(t *testing.T) {
 		{
 			name: "正常に追加できる",
 			post: &entity.Post{
-				ID:        2,
-				UserID:    "user-id",
-				Title:     "test title",
-				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-				Language:  "Go",
-				Content:   "Test code",
-				Source:    "github.com",
-				CreatedAt: "2021-03-23T11:42:56+09:00",
-				UpdatedAt: "2021-03-23T11:42:56+09:00",
+				ID:       2,
+				UserID:   "user-id",
+				Title:    "test title",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
 			},
 			wantErr: nil,
 		},
 		{
 			name: "存在しないユーザで登録するとエラー",
 			post: &entity.Post{
-				ID:        3,
-				UserID:    "user-id2",
-				Title:     "test title",
-				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-				Language:  "Go",
-				Content:   "Test code",
-				Source:    "github.com",
-				CreatedAt: "2021-03-23T11:42:56+09:00",
-				UpdatedAt: "2021-03-23T11:42:56+09:00",
+				ID:       3,
+				UserID:   "user-id2",
+				Title:    "test title",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
 			},
 			wantErr: errors.New("unexisted user"),
 		},
 		{
 			name: "重複したpostIDで登録するとエラー",
 			post: &entity.Post{
-				ID:        1,
-				UserID:    "user-id",
-				Title:     "test title",
-				Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-				Language:  "Go",
-				Content:   "Test code",
-				Source:    "github.com",
-				CreatedAt: "2021-03-23T11:42:56+09:00",
-				UpdatedAt: "2021-03-23T11:42:56+09:00",
+				ID:       1,
+				UserID:   "user-id",
+				Title:    "test title",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
 			},
 			wantErr: errors.New("post ID is duplicated"),
 		},

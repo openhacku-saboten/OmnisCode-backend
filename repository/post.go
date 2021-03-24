@@ -11,5 +11,6 @@ import (
 // Post は永続化と再構築のためのリポジトリです
 type Post interface {
 	GetAll(ctx context.Context) ([]*entity.Post, error)
+	FindByID(ctx context.Context, postID int) (*entity.Post, error)
 	Insert(ctx context.Context, post *entity.Post) error
 }

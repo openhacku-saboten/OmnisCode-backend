@@ -3,8 +3,6 @@ package infra
 import (
 	"context"
 	"database/sql"
-	"fmt"
-
 	"errors"
 	"strings"
 	"time"
@@ -77,8 +75,31 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	updatedAt, err := service.ConvertStrToTime(post.UpdatedAt)
 	if err != nil {
 		return err
+// FindByID はpostIDから投稿を取得します
+func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
+	var postDTO PostDTO
+	if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, entity.NewErrorNotFound("post")
+		}
+		return nil, err
 	}
 
+	return &entity.Post{
+		ID:        postDTO.ID,
+		UserID:    postDTO.UserID,
+		Title:     postDTO.Title,
+		Code:      postDTO.Title,
+		Language:  postDTO.Language,
+		Content:   postDTO.Content,
+		Source:    postDTO.Source,
+		CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
+		UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
+	}, nil
+}
+
+// Insert は引数で渡したエンティティの投稿をDBに保存します
+func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	postDTO := &PostDTO{
 		ID:        post.ID,
 		UserID:    post.UserID,
@@ -87,8 +108,8 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 		Language:  post.Language,
 		Content:   post.Content,
 		Source:    post.Source,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		CreatedAt: time.Now(), // 空だとエラーになるので、ひとまず現在時刻を入れる
+		UpdatedAt: time.Now(),
 	}
 
 	if err := p.dbMap.Insert(postDTO); err != nil {

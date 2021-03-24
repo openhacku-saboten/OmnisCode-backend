@@ -21,6 +21,26 @@ type ErrTooLong struct {
 	fieldName string
 }
 
+// ErrEmptyField はフィールドの内容が空のときのエラー
+type ErrEmpty struct {
+	fieldName string
+}
+
+// ErrNegativeValue はフィールドの内容が負のときのエラー
+type ErrNegativeValue struct {
+	fieldName string
+}
+
+// ErrNotFound はエンティティが存在しないときのエラー
+type ErrNotFound struct {
+	entityName string
+}
+
+// ErrDuplicated はエンティティが重複したときのエラー
+type ErrDuplicated struct {
+	entityName string
+}
+
 // NewErrorTooLong はフィールド名が空のときのエラーを生成します
 func NewErrorTooLong(fieldName string) error {
 	return ErrTooLong{
@@ -30,11 +50,6 @@ func NewErrorTooLong(fieldName string) error {
 
 func (e ErrTooLong) Error() string {
 	return fmt.Sprintf("%s is too long", e.fieldName)
-}
-
-// ErrEmptyField はフィールド名が空のときのエラー
-type ErrEmpty struct {
-	fieldName string
 }
 
 // NewErrorEmpty はフィールド名が空のときのエラーを生成します
@@ -48,12 +63,18 @@ func (e ErrEmpty) Error() string {
 	return fmt.Sprintf("%s is empty", e.fieldName)
 }
 
-// ErrNotFound はエンティティがDBに存在しない時のエラー
-type ErrNotFound struct {
-	entityName string
+// NewErrorNegativeValue はフィールドが負の値の時のエラーを生成します
+func NewErrorNegativeValue(fieldName string) error {
+	return ErrNegativeValue{
+		fieldName: fieldName,
+	}
 }
 
-// NewErrorNotFound はエンティティがDBに存在しない時のエラーを生成します
+func (e ErrNegativeValue) Error() string {
+	return fmt.Sprintf("%s is negative value", e.fieldName)
+}
+
+// NewErrorNotFound はフィールド名が存在しないときのエラーを生成します
 func NewErrorNotFound(entityName string) error {
 	return ErrNotFound{
 		entityName: entityName,
@@ -62,4 +83,15 @@ func NewErrorNotFound(entityName string) error {
 
 func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("%s is not found", e.entityName)
+}
+
+// NewDuplicated はフィールド名が重複したときのエラーを生成します
+func NewErrorDuplicated(entityName string) error {
+	return ErrDuplicated{
+		entityName: entityName,
+	}
+}
+
+func (e ErrDuplicated) Error() string {
+	return fmt.Sprintf("%s is duplicated", e.entityName)
 }

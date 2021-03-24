@@ -55,10 +55,12 @@ func main() {
 	user := v1.Group("/user")
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
+	user.PUT("", userController.Update, authMiddleware.Authenticate)
 
 	post := v1.Group("/post")
 	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
 	post.POST("", postController.Create, authMiddleware.Authenticate)
+	post.GET("/:postID", postController.Get)
 
 	e.GET("", func(c echo.Context) error {
 		logger.Infof("Authorized access from%s", c.Request().RemoteAddr)

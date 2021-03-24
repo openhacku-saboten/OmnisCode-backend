@@ -56,3 +56,15 @@ func (_m *MockUser) Insert(user *entity.User) error {
 func (_mr *MockUserMockRecorder) Insert(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockUser)(nil).Insert), arg0)
 }
+
+// Update mocks base method
+func (_m *MockUser) Update(user *entity.User) error {
+	ret := _m.ctrl.Call(_m, "Update", user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update
+func (_mr *MockUserMockRecorder) Update(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), arg0)
+}
