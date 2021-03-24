@@ -39,3 +39,34 @@ func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, comments)
 }
+
+// Create は POST /post/{postID}/comment のHandler
+func (ctrl *CommentController) Create(c echo.Context) error {
+	logger := log.New()
+
+	comment := &entity.Comment{}
+	if err := c.Bind(comment); err != nil {
+		logger.Info(err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		logger.Info(err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	comment.PostID = postID
+
+	userID, ok := c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	comment.UserID = userID
+
+	if err := ctrl.uc.Create(comment); err != nil {
+		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.NoContent(http.StatusCreated)
+}
