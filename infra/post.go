@@ -10,7 +10,6 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
-	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
 
@@ -29,25 +28,14 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
-	createdAt, err := service.ConvertStrToTime(post.CreatedAt)
-	if err != nil {
-		return err
-	}
-	updatedAt, err := service.ConvertStrToTime(post.UpdatedAt)
-	if err != nil {
-		return err
-	}
-
 	postDTO := &PostDTO{
-		ID:        post.ID,
-		UserID:    post.UserID,
-		Title:     post.Title,
-		Code:      post.Code,
-		Language:  post.Language,
-		Content:   post.Content,
-		Source:    post.Source,
-		CreatedAt: createdAt,
-		UpdatedAt: updatedAt,
+		ID:       post.ID,
+		UserID:   post.UserID,
+		Title:    post.Title,
+		Code:     post.Code,
+		Language: post.Language,
+		Content:  post.Content,
+		Source:   post.Source,
 	}
 
 	if err := p.dbMap.Insert(postDTO); err != nil {
