@@ -20,6 +20,9 @@ func NewPostUsecase(postRepo repository.Post) *PostUsecase {
 
 // Create は投稿の情報を保存するというユースケースです
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
+	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを
+	// フロントでセットできてしまうので，ここらへんでpostIDを初期化しておく
+	post.ID = 0
 	if err := post.IsValid(); err != nil {
 		return fmt.Errorf("invalid post field: %w", err)
 	}
