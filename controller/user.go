@@ -40,6 +40,28 @@ func (ctrl *UserController) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// GetPosts は  GET /user/{userID}/post のHandler
+func (ctrl *UserController) GetPosts(c echo.Context) error {
+	logger := log.New()
+	userID := c.Param("userID")
+	if len(userID) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	ctx := c.Request().Context()
+	posts, err := ctrl.uc.GetPosts(ctx, userID)
+	if err != nil {
+		if errors.As(err, &entity.ErrNotFound{}) {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+
+		logger.Errorf("error GET /user/{userID}/post: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}
+
 // Create は POST /user のHandler
 func (ctrl *UserController) Create(c echo.Context) error {
 	logger := log.New()
