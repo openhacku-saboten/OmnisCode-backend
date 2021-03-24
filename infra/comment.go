@@ -57,3 +57,17 @@ type CommentDTO struct {
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }
+
+// CommentInsertDTO はDBにInsertするためのDataTransferObject
+type CommentInsertDTO struct {
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	PostID    int       `db:"post_id"`
+	Type      string    `db:"type"`
+	Content   string    `db:"content"`
+	FirstLine int       `db:"first_line"`
+	LastLine  int       `db:"last_line"`
+	Code      string    `db:"code"`
+	CreatedAt time.Time `db:"-"`
+	UpdatedAt time.Time `db:"-"`
+}

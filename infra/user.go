@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
 
 type UserRepository struct {
@@ -38,6 +40,35 @@ func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
 		"",
 	)
 	return
+}
+
+// FindCommentsByID は該当IDのユーザのコメントをDBから取得して返す
+func (r *UserRepository) FindCommentsByID(ctx context.Context, uid string) ([]*entity.Comment, error) {
+	var commentDTOs []CommentDTO
+	if _, err := r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE user_id = ?", uid); err != nil {
+		return nil, err
+	}
+
+	var comments []*entity.Comment
+	for _, commentDTO := range commentDTOs {
+		comment := &entity.Comment{
+			ID:        commentDTO.ID,
+			UserID:    commentDTO.UserID,
+			PostID:    commentDTO.PostID,
+			Type:      commentDTO.Type,
+			Content:   commentDTO.Content,
+			FirstLine: commentDTO.FirstLine,
+			LastLine:  commentDTO.LastLine,
+			Code:      commentDTO.Code,
+			CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
+		}
+		comments = append(comments, comment)
+	}
+	if comments == nil {
+		return nil, entity.NewErrorNotFound("comment")
+	}
+	return comments, nil
 }
 
 // Insert は該当ユーザーをDBに保存する
