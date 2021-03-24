@@ -1,7 +1,9 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -114,6 +116,105 @@ func TestUserController_Get(t *testing.T) {
 				if diff := cmp.Diff(tt.wantBody, gotBody); diff != "" {
 					t.Errorf("body (-want +got) =\n%s\n", diff)
 				}
+			}
+		})
+	}
+}
+
+func TestUserController_GetPosts(t *testing.T) {
+	const (
+		token = "test token"
+	)
+
+	tests := []struct {
+		name            string
+		userID          string
+		prepareMockUser func(ctx context.Context, uid string, user *mock.MockUser)
+		wantErr         bool
+		wantCode        int
+		wantBody        string
+	}{
+		{
+			name:   "正しく投稿を取得できる",
+			userID: "user-id",
+			prepareMockUser: func(ctx context.Context, uid string, user *mock.MockUser) {
+				user.EXPECT().FindPostsByID(ctx, uid).Return([]*entity.Post{
+					{
+						ID:        1,
+						UserID:    "user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					},
+					{
+						ID:        2,
+						UserID:    "user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					},
+				}, nil)
+			},
+			wantErr:  false,
+			wantCode: http.StatusOK,
+			wantBody: `[{"id":1,"user_id":"user-id","title":"test title","code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}","language":"Go","content":"Test code","source":"github.com","created_at":"2021-03-23T11:42:56+09:00","updated_at":"2021-03-23T11:42:56+09:00"},{"id":2,"user_id":"user-id","title":"test title","code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}","language":"Go","content":"Test code","source":"github.com","created_at":"2021-03-23T11:42:56+09:00","updated_at":"2021-03-23T11:42:56+09:00"}]
+`,
+		},
+		{
+			name:   "1つも投稿が存在しないならErrUserNotFound",
+			userID: "user-id2",
+			prepareMockUser: func(ctx context.Context, uid string, user *mock.MockUser) {
+				user.EXPECT().FindPostsByID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
+			},
+			wantErr:  true,
+			wantCode: http.StatusNotFound,
+			wantBody: ``,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("GET", "/", nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			ctx := context.Background()
+			authRepo := mock.NewMockAuth(ctrl)
+			userRepo := mock.NewMockUser(ctrl)
+			tt.prepareMockUser(ctx, tt.userID, userRepo)
+
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			c.SetParamNames("userID")
+			c.SetParamValues(tt.userID)
+			err := con.GetPosts(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+
+			if got := rec.Body.String(); got != tt.wantBody {
+				t.Errorf("\nwant: %s, \nbut: %s", tt.wantBody, got)
 			}
 		})
 	}
