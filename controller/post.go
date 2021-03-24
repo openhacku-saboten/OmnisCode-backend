@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
@@ -17,6 +18,36 @@ type PostController struct {
 // NewPostController はPostControllerのポインタを生成する関数です
 func NewPostController(uc *usecase.PostUsecase) *PostController {
 	return &PostController{uc: uc}
+}
+
+// Get は GET /post/{postID}のハンドラです
+func (ctrl *PostController) Get(c echo.Context) error {
+	logger := log.New()
+
+	postID := c.Param("postID")
+	if len(postID) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	postIDInt, err := strconv.Atoi(postID)
+	if err != nil {
+		// 数字ではない場合はエラー
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	ctx := c.Request().Context()
+	post, err := ctrl.uc.Get(ctx, postIDInt)
+
+	if err != nil {
+		if err.Error() == entity.NewErrorNotFound("post").Error() {
+			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		}
+		logger.Errorf("%s", entity.NewErrorNotFound("post").Error())
+
+		logger.Errorf("unexpected error GET /post/{postID}: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, post)
 }
 
 // Create は POST /postのハンドラです

@@ -22,7 +22,7 @@ func NewPostUsecase(postRepo repository.Post) *PostUsecase {
 func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
 	post, err := p.postRepo.FindByID(ctx, postID)
 	if err != nil {
-		return nil, fmt.Errorf("failed Get Post from DB: %w", err)
+		return nil, err
 	}
 	return post, nil
 }
