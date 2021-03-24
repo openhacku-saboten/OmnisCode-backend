@@ -115,7 +115,6 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 				return errors.New("post ID is duplicated")
 			}
 		}
-
 		return err
 	}
 

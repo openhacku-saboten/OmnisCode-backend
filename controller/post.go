@@ -27,14 +27,15 @@ func (p *PostController) GetAll(c echo.Context) error {
 
 	posts, err := p.uc.GetAll(c.Request().Context())
 	if err != nil {
-		if err.Error() == entity.NewErrorNotFound("post").Error() {
+		if errors.As(err, &entity.ErrNotFound{}) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 
 		logger.Errorf("error GET /post: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return c.JSON(http.StatusOK, &posts)
+
+	return c.JSON(http.StatusOK, posts)
 }
 
 // Get は GET /post/{postID}のハンドラです
