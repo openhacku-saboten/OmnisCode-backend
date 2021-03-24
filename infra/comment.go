@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-gorp/gorp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
 
 type CommentRepository struct {
@@ -32,6 +33,8 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 			FirstLine: commentDTO.FirstLine,
 			LastLine:  commentDTO.LastLine,
 			Code:      commentDTO.Code,
+			CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
 		}
 		comments = append(comments, comment)
 	}

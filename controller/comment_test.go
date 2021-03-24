@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
@@ -37,8 +36,8 @@ func TestCommentController_GetByPostID(t *testing.T) {
 							Content:   "content1",
 							FirstLine: 10,
 							LastLine:  12,
-							CreatedAt: time.Unix(100, 0),
-							UpdatedAt: time.Unix(100, 0),
+							CreatedAt: "1970-01-01T09:01:40+09:00",
+							UpdatedAt: "1970-01-01T09:01:40+09:00",
 						},
 						&entity.Comment{
 							ID:        2,
@@ -47,8 +46,8 @@ func TestCommentController_GetByPostID(t *testing.T) {
 							Type:      "commit",
 							Content:   "content2",
 							Code:      "code2",
-							CreatedAt: time.Unix(100, 0),
-							UpdatedAt: time.Unix(100, 0),
+							CreatedAt: "1970-01-01T09:01:40+09:00",
+							UpdatedAt: "1970-01-01T09:01:40+09:00",
 						},
 					},
 					nil,

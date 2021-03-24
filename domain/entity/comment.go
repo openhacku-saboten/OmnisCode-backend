@@ -2,20 +2,19 @@ package entity
 
 import (
 	"errors"
-	"time"
 )
 
 type Comment struct {
-	ID        int       `json:"id"`
-	UserID    string    `json:"user_id"`
-	PostID    int       `json:"post_id"`
-	Type      string    `json:"type"`
-	Content   string    `json:"content"`
-	FirstLine int       `json:"first_line"`
-	LastLine  int       `json:"last_line"`
-	Code      string    `json:"code"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int    `json:"id"`
+	UserID    string `json:"user_id"`
+	PostID    int    `json:"post_id"`
+	Type      string `json:"type"`
+	Content   string `json:"content"`
+	FirstLine int    `json:"first_line"`
+	LastLine  int    `json:"last_line"`
+	Code      string `json:"code"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func (c *Comment) IsValid() error {
