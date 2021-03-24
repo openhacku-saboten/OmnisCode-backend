@@ -38,6 +38,7 @@ func main() {
 	authRepo := infra.NewAuthRepository(firebase)
 	userRepo := infra.NewUserRepository(dbMap)
 	postRepo := infra.NewPostRepository(dbMap)
+	commentRepo := infra.NewCommentRepository(dbMap)
 
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
@@ -47,6 +48,9 @@ func main() {
 
 	postUsecase := usecase.NewPostUsecase(postRepo)
 	postController := controller.NewPostController(postUsecase)
+
+	commentUseCase := usecase.NewCommentUseCase(commentRepo)
+	commentController := controller.NewCommentController(commentUseCase)
 
 	e := echo.New()
 	v1 := e.Group("/api/v1")
@@ -59,6 +63,9 @@ func main() {
 	post := v1.Group("/post")
 	post.POST("", postController.Create, authMiddleware.Authenticate)
 	post.GET("/:postID", postController.Get)
+
+	comment := v1.Group("/post/:postID/comment")
+	comment.GET("", commentController.GetByPostID)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
