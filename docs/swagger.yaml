@@ -501,18 +501,18 @@ definitions:
           - "none"
       content:
         type: "string"
-        description: "コメントの内容(すべてのtypeに含まれる)"
+        description: "コメントの内容(type:noneなら必要．他のtypeでも含んでいて良い)"
       first_line:
         type: "integer"
         format: "int32"
-        description: "ハイライトする行の開始行数(type:highlightのみ)"
+        description: "ハイライトする行の開始行数(type:highlightのみ必要)"
       last_line:
         type: "integer"
         format: "int32"
-        description: "ハイライトする行の終了行数(type:highlightのみ)"
+        description: "ハイライトする行の終了行数(type:highlightのみ必要)"
       code:
         type: "string"
-        description: "変更後のコードすべてを含む(type:commitのみ)"
+        description: "変更後のコードすべてを含む(type:commitのみ必要)"
   CommentResponse:
     type: "object"
     properties:

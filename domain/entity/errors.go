@@ -14,6 +14,8 @@ var (
 	ErrDuplicatedTwitterID = errors.New("twitter id is already used")
 	// ErrEmptyUserName はユーザー名が空だったときのエラー
 	ErrEmptyUserName = errors.New("user name must not be empty")
+	// ErrInvalidCommentType はコメントのType関連での不正な値があったときのエラー
+	ErrInvalidCommentType = errors.New("invalid comment type")
 )
 
 // ErrTooLong はフィールドの内容が長すぎるときのエラー
