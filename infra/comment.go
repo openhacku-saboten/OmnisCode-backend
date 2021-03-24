@@ -20,7 +20,7 @@ func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 // GetByPostID は該当PostIDに属するコメントのスライスを返す
 func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment, err error) {
 	var commentDTOs []CommentDTO
-	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE postid = ?", postid); err != nil {
+	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postid); err != nil {
 		return nil, err
 	}
 	for _, commentDTO := range commentDTOs {
