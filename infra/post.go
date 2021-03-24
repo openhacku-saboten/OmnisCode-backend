@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -66,15 +67,6 @@ func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
 	return resDTO, nil
 }
 
-// Insert は引数で渡したエンティティの投稿をDBに保存します
-func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
-	createdAt, err := service.ConvertStrToTime(post.CreatedAt)
-	if err != nil {
-		return err
-	}
-	updatedAt, err := service.ConvertStrToTime(post.UpdatedAt)
-	if err != nil {
-		return err
 // FindByID はpostIDから投稿を取得します
 func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
 	var postDTO PostDTO

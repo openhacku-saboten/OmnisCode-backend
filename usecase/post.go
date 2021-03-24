@@ -26,6 +26,8 @@ func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
 	}
 
 	return posts, nil
+}
+
 // Get はpost IDをもとに投稿情報を取得するというユースケースです
 func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
 	post, err := p.postRepo.FindByID(ctx, postID)
