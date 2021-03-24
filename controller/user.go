@@ -65,9 +65,6 @@ func (ctrl *UserController) Create(c echo.Context) error {
 		if errors.Is(err, entity.ErrEmptyUserName) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
 		}
-		if errors.Is(err, entity.ErrTooLong) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrTooLong.Error())
-		}
 		logger.Errorf("Unexpected error POST/user: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
@@ -94,14 +91,14 @@ func (ctrl *UserController) Update(c echo.Context) error {
 		if errors.Is(err, entity.ErrUserNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
 		}
-		if errors.Is(err, entity.ErrDuplicatedTwitterID) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedTwitterID.Error())
-		}
 		if errors.Is(err, entity.ErrEmptyUserName) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
 		}
-		if errors.Is(err, entity.ErrTooLong) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrTooLong.Error())
+		if errors.As(err, &entity.ErrDuplicated{}) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+		if errors.As(err, &entity.ErrTooLong{}) {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 		}
 		logger.Errorf("Unexpected error PUT/user: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)

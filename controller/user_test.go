@@ -348,7 +348,7 @@ func TestUserController_Update(t *testing.T) {
 				)
 				user.EXPECT().Update(
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
-				).Return(entity.ErrDuplicatedTwitterID)
+				).Return(entity.NewErrorDuplicated("user TwitterID"))
 			},
 			wantErr:  true,
 			wantCode: 400,

@@ -160,7 +160,7 @@ func TestUserRepository_Update(t *testing.T) {
 		{
 			name:    "すでに存在するTwitterIDならErrDuplicatedTwitterID",
 			user:    entity.NewUser("existing-id", "updateUser", "update", "existing2", ""),
-			wantErr: entity.ErrDuplicatedTwitterID,
+			wantErr: entity.NewErrorDuplicated("user TwitterID"),
 		},
 		{
 			name:    "フィールドに変更がなくても正しくユーザーを更新できる",
