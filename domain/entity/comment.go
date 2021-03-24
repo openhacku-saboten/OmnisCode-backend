@@ -26,22 +26,27 @@ func (c *Comment) IsValid() error {
 	if c.PostID == 0 {
 		return NewErrorEmpty("comment PostID")
 	}
-	// Typeに応じて不必要なフィールドが含まれていたらエラー
+	// Typeに応じて必要なフィールドが含まれていなかったらエラー
 	switch c.Type {
 	case "none":
-		// FirstLine,LastLine,Codeが空でない
-		if c.FirstLine != 0 || c.LastLine != 0 || len(c.Code) != 0 {
-			return ErrInvalidCommentType
+		// Contentが空ならエラー
+		if len(c.Content) == 0 {
+			return NewErrorEmpty("comment Content")
 		}
 	case "highlight":
-		// Codeが空でない
-		if len(c.Code) != 0 {
-			return ErrInvalidCommentType
+		// Contentは空でも良い
+		// FirstLine,LastLineが空ならエラー
+		if c.FirstLine <= 0 {
+			return NewErrorEmpty("comment FirstLine")
+		}
+		if c.LastLine <= 0 {
+			return NewErrorEmpty("comment LastLine")
 		}
 	case "commit":
-		// FirstLine,LastLineが空でない
-		if c.FirstLine != 0 || c.LastLine != 0 {
-			return ErrInvalidCommentType
+		// Contentは空でも良い
+		// Codeが空ならエラー
+		if len(c.Code) == 0 {
+			return NewErrorEmpty("comment Code")
 		}
 	default:
 		// none,highlight,commit以外の文字列の場合
