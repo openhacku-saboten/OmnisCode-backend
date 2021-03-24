@@ -1,9 +1,12 @@
 package infra
 
 import (
+	"strings"
 	"time"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/go-gorp/gorp"
+	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 )
@@ -13,7 +16,7 @@ type CommentRepository struct {
 }
 
 func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
-	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(false, "ID")
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "ID")
 	return &CommentRepository{dbMap: dbMap}
 }
 
@@ -42,6 +45,37 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 		return nil, entity.NewErrorNotFound("comment")
 	}
 	return
+}
+
+// Insert は該当ユーザーをDBに保存する
+func (r *CommentRepository) Insert(comment *entity.Comment) error {
+	commentDTO := &CommentDTO{
+		ID:        comment.ID,
+		UserID:    comment.UserID,
+		PostID:    comment.PostID,
+		Type:      comment.Type,
+		Content:   comment.Content,
+		FirstLine: comment.FirstLine,
+		LastLine:  comment.LastLine,
+		Code:      comment.Code,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+
+	if err := r.dbMap.Insert(commentDTO); err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			// IDが重複したときのエラー
+			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "comments.PRIMARY") {
+				return entity.ErrDuplicatedUser
+			}
+			// 存在しないPostIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
+				return entity.NewErrorNotFound("post")
+			}
+		}
+		return err
+	}
+	return nil
 }
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
