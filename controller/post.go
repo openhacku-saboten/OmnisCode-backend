@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -38,7 +39,7 @@ func (ctrl *PostController) Get(c echo.Context) error {
 	post, err := ctrl.uc.Get(ctx, postIDInt)
 
 	if err != nil {
-		if err.Error() == entity.NewErrorNotFound("post").Error() {
+		if errors.As(err, &entity.ErrNotFound{}) {
 			return echo.NewHTTPError(http.StatusNotFound, err.Error())
 		}
 		logger.Errorf("%s", entity.NewErrorNotFound("post").Error())
