@@ -4,6 +4,7 @@
 package mock
 
 import (
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	reflect "reflect"
@@ -43,6 +44,19 @@ func (_m *MockUser) FindByID(uid string) (*entity.User, error) {
 // FindByID indicates an expected call of FindByID
 func (_mr *MockUserMockRecorder) FindByID(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockUser)(nil).FindByID), arg0)
+}
+
+// FindPostsByID mocks base method
+func (_m *MockUser) FindPostsByID(ctx context.Context, uid string) ([]*entity.Post, error) {
+	ret := _m.ctrl.Call(_m, "FindPostsByID", ctx, uid)
+	ret0, _ := ret[0].([]*entity.Post)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindPostsByID indicates an expected call of FindPostsByID
+func (_mr *MockUserMockRecorder) FindPostsByID(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindPostsByID", reflect.TypeOf((*MockUser)(nil).FindPostsByID), arg0, arg1)
 }
 
 // Insert mocks base method
