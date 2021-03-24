@@ -18,6 +18,15 @@ func NewPostUsecase(postRepo repository.Post) *PostUsecase {
 	return &PostUsecase{postRepo: postRepo}
 }
 
+// Get はpost IDをもとに投稿情報を取得するというユースケースです
+func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
+	post, err := p.postRepo.FindByID(ctx, postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed Get Post from DB: %w", err)
+	}
+	return post, nil
+}
+
 // Create は投稿の情報を保存するというユースケースです
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを

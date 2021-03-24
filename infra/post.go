@@ -26,6 +26,11 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 	return &PostRepository{dbMap: dbMap}
 }
 
+// FindByID はpostIDから投稿を取得します
+func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
+	return nil, nil
+}
+
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	postDTO := &PostDTO{
