@@ -34,8 +34,8 @@ func (ctrl *PostController) Create(c echo.Context) error {
 	var ok bool
 	post.UserID, ok = c.Get("userID").(string)
 	if !ok {
-		logger.Infof("failed type assertion")
-		return echo.NewHTTPError(http.StatusBadRequest)
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
 	if err := ctrl.uc.Create(c.Request().Context(), post); err != nil {
