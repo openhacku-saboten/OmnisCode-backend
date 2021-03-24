@@ -32,8 +32,6 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 			FirstLine: commentDTO.FirstLine,
 			LastLine:  commentDTO.LastLine,
 			Code:      commentDTO.Code,
-			CreatedAt: commentDTO.CreatedAt,
-			UpdatedAt: commentDTO.UpdatedAt,
 		}
 		comments = append(comments, comment)
 	}
@@ -42,14 +40,14 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
 type CommentDTO struct {
-	ID        int    `json:"id"`
-	UserID    string `json:"user_id"`
-	PostID    int    `json:"post_id"`
-	Type      string `json:"type"`
-	Content   string `json:"content"`
-	FirstLine int    `json:"first_line"`
-	LastLine  int    `json:"last_line"`
-	Code      string `json:"code"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	PostID    int       `db:"post_id"`
+	Type      string    `db:"type"`
+	Content   string    `db:"content"`
+	FirstLine int       `db:"first_line"`
+	LastLine  int       `db:"last_line"`
+	Code      string    `db:"code"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
