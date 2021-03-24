@@ -44,7 +44,6 @@ func main() {
 
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
 	userController := controller.NewUserController(userUseCase)
-	_ = userController
 
 	postUsecase := usecase.NewPostUsecase(postRepo)
 	postController := controller.NewPostController(postUsecase)
