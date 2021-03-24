@@ -18,10 +18,13 @@ func (c *Comment) IsValid() error {
 		return NewErrorEmpty("comment ID")
 	}
 	if len(c.UserID) == 0 {
-		return NewErrorEmpty("user ID")
+		return NewErrorEmpty("comment UserID")
+	}
+	if len([]rune(c.UserID)) > 128 {
+		return NewErrorTooLong("comment UserID")
 	}
 	if c.PostID == 0 {
-		return NewErrorEmpty("post ID")
+		return NewErrorEmpty("comment PostID")
 	}
 	// Typeに応じて不必要なフィールドが含まれていたらエラー
 	switch c.Type {
@@ -37,7 +40,7 @@ func (c *Comment) IsValid() error {
 		}
 	case "commit":
 		// FirstLine,LastLineが空でない
-		if len(c.Code) != 0 {
+		if c.FirstLine != 0 || c.LastLine != 0 {
 			return ErrInvalidCommentType
 		}
 	default:
