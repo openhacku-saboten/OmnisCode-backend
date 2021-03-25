@@ -59,6 +59,9 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 
 	userID, ok := c.Get("userID").(string)
 	if !ok {
+		if errors.Is(err, entity.ErrCannotCommit) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
+		}
 		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

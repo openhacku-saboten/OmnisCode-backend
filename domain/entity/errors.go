@@ -16,6 +16,8 @@ var (
 	ErrEmptyUserName = errors.New("user name must not be empty")
 	// ErrInvalidCommentType はコメントのType関連での不正な値があったときのエラー
 	ErrInvalidCommentType = errors.New("invalid comment type")
+	// ErrCannotCommit はPostのオーナー以外がcommitしようとしたときのエラー
+	ErrCannotCommit = errors.New("you cannot commit")
 )
 
 // ErrTooLong はフィールドの内容が長すぎるときのエラー
