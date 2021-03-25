@@ -85,13 +85,13 @@ func (_mr *MockCommentMockRecorder) Insert(arg0 interface{}) *gomock.Call {
 }
 
 // Update mocks base method
-func (_m *MockComment) Update(ctx context.Context, postID int, commentID int) error {
-	ret := _m.ctrl.Call(_m, "Update", ctx, postID, commentID)
+func (_m *MockComment) Update(ctx context.Context, comment *entity.Comment) error {
+	ret := _m.ctrl.Call(_m, "Update", ctx, comment)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (_mr *MockCommentMockRecorder) Update(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockComment)(nil).Update), arg0, arg1, arg2)
+func (_mr *MockCommentMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockComment)(nil).Update), arg0, arg1)
 }
