@@ -446,3 +446,115 @@ func TestPostRepository_Insert(t *testing.T) {
 		})
 	}
 }
+
+func TestPostRepository_Update(t *testing.T) {
+	dbMap, err := NewDB()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateTable(t, dbMap, "users")
+
+	preparedUsers := []*UserDTO{
+		{
+			ID:        "user-id",
+			Name:      "test user",
+			Profile:   "test profile",
+			TwitterID: "twitter",
+		},
+		{
+			ID:        "user-id2",
+			Name:      "test user2",
+			Profile:   "test profile2",
+			TwitterID: "twitter2",
+		},
+	}
+
+	for _, user := range preparedUsers {
+		if err := dbMap.Insert(user); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
+	truncateTable(t, dbMap, "posts")
+	// デフォルトの投稿追加
+	if err := dbMap.Insert(&PostInsertDTO{
+		ID:       1,
+		UserID:   "user-id",
+		Title:    "test title",
+		Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+		Language: "Go",
+		Content:  "Test code",
+		Source:   "github.com",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	postRepo := NewPostRepository(dbMap)
+
+	tests := []struct {
+		name    string
+		post    *entity.Post
+		wantErr error
+	}{
+		{
+			name: "正常に更新できる",
+			post: &entity.Post{
+				ID:       1,
+				UserID:   "user-id",
+				Title:    "test title2",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
+			},
+			wantErr: nil,
+		},
+		{
+			name: "存在しないユーザで登録するとスルー",
+			post: &entity.Post{
+				ID:       3,
+				UserID:   "user-id2",
+				Title:    "test title",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
+			},
+			wantErr: errors.New("unexisted user"),
+		},
+		{
+			name: "投稿元のユーザ以外が更新するとエラー",
+			post: &entity.Post{
+				ID:       1,
+				UserID:   "user-id2",
+				Title:    "test title2",
+				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				Language: "Go",
+				Content:  "Test code",
+				Source:   "github.com",
+			},
+			wantErr: entity.ErrIsNotAuthor,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			err := postRepo.Insert(ctx, tt.post)
+
+			if err == nil || tt.wantErr == nil {
+				if err == tt.wantErr {
+					return
+				}
+				// どちらかがnilの場合は%vを使う
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			} else if err.Error() != tt.wantErr.Error() {
+				t.Errorf("error = %s, wantErr = %s", err.Error(), tt.wantErr.Error())
+			}
+		})
+	}
+}
