@@ -1,7 +1,6 @@
 package infra
 
 import (
-	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -10,7 +9,6 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
-	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
 
@@ -43,35 +41,6 @@ func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
 		"",
 	)
 	return
-}
-
-// FindPostsByID はユーザの投稿をDBから取得します
-func (r *UserRepository) FindPostsByID(ctx context.Context, uid string) ([]*entity.Post, error) {
-	var postDTOs []PostDTO
-	if _, err := r.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
-		return nil, err
-	}
-
-	var posts []*entity.Post
-
-	for _, dto := range postDTOs {
-		posts = append(posts, &entity.Post{
-			ID:        dto.ID,
-			UserID:    dto.UserID,
-			Title:     dto.Title,
-			Code:      dto.Code,
-			Language:  dto.Language,
-			Content:   dto.Content,
-			Source:    dto.Source,
-			CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
-			UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
-		})
-	}
-	if posts == nil {
-		return nil, entity.NewErrorNotFound("post")
-	}
-
-	return posts, nil
 }
 
 // Insert は該当ユーザーをDBに保存する
