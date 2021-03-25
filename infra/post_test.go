@@ -273,8 +273,7 @@ func TestUserRepository_FindByUserID(t *testing.T) {
 		},
 	}
 
-	wantPosts := []*entity.Post{}
-
+	var wantPosts []*entity.Post
 	for _, validPost := range validPosts {
 		wantPosts = append(wantPosts, &entity.Post{
 			ID:       validPost.ID,
@@ -480,17 +479,41 @@ func TestPostRepository_Update(t *testing.T) {
 	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
 	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
+
+	validPosts := []*PostInsertDTO{
+		{
+			ID:       1,
+			UserID:   "user-id",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+		{
+			ID:       2,
+			UserID:   "user-id2",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+		{
+			ID:       3,
+			UserID:   "user-id",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+	}
 	// デフォルトの投稿追加
-	if err := dbMap.Insert(&PostInsertDTO{
-		ID:       1,
-		UserID:   "user-id",
-		Title:    "test title",
-		Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-		Language: "Go",
-		Content:  "Test code",
-		Source:   "github.com",
-	}); err != nil {
-		t.Fatal(err)
+	for _, post := range validPosts {
+		if err := dbMap.Insert(post); err != nil {
+			t.Fatal(err)
+		}
 	}
 
 	postRepo := NewPostRepository(dbMap)
@@ -514,17 +537,17 @@ func TestPostRepository_Update(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "存在しないユーザで登録するとスルー",
+			name: "存在しないユーザで登録するとErrIsNotAuthor",
 			post: &entity.Post{
 				ID:       3,
-				UserID:   "user-id2",
+				UserID:   "user-id3",
 				Title:    "test title",
 				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				Language: "Go",
 				Content:  "Test code",
 				Source:   "github.com",
 			},
-			wantErr: errors.New("unexisted user"),
+			wantErr: entity.ErrIsNotAuthor,
 		},
 		{
 			name: "投稿元のユーザ以外が更新するとエラー",
@@ -544,7 +567,7 @@ func TestPostRepository_Update(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
-			err := postRepo.Insert(ctx, tt.post)
+			err := postRepo.Update(ctx, tt.post)
 
 			if err == nil || tt.wantErr == nil {
 				if err == tt.wantErr {
