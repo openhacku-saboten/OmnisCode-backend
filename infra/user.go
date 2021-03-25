@@ -9,7 +9,10 @@ import (
 	"github.com/go-gorp/gorp"
 	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
+
+var _ repository.User = (*UserRepository)(nil)
 
 type UserRepository struct {
 	dbMap *gorp.DbMap
