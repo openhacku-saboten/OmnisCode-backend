@@ -1,5 +1,6 @@
 package entity
 
+// Comment は投稿に紐づくコメント情報を表します
 type Comment struct {
 	ID        int    `json:"id"`
 	UserID    string `json:"user_id"`
@@ -13,6 +14,7 @@ type Comment struct {
 	UpdatedAt string `json:"updated_at"`
 }
 
+// IsValid はCommentのバリデーションを行うメソッドです
 func (c *Comment) IsValid() error {
 	if c.ID < 0 {
 		return NewErrorNegativeValue("comment ID")

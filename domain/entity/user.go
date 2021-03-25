@@ -1,5 +1,6 @@
 package entity
 
+// User はユーザを表します
 type User struct {
 	ID        string `json:"id"`
 	Name      string `json:"name"`
@@ -8,6 +9,7 @@ type User struct {
 	IconURL   string `json:"icon_url"`
 }
 
+// NewUser はUserのポインタを生成する関数です
 func NewUser(id, name, profile, twitterID, iconURL string) *User {
 	return &User{
 		ID:        id,

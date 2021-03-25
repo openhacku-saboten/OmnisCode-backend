@@ -4,7 +4,7 @@ package repository
 
 import "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 
-// Post はコメントに関する永続化と再構築のためのリポジトリです
+// Comment はコメントに関する永続化と再構築のためのリポジトリです
 type Comment interface {
 	FindByPostID(postid int) (comments []*entity.Comment, err error)
 	Insert(comment *entity.Comment) error
