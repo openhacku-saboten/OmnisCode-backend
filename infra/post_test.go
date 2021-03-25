@@ -537,7 +537,10 @@ func TestPostRepository_Update(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "存在しないユーザで登録するとErrIsNotAuthor",
+			name: `存在しないユーザで登録するとErrNotFoundにしたいが、
+			Gorpは検知してくれないのでUsecaseでUserRepositoryを用いて
+			存在証明をするので、エラーは投稿元のユーザ以外が更新すると
+			エラーの時と同じerrIsNotAuthor`,
 			post: &entity.Post{
 				ID:       3,
 				UserID:   "user-id3",

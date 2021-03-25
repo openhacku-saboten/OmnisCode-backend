@@ -11,11 +11,15 @@ import (
 // PostUsecase は投稿に関するユースケースの構造体です
 type PostUsecase struct {
 	postRepo repository.Post
+	userRepo repository.User
 }
 
 // NewPostUsecase は投稿に関するユースケースのポインタを生成します
-func NewPostUsecase(postRepo repository.Post) *PostUsecase {
-	return &PostUsecase{postRepo: postRepo}
+func NewPostUsecase(postRepo repository.Post, userRepo repository.User) *PostUsecase {
+	return &PostUsecase{
+		postRepo: postRepo,
+		userRepo: userRepo,
+	}
 }
 
 // GetAll は保存されている投稿を全て取得します
@@ -47,6 +51,10 @@ func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 
 // Update は引数のpostエンティティをもとに投稿を1つ更新します
 func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
+	if _, err := p.userRepo.FindByID(post.UserID); err != nil {
+		return fmt.Errorf("failed find user(userID: %s): %w", post.UserID, err)
+	}
+
 	if err := p.postRepo.Update(ctx, post); err != nil {
 		return fmt.Errorf("failed Update Post: %w", err)
 	}

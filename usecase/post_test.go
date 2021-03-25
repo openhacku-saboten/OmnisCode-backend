@@ -42,8 +42,9 @@ func TestPost_Get_All_With_Mock(t *testing.T) {
 	ctx := context.Background()
 	postMock := mock.NewMockPost(ctrl)
 	postMock.EXPECT().GetAll(ctx).Return(validPosts, nil)
+	userMock := mock.NewMockPost(ctrl)
 
-	sut := NewPostUsecase(postMock)
+	sut := NewPostUsecase(postMock, userMock)
 	posts, err := sut.postRepo.GetAll(ctx)
 	if err != nil {
 		t.Fatal(err)
@@ -75,8 +76,9 @@ func TestPost_Get_With_Mock(t *testing.T) {
 	ctx := context.Background()
 	postMock := mock.NewMockPost(ctrl)
 	postMock.EXPECT().FindByID(ctx, 1).Return(validPost, nil)
+	userMock := mock.NewMockUser(ctrl)
 
-	sut := NewPostUsecase(postMock)
+	sut := NewPostUsecase(postMock, userMock)
 	post, err := sut.postRepo.FindByID(ctx, 1)
 	if err != nil {
 		t.Fatal(err)
@@ -105,8 +107,9 @@ func TestPost_Create_With_Mock(t *testing.T) {
 	ctx := context.Background()
 	postMock := mock.NewMockPost(ctrl)
 	postMock.EXPECT().Insert(ctx, validPost).Return(nil)
+	userMock := mock.NewMockUser(ctrl)
 
-	sut := NewPostUsecase(postMock)
+	sut := NewPostUsecase(postMock, userMock)
 	if err := sut.Create(ctx, validPost); err != nil {
 		t.Fatal(err)
 	}
@@ -131,8 +134,10 @@ func TestPost_Update_With_Mock(t *testing.T) {
 	ctx := context.Background()
 	postMock := mock.NewMockPost(ctrl)
 	postMock.EXPECT().Update(ctx, validPost).Return(nil)
+	userMock := mock.NewMockUser(ctrl)
+	userMock.EXPECT().FindByID(validPost.UserID).Return(nil, nil)
 
-	sut := NewPostUsecase(postMock)
+	sut := NewPostUsecase(postMock, userMock)
 	if err := sut.Update(ctx, validPost); err != nil {
 		t.Fatal(err)
 	}
