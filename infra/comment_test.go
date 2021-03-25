@@ -27,7 +27,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dbMap.AddTableWithName(PostDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
 
 	postDTOs := []*PostDTO{

@@ -50,6 +50,21 @@ func (mr *MockPostMockRecorder) FindByID(ctx, postID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockPost)(nil).FindByID), ctx, postID)
 }
 
+// GetAll mocks base method.
+func (m *MockPost) GetAll(ctx context.Context) ([]*entity.Post, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAll", ctx)
+	ret0, _ := ret[0].([]*entity.Post)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAll indicates an expected call of GetAll.
+func (mr *MockPostMockRecorder) GetAll(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockPost)(nil).GetAll), ctx)
+}
+
 // Insert mocks base method.
 func (m *MockPost) Insert(ctx context.Context, post *entity.Post) error {
 	m.ctrl.T.Helper()

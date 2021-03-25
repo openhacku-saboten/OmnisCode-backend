@@ -30,9 +30,11 @@ func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 	comments, err := ctrl.uc.GetByPostID(postID)
 
 	if err != nil {
-		if errors.As(err, &entity.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
+
 		logger.Errorf("Unexpected error GET /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
