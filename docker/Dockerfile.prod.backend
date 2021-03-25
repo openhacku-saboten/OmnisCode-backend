@@ -5,6 +5,8 @@ COPY . .
 RUN CGO_ENABLED=0 go build -o /omniscode-backend
 
 FROM scratch
+COPY --from=golang:1.15 /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY --from=golang:1.15 /usr/share/zoneinfo /usr/share/zoneinfo
 
 COPY --from=builder /omniscode-backend /bin/backend
 ENTRYPOINT [ "/bin/backend" ]
