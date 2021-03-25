@@ -9,12 +9,17 @@ import (
 )
 
 type UserUseCase struct {
-	userRepo repository.User
-	authRepo repository.Auth
+	userRepo    repository.User
+	authRepo    repository.Auth
+	commentRepo repository.Comment
 }
 
-func NewUserUseCase(user repository.User, auth repository.Auth) *UserUseCase {
-	return &UserUseCase{userRepo: user, authRepo: auth}
+func NewUserUseCase(user repository.User, auth repository.Auth, comment repository.Comment) *UserUseCase {
+	return &UserUseCase{
+		userRepo:    user,
+		authRepo:    auth,
+		commentRepo: comment,
+	}
 }
 
 func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, err error) {
@@ -28,6 +33,14 @@ func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, e
 		return nil, fmt.Errorf("failed to Get User from Firebase: %w", err)
 	}
 	return
+}
+
+func (u *UserUseCase) GetComments(ctx context.Context, uid string) ([]*entity.Comment, error) {
+	comments, err := u.commentRepo.FindByUserID(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	return comments, nil
 }
 
 func (u *UserUseCase) Create(user *entity.User) error {
