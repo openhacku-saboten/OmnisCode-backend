@@ -131,8 +131,9 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			commentRepo := mock.NewMockComment(ctrl)
 			tt.prepareMockComment(commentRepo)
 			postRepo := mock.NewMockPost(ctrl)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo, userRepo))
 			err := con.GetByPostID(c)
 
 			if (err != nil) != tt.wantErr {
@@ -279,8 +280,9 @@ func TestCommentController_Create(t *testing.T) {
 			tt.prepareMockComment(commentRepo)
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo, userRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -410,8 +412,9 @@ func TestCommentController_Get(t *testing.T) {
 			commentRepo := mock.NewMockComment(ctrl)
 			tt.prepareMockComment(commentRepo)
 			postRepo := mock.NewMockPost(ctrl)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo, userRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {

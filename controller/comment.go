@@ -22,6 +22,33 @@ func NewCommentController(uc *usecase.CommentUseCase) *CommentController {
 	return &CommentController{uc: uc}
 }
 
+// Get は GET /post/{postID}/comment/{commentID} のHandler
+func (ctrl *CommentController) Get(c echo.Context) error {
+	logger := log.New()
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	commentID, err := strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	comment, err := ctrl.uc.Get(postID, commentID)
+
+	if err != nil {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+
+		logger.Errorf("Unexpected error GET /post/{postID}/comment/{commentID}: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, comment)
+}
+
 // GetByPostID は GET /post/{postID}/comment のHandler
 func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 	logger := log.New()
@@ -83,29 +110,46 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 	return c.NoContent(http.StatusCreated)
 }
 
-// Get は GET /post/{postID}/comment/{commentID} のHandler
-func (ctrl *CommentController) Get(c echo.Context) error {
+// Update は PUT /post/{postID}/comment/{commentID} のHandler
+func (ctrl *CommentController) Update(c echo.Context) error {
 	logger := log.New()
-	postID, err := strconv.Atoi(c.Param("postID"))
-	if err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-	commentID, err := strconv.Atoi(c.Param("commentID"))
-	if err != nil {
+
+	comment := &entity.Comment{}
+	if err := c.Bind(comment); err != nil {
+		logger.Info(err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comment, err := ctrl.uc.Get(postID, commentID)
-
+	var err error
+	comment.PostID, err = strconv.Atoi(c.Param("postID"))
 	if err != nil {
+		logger.Info(err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	comment.ID, err = strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		logger.Info(err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	var ok bool
+	comment.UserID, ok = c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if err := ctrl.uc.Update(c.Request().Context(), comment); err != nil {
+		if errors.Is(err, entity.ErrCannotCommit) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
+		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
 			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
-
-		logger.Errorf("Unexpected error GET /post/{postID}/comment/{commentID}: %s", err.Error())
+		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-
-	return c.JSON(http.StatusOK, comment)
+	return c.NoContent(http.StatusCreated)
 }

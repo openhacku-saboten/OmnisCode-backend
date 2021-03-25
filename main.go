@@ -49,7 +49,7 @@ func main() {
 	postUsecase := usecase.NewPostUsecase(postRepo)
 	postController := controller.NewPostController(postUsecase)
 
-	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo)
+	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo, userRepo)
 	commentController := controller.NewCommentController(commentUseCase)
 
 	e := echo.New()
