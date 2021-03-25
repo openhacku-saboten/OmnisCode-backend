@@ -241,7 +241,7 @@ func TestCommentController_Create(t *testing.T) {
 					}, nil)
 			},
 			wantErr:  true,
-			wantCode: 400,
+			wantCode: 403,
 		},
 		{
 			name:   "存在しないPostIDならErrNotFound",
