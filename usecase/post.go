@@ -39,15 +39,13 @@ func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error)
 
 // Create は引数のpostエンティティをもとに投稿を1つ生成します
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
-	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを
-	// フロントでセットできてしまうので，ここらへんでpostIDを初期化しておく
-	post.ID = 0
-	if err := post.IsValid(); err != nil {
-		return fmt.Errorf("invalid post field: %w", err)
-	}
-
 	if err := p.postRepo.Insert(ctx, post); err != nil {
 		return fmt.Errorf("failed Store Post entity: %w", err)
 	}
 	return nil
+}
+
+// Update は引数のpostエンティティをもとに投稿を1つ更新します
+func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
+
 }
