@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"time"
 
 	"github.com/go-gorp/gorp"
@@ -42,6 +43,35 @@ func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment,
 		return nil, entity.NewErrorNotFound("comment")
 	}
 	return
+}
+
+// FindByUserID は該当IDのユーザのコメントをDBから取得して返す
+func (r *CommentRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error) {
+	var commentDTOs []CommentDTO
+	if _, err := r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE user_id = ?", uid); err != nil {
+		return nil, err
+	}
+
+	var comments []*entity.Comment
+	for _, commentDTO := range commentDTOs {
+		comment := &entity.Comment{
+			ID:        commentDTO.ID,
+			UserID:    commentDTO.UserID,
+			PostID:    commentDTO.PostID,
+			Type:      commentDTO.Type,
+			Content:   commentDTO.Content,
+			FirstLine: commentDTO.FirstLine,
+			LastLine:  commentDTO.LastLine,
+			Code:      commentDTO.Code,
+			CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
+		}
+		comments = append(comments, comment)
+	}
+	if comments == nil {
+		return nil, entity.NewErrorNotFound("comment")
+	}
+	return comments, nil
 }
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
