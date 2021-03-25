@@ -143,9 +143,15 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 // 投稿の所有者以外が更新する場合、更新は行われません
 func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
 	// 該当するポストがあるか確認
-	post, err := p.FindByID(ctx, post.ID)
+	getPost, err := p.FindByID(ctx, post.ID)
 	if err != nil {
+		// Update出来ない理由は権限がないことなのでErrIsNotAuthorを返す
+		return entity.ErrIsNotAuthor
+	}
 
+	// 所有者でなければ更新処理は行わない
+	if getPost.UserID != post.UserID {
+		return entity.ErrIsNotAuthor
 	}
 
 	postDTO := &PostInsertDTO{
@@ -159,12 +165,6 @@ func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
 	}
 
 	if _, err := p.dbMap.Update(postDTO); err != nil {
-		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			// postIDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "posts.PRIMARY") {
-				return errors.New("post ID is duplicated")
-			}
-		}
 		return err
 	}
 
