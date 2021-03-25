@@ -5,9 +5,10 @@ package mock
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
-	reflect "reflect"
 )
 
 // MockPost is a mock of Post interface

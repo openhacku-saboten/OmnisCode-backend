@@ -4,9 +4,10 @@
 package mock
 
 import (
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
-	reflect "reflect"
 )
 
 // MockUser is a mock of User interface
