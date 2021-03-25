@@ -39,7 +39,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 			Language:  "Go",
 			Content:   "Test code",
 			Source:    "github.com",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
+			CreatedAt: time.Unix(100, 0),
 			UpdatedAt: time.Unix(100, 0),
 		},
 		{
@@ -50,7 +50,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 			Language:  "Go",
 			Content:   "Test code",
 			Source:    "github.com",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
+			CreatedAt: time.Unix(100, 0),
 			UpdatedAt: time.Unix(100, 0),
 		},
 	}
@@ -60,7 +60,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 		}
 	}
 
-	dbMap.AddTableWithName(CommentDTO{}, "comments")
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "id")
 	truncateTable(t, dbMap, "comments")
 
 	commentDTOs := []*CommentDTO{
@@ -70,7 +70,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 			PostID:    1,
 			Type:      "none",
 			Content:   "type none",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
+			CreatedAt: time.Unix(100, 0),
 			UpdatedAt: time.Unix(100, 0),
 		},
 		{
@@ -81,7 +81,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 			Content:   "type highlight",
 			FirstLine: 10,
 			LastLine:  11,
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
+			CreatedAt: time.Unix(100, 0),
 			UpdatedAt: time.Unix(100, 0),
 		},
 		{
@@ -91,7 +91,7 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 			Type:      "commit",
 			Content:   "type commit",
 			Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
+			CreatedAt: time.Unix(100, 0),
 			UpdatedAt: time.Unix(100, 0),
 		},
 	}
@@ -180,7 +180,7 @@ func TestCommentRepository_Create(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dbMap.AddTableWithName(PostDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
 
 	if err := dbMap.Insert(&PostDTO{
@@ -191,13 +191,13 @@ func TestCommentRepository_Create(t *testing.T) {
 		Language:  "Go",
 		Content:   "Test code",
 		Source:    "github.com",
-		CreatedAt: time.Unix(100, 0), // とりあえず入れる
+		CreatedAt: time.Unix(100, 0),
 		UpdatedAt: time.Unix(100, 0),
 	}); err != nil {
 		t.Fatal(err)
 	}
 
-	dbMap.AddTableWithName(CommentDTO{}, "comments")
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "id")
 	truncateTable(t, dbMap, "comments")
 
 	if err := dbMap.Insert(&CommentDTO{
@@ -206,7 +206,7 @@ func TestCommentRepository_Create(t *testing.T) {
 		PostID:    1,
 		Type:      "none",
 		Content:   "type none",
-		CreatedAt: time.Unix(100, 0), // とりあえず入れる
+		CreatedAt: time.Unix(100, 0),
 		UpdatedAt: time.Unix(100, 0),
 	}); err != nil {
 		t.Fatal(err)
