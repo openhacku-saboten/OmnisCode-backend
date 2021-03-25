@@ -212,6 +212,52 @@ func TestCommentController_Create(t *testing.T) {
 			wantErr:  false,
 			wantCode: 201,
 		},
+		{
+			name:   "Postのオーナー以外によるcommitならErrCannotCommit",
+			postID: "1",
+			userID: "user-id",
+			body: `{
+				"type": "commit",
+				"content": "content1",
+				"code":"hello"
+			}`,
+			prepareMockComment: func(comment *mock.MockComment) {
+			},
+			prepareMockPost: func(post *mock.MockPost) {
+				post.EXPECT().FindByID(gomock.Any(), 1).Return(
+					&entity.Post{
+						ID:        1,
+						UserID:    "other-user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					}, nil)
+			},
+			wantErr:  true,
+			wantCode: 400,
+		},
+		{
+			name:   "存在しないPostIDならErrNotFound",
+			postID: "100",
+			userID: "user-id",
+			body: `{
+				"type": "highlight",
+				"content": "content1",
+				"first_line": 10,
+				"last_line": 12
+			}`,
+			prepareMockComment: func(comment *mock.MockComment) {
+			},
+			prepareMockPost: func(post *mock.MockPost) {
+				post.EXPECT().FindByID(gomock.Any(), 100).Return(nil, entity.NewErrorNotFound("post"))
+			},
+			wantErr:  true,
+			wantCode: 404,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
