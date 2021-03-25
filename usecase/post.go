@@ -32,7 +32,7 @@ func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
 func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
 	post, err := p.postRepo.FindByID(ctx, postID)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed PostUsecase.Get: %w", err)
 	}
 	return post, nil
 }

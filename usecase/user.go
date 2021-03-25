@@ -34,7 +34,7 @@ func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, e
 func (u *UserUseCase) GetPosts(ctx context.Context, uid string) ([]*entity.Post, error) {
 	posts, err := u.postRepo.FindByUserID(ctx, uid)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed UserUseCase.GetPosts: %w", err)
 	}
 	return posts, nil
 }
