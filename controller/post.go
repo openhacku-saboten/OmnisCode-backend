@@ -11,7 +11,8 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
-// PostController は投稿情報のHTTPリクエストをコントロールする構造体です
+// PostController は 投稿に関するハンドラに対してHTTPリクエストとして
+// 送られたデータを入力として、ユースケースに伝えるまでを責務とするコントローラです
 type PostController struct {
 	uc *usecase.PostUsecase
 }

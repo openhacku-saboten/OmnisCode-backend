@@ -10,10 +10,13 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
+// UserController は ユーザに関するハンドラに対してHTTPリクエストとして
+// 送られたデータを入力として、ユースケースに伝えるまでを責務とするコントローラです
 type UserController struct {
 	uc *usecase.UserUseCase
 }
 
+// NewUserController はUserControllerのポインタを生成する関数です
 func NewUserController(uc *usecase.UserUseCase) *UserController {
 	return &UserController{uc: uc}
 }
