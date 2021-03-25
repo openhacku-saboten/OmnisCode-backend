@@ -2,6 +2,8 @@ package infra
 
 import (
 	"context"
+	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -26,9 +28,9 @@ func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 }
 
 // FindByPostID は該当PostIDに属するコメントのスライスを返す
-func (r *CommentRepository) FindByPostID(postid int) (comments []*entity.Comment, err error) {
+func (r *CommentRepository) FindByPostID(postID int) (comments []*entity.Comment, err error) {
 	var commentDTOs []CommentDTO
-	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postid); err != nil {
+	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postID); err != nil {
 		return nil, err
 	}
 	for _, commentDTO := range commentDTOs {
@@ -108,6 +110,30 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 		return err
 	}
 	return nil
+}
+
+// FindByID はpostID, commentIDからコメントを取得します
+func (r *CommentRepository) FindByID(postID, commentID int) (*entity.Comment, error) {
+	var commentDTO CommentDTO
+	if err := r.dbMap.SelectOne(&commentDTO, "SELECT * FROM comments WHERE post_id = ? AND id = ?", postID, commentID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, entity.NewErrorNotFound("comment")
+		}
+		return nil, err
+	}
+
+	return &entity.Comment{
+		ID:        commentDTO.ID,
+		UserID:    commentDTO.UserID,
+		PostID:    commentDTO.PostID,
+		Type:      commentDTO.Type,
+		Content:   commentDTO.Content,
+		FirstLine: commentDTO.FirstLine,
+		LastLine:  commentDTO.LastLine,
+		Code:      commentDTO.Code,
+		CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+		UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
+	}, nil
 }
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
