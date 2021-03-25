@@ -3,7 +3,6 @@ package usecase
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
@@ -55,8 +54,6 @@ func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
 	if _, err := p.userRepo.FindByID(post.UserID); err != nil {
 		return fmt.Errorf("failed find user(userID: %s): %w", post.UserID, err)
 	}
-
-	fmt.Fprintf(os.Stderr, "OUT: %+v", post)
 
 	if err := p.postRepo.Update(ctx, post); err != nil {
 		return fmt.Errorf("failed Update Post: %w", err)

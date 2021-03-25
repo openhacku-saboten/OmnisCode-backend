@@ -148,30 +148,36 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 // Update は引数で渡したエンティティの投稿でDBに保存されている情報を更新します
 // 投稿の所有者以外が更新する場合、更新は行われません
 func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
-	// 該当するポストがあるか確認
-	getPost, err := p.FindByID(ctx, post.ID)
-	if err != nil {
-		// Update出来ない理由は権限がないことなのでErrIsNotAuthorを返す
-		return entity.ErrIsNotAuthor
-	}
+	select {
+	// echoのリクエストが途切れた場合は早めにリソースを開放するために処理を中断する
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当するポストがあるか確認
+		getPost, err := p.FindByID(ctx, post.ID)
+		if err != nil {
+			// Update出来ない理由は権限がないことなのでErrIsNotAuthorを返す
+			return entity.ErrIsNotAuthor
+		}
 
-	// 所有者でなければ更新処理は行わない
-	if getPost.UserID != post.UserID {
-		return entity.ErrIsNotAuthor
-	}
+		// 所有者でなければ更新処理は行わない
+		if getPost.UserID != post.UserID {
+			return entity.ErrIsNotAuthor
+		}
 
-	postDTO := &PostInsertDTO{
-		ID:       post.ID,
-		UserID:   post.UserID,
-		Title:    post.Title,
-		Code:     post.Code,
-		Language: post.Language,
-		Content:  post.Content,
-		Source:   post.Source,
-	}
+		postDTO := &PostInsertDTO{
+			ID:       post.ID,
+			UserID:   post.UserID,
+			Title:    post.Title,
+			Code:     post.Code,
+			Language: post.Language,
+			Content:  post.Content,
+			Source:   post.Source,
+		}
 
-	if _, err := p.dbMap.Update(postDTO); err != nil {
-		return err
+		if _, err := p.dbMap.Update(postDTO); err != nil {
+			return err
+		}
 	}
 
 	return nil
