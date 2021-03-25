@@ -211,6 +211,141 @@ func TestPostRepository_FindByID(t *testing.T) {
 
 }
 
+func TestUserRepository_FindByUserID(t *testing.T) {
+	dbMap, err := NewDB()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateTable(t, dbMap, "users")
+
+	dbMap.AddTableWithName(PostDTO{}, "posts")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts")
+
+	validUsers := []*UserDTO{
+		{
+			ID:        "user-id",
+			Name:      "test user",
+			Profile:   "test profile",
+			TwitterID: "twitter",
+		},
+		{
+			ID:        "user-id2",
+			Name:      "test user",
+			Profile:   "test profile",
+			TwitterID: "twitter2",
+		},
+	}
+
+	for _, user := range validUsers {
+		if err := dbMap.Insert(user); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	validPosts := []*PostInsertDTO{
+		{
+			ID:       1,
+			UserID:   "user-id",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+		{
+			ID:       2,
+			UserID:   "user-id2",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+		{
+			ID:       3,
+			UserID:   "user-id",
+			Title:    "test title",
+			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+			Language: "Go",
+			Content:  "Test code",
+			Source:   "github.com",
+		},
+	}
+
+	wantPosts := []*entity.Post{}
+
+	for _, validPost := range validPosts {
+		wantPosts = append(wantPosts, &entity.Post{
+			ID:       validPost.ID,
+			UserID:   validPost.UserID,
+			Title:    validPost.Title,
+			Code:     validPost.Code,
+			Language: validPost.Language,
+			Content:  validPost.Content,
+			Source:   validPost.Source,
+		})
+	}
+
+	tests := []struct {
+		name      string
+		userID    string
+		posts     []*entity.Post
+		wantPosts []*entity.Post
+		wantErr   error
+	}{
+		{
+			name:   "正しく全ての投稿を取得できる",
+			userID: "user-id",
+			posts:  wantPosts,
+			wantPosts: []*entity.Post{
+				wantPosts[0],
+				wantPosts[2],
+			},
+			wantErr: nil,
+		},
+		{
+			name:      "投稿が存在しなければNotFound",
+			userID:    "user-id3",
+			posts:     wantPosts,
+			wantPosts: nil,
+			wantErr:   entity.NewErrorNotFound("post"),
+		},
+	}
+
+	postRepo := NewPostRepository(dbMap)
+
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			// 初期化
+			truncateTable(t, dbMap, "posts")
+
+			for _, validPost := range tt.posts {
+				// デフォルトの投稿追加
+				if err := postRepo.Insert(ctx, validPost); err != nil {
+					t.Fatal(err)
+				}
+			}
+			posts, err := postRepo.FindByUserID(ctx, tt.userID)
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+
+			if tt.wantErr == nil {
+				for idx := range posts {
+					diff := cmp.Diff(tt.wantPosts[idx], posts[idx], cmpopts.IgnoreFields(entity.Post{}, "CreatedAt", "UpdatedAt"))
+					if diff != "" {
+						t.Errorf("Data (-want +got) =\n%s\n", diff)
+					}
+				}
+			}
+		})
+	}
+}
+
 func TestPostRepository_Insert(t *testing.T) {
 	dbMap, err := NewDB()
 	if err != nil {
