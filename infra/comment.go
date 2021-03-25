@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -17,10 +18,12 @@ import (
 
 var _ repository.Comment = (*CommentRepository)(nil)
 
+// CommentRepository は認証情報の永続化と再構築のためのリポジトリです
 type CommentRepository struct {
 	dbMap *gorp.DbMap
 }
 
+// NewCommentRepository は投稿情報のリポジトリのポインタを生成する関数です
 func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "ID")
 	dbMap.AddTableWithName(CommentInsertDTO{}, "comments").SetKeys(true, "ID")
@@ -31,7 +34,7 @@ func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 func (r *CommentRepository) FindByPostID(postID int) (comments []*entity.Comment, err error) {
 	var commentDTOs []CommentDTO
 	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postID); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed CommentRepository.FindByPostID: %w", err)
 	}
 	for _, commentDTO := range commentDTOs {
 		comment := &entity.Comment{

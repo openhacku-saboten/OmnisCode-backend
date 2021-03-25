@@ -8,10 +8,13 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
+// AuthMiddleware はHTTPリクエストとして送られたデータを入力として
+// ユースケースに伝えるまでを責務とするコントローラです
 type AuthMiddleware struct {
 	uc *usecase.AuthUseCase
 }
 
+// NewAuthMiddleware はAuthMiddlewareのポインタを生成する関数です
 func NewAuthMiddleware(uc *usecase.AuthUseCase) *AuthMiddleware {
 	return &AuthMiddleware{uc: uc}
 }

@@ -4,6 +4,7 @@ import (
 	"errors"
 )
 
+// Post は投稿を表します
 type Post struct {
 	ID        int    `json:"id"`
 	UserID    string `json:"user_id"`

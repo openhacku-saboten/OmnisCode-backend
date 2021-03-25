@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -33,7 +34,7 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
 	var postDTOs []PostDTO
 	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts"); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed PostRepository.GetAll: %w", err)
 	}
 
 	var posts []*entity.Post
@@ -81,10 +82,10 @@ func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post
 }
 
 // FindByUserID はユーザの投稿をDBから取得します
-func (r *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
+func (p *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
 	var postDTOs []PostDTO
-	if _, err := r.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
-		return nil, err
+	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
+		return nil, fmt.Errorf("failed PostRepository.FindByUserID: %w", err)
 	}
 
 	var posts []*entity.Post
