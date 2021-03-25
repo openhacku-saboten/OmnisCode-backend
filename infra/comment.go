@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -28,7 +29,7 @@ func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 func (r *CommentRepository) FindByPostID(postid int) (comments []*entity.Comment, err error) {
 	var commentDTOs []CommentDTO
 	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postid); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed CommentRepository.FindByPostID: %w", err)
 	}
 	for _, commentDTO := range commentDTOs {
 		comment := &entity.Comment{
