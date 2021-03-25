@@ -126,8 +126,8 @@ func (r *CommentRepository) Insert(ctx context.Context, comment *entity.Comment)
 			}
 			return err
 		}
+		return nil
 	}
-	return nil
 }
 
 // FindByID はpostID, commentIDからコメントを取得します

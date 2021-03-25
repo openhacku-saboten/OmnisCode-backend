@@ -103,8 +103,8 @@ func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
 			}
 			return err
 		}
+		return nil
 	}
-	return nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject

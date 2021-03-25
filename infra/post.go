@@ -153,8 +153,8 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 			}
 			return err
 		}
+		return nil
 	}
-	return nil
 }
 
 // PostDTO はDBとやりとりするためのDataTransferObjectです
