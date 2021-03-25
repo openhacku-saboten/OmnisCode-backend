@@ -50,6 +50,21 @@ func (mr *MockPostMockRecorder) FindByID(ctx, postID interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockPost)(nil).FindByID), ctx, postID)
 }
 
+// FindByUserID mocks base method.
+func (m *MockPost) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByUserID", ctx, uid)
+	ret0, _ := ret[0].([]*entity.Post)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByUserID indicates an expected call of FindByUserID.
+func (mr *MockPostMockRecorder) FindByUserID(ctx, uid interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByUserID", reflect.TypeOf((*MockPost)(nil).FindByUserID), ctx, uid)
+}
+
 // GetAll mocks base method.
 func (m *MockPost) GetAll(ctx context.Context) ([]*entity.Post, error) {
 	m.ctrl.T.Helper()
