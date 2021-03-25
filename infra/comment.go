@@ -15,10 +15,12 @@ import (
 
 var _ repository.Comment = (*CommentRepository)(nil)
 
+// CommentRepository は認証情報の永続化と再構築のためのリポジトリです
 type CommentRepository struct {
 	dbMap *gorp.DbMap
 }
 
+// NewCommentRepository は投稿情報のリポジトリのポインタを生成する関数です
 func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "ID")
 	dbMap.AddTableWithName(CommentInsertDTO{}, "comments").SetKeys(true, "ID")

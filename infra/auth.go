@@ -7,10 +7,12 @@ import (
 	"firebase.google.com/go/auth"
 )
 
+// AuthRepository は認証情報の永続化と再構築のためのリポジトリです
 type AuthRepository struct {
 	firebase *auth.Client
 }
 
+// NewAuthRepository は認証情報のリポジトリのポインタを生成する関数です
 func NewAuthRepository(firebase *auth.Client) *AuthRepository {
 	return &AuthRepository{firebase: firebase}
 }
@@ -25,7 +27,7 @@ func (a *AuthRepository) Authenticate(ctx context.Context, token string) (uid st
 	return
 }
 
-// SetIconURL はuserIDからIconURLを取得して返す
+// GetIconURL はuserIDからIconURLを取得して返す
 func (a *AuthRepository) GetIconURL(ctx context.Context, uid string) (iconURL string, err error) {
 	user, err := a.firebase.GetUser(ctx, uid)
 	if err != nil {
