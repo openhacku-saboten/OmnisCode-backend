@@ -230,6 +230,17 @@ func TestCommentRepository_Create(t *testing.T) {
 			wantErr: nil,
 		},
 		{
+			name: "IDが重複していてもAUTO_INCREMENTしてくれる",
+			comment: &entity.Comment{
+				ID:      1,
+				UserID:  "user-id",
+				PostID:  1,
+				Type:    "none",
+				Content: "type none",
+			},
+			wantErr: nil,
+		},
+		{
 			name: "PostIDが存在しなければErrNotFound",
 			comment: &entity.Comment{
 				UserID:  "user-id",

@@ -64,10 +64,6 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 
 	if err := r.dbMap.Insert(commentDTO); err != nil {
 		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			// IDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "comments.PRIMARY") {
-				return entity.ErrDuplicatedUser
-			}
 			// 存在しないPostIDで登録した時のエラー
 			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
 				return entity.NewErrorNotFound("post")
