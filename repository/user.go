@@ -6,6 +6,7 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
+// Post はユーザに関する永続化と再構築のためのリポジトリです
 type User interface {
 	FindByID(uid string) (user *entity.User, err error)
 	Insert(user *entity.User) error
