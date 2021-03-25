@@ -46,7 +46,7 @@ func main() {
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo)
 	userController := controller.NewUserController(userUseCase)
 
-	postUsecase := usecase.NewPostUsecase(postRepo)
+	postUsecase := usecase.NewPostUsecase(postRepo, userRepo)
 	postController := controller.NewPostController(postUsecase)
 
 	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo)
