@@ -242,7 +242,7 @@ func TestUserController_Create(t *testing.T) {
 				).Return(nil)
 			},
 			wantErr:  false,
-			wantCode: 200,
+			wantCode: 201,
 		},
 		{
 			name:   "TwitterIDに@が含まれていれば取り除いてユーザーを作成できる",
@@ -258,7 +258,7 @@ func TestUserController_Create(t *testing.T) {
 				).Return(nil)
 			},
 			wantErr:  false,
-			wantCode: 200,
+			wantCode: 201,
 		},
 		{
 			name:   "不正なbodyならBadRequest",

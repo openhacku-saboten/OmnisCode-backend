@@ -92,7 +92,7 @@ func (ctrl *UserController) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return nil
+	return c.NoContent(http.StatusCreated)
 }
 
 // Update は PUT /user のHandler
@@ -129,5 +129,5 @@ func (ctrl *UserController) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return nil
+	return c.NoContent(http.StatusOK)
 }
