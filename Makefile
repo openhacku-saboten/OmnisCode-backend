@@ -9,7 +9,7 @@ run:
 	$(ENV) go run main.go
 
 .PHONY:test
-test: gen lint
+test: lint
 	$(ENV_TEST) go test -count=1 ./...
 
 .PHONY:test-with-coverage
