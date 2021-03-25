@@ -280,7 +280,7 @@ func TestPostRepository_Insert(t *testing.T) {
 			wantErr: errors.New("unexisted user"),
 		},
 		{
-			name: "重複したpostIDで登録するとエラー",
+			name: "重複したpostIDで登録しても、auto incrementが働いてエラーは発生しない",
 			post: &entity.Post{
 				ID:       1,
 				UserID:   "user-id",
@@ -290,7 +290,7 @@ func TestPostRepository_Insert(t *testing.T) {
 				Content:  "Test code",
 				Source:   "github.com",
 			},
-			wantErr: errors.New("post ID is duplicated"),
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
