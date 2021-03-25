@@ -47,5 +47,5 @@ func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 
 // Update は引数のpostエンティティをもとに投稿を1つ更新します
 func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
-
+	return nil
 }

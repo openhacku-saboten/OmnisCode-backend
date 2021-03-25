@@ -112,15 +112,14 @@ func (p *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entit
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
-	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを
-	// フロントでセットできてしまうので，ここらへんでpostIDを初期化しておく
-	post.ID = 0
 	if err := post.IsValid(); err != nil {
 		return fmt.Errorf("invalid post field: %w", err)
 	}
 
+	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDをフロントで
+	// セットできてしまうので，DTOに変換する時に0でIDを初期化しておく
 	postDTO := &PostInsertDTO{
-		ID:       post.ID,
+		ID:       0,
 		UserID:   post.UserID,
 		Title:    post.Title,
 		Code:     post.Code,
