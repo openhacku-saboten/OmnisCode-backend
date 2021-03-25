@@ -51,8 +51,9 @@ func (ctrl *UserController) GetPosts(c echo.Context) error {
 	ctx := c.Request().Context()
 	posts, err := ctrl.uc.GetPosts(ctx, userID)
 	if err != nil {
-		if errors.As(err, &entity.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("error GET /user/{userID}/post: %s", err.Error())
