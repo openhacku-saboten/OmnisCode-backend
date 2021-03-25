@@ -94,11 +94,13 @@ func (ctrl *UserController) Update(c echo.Context) error {
 		if errors.Is(err, entity.ErrEmptyUserName) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
 		}
-		if errors.As(err, &entity.ErrDuplicated{}) {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		errDup := &entity.ErrDuplicated{}
+		if errors.As(err, errDup) {
+			return echo.NewHTTPError(http.StatusBadRequest, errDup.Error())
 		}
-		if errors.As(err, &entity.ErrTooLong{}) {
-			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		errTL := &entity.ErrTooLong{}
+		if errors.As(err, errTL) {
+			return echo.NewHTTPError(http.StatusBadRequest, errTL.Error())
 		}
 		logger.Errorf("Unexpected error PUT/user: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
