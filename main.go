@@ -60,6 +60,7 @@ func main() {
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 	user.PUT("", userController.Update, authMiddleware.Authenticate)
 	user.GET("/:userID/post", userController.GetPosts)
+	user.GET("/:userID/comment", userController.GetComments)
 
 	post := v1.Group("/post")
 	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
