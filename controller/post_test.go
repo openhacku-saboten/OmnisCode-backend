@@ -78,8 +78,9 @@ func TestPostController_GetAll(t *testing.T) {
 			ctx := c.Request().Context()
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.GetAll(c)
 
 			if (err != nil) != tt.wantErr {
@@ -165,8 +166,9 @@ func TestPostController_Get(t *testing.T) {
 			ctx := c.Request().Context()
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
@@ -237,8 +239,9 @@ func TestPostController_Create(t *testing.T) {
 			postRepo := mock.NewMockPost(ctrl)
 			ctx := context.Background()
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -264,6 +267,7 @@ func TestPostController_Update(t *testing.T) {
 		userID          string
 		body            string
 		prepareMockPost func(ctx context.Context, post *mock.MockPost)
+		prepareMockUser func(user *mock.MockUser)
 		wantErr         bool
 		wantCode        int
 	}{
@@ -293,6 +297,9 @@ func TestPostController_Update(t *testing.T) {
 					UpdatedAt: "2021-03-23T11:42:56+09:00",
 				}).Return(nil)
 			},
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id").Return(nil, nil)
+			},
 			wantErr:  false,
 			wantCode: 200,
 		},
@@ -303,6 +310,7 @@ func TestPostController_Update(t *testing.T) {
 				"aaaa":"test title",
 				}`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
+			prepareMockUser: func(user *mock.MockUser) {},
 			wantErr:         true,
 			wantCode:        http.StatusBadRequest,
 		},
@@ -311,6 +319,7 @@ func TestPostController_Update(t *testing.T) {
 			userID:          "user-id",
 			body:            `aaaaa`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
+			prepareMockUser: func(user *mock.MockUser) {},
 			wantErr:         true,
 			wantCode:        http.StatusBadRequest,
 		},
@@ -340,6 +349,29 @@ func TestPostController_Update(t *testing.T) {
 					UpdatedAt: "2021-03-23T11:42:56+09:00",
 				}).Return(entity.ErrIsNotAuthor)
 			},
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id").Return(nil, nil)
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+		{
+			name:   "存在しないユーザならばErrIsNotAuthorでForbidden",
+			userID: "user-id2002",
+			body: `{
+				"id": 1,
+				"title":"test title",
+				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				"language":"Go",
+				"content":"Test code",
+				"source":"github.com",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+				}`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID("user-id2002").Return(nil, entity.NewErrorNotFound("user"))
+			},
 			wantErr:  true,
 			wantCode: http.StatusForbidden,
 		},
@@ -358,8 +390,10 @@ func TestPostController_Update(t *testing.T) {
 			defer ctrl.Finish()
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
+			tt.prepareMockUser(userRepo)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.Update(c)
 
 			if (err != nil) != tt.wantErr {

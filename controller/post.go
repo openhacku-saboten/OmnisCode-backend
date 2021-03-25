@@ -119,6 +119,11 @@ func (ctrl *PostController) Update(c echo.Context) error {
 			logger.Errorf("forbedden update occurs: %s", err.Error())
 			return echo.NewHTTPError(http.StatusForbidden, err.Error())
 		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			logger.Errorf("forbedden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
+		}
 
 		logger.Errorf("error POST /post: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
