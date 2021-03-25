@@ -10,8 +10,9 @@ import (
 
 // Comment はコメントに関する永続化と再構築のためのリポジトリです
 type Comment interface {
+	FindByID(postID, commentID int) (comment *entity.Comment, err error)
 	FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error)
 	FindByPostID(postID int) (comments []*entity.Comment, err error)
 	Insert(comment *entity.Comment) error
-	FindByID(postID, commentID int) (comment *entity.Comment, err error)
+	Update(ctx context.Context, postID int, commentID int) error
 }
