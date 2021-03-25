@@ -111,3 +111,29 @@ func TestPost_Create_With_Mock(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestPost_Update_With_Mock(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	validPost := &entity.Post{
+		ID:        0,
+		UserID:    "testID",
+		Title:     "test title",
+		Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+		Language:  "Go",
+		Content:   "Test code",
+		Source:    "github.com",
+		CreatedAt: "2021-03-23T11:42:56+09:00",
+		UpdatedAt: "2021-03-23T11:42:56+09:00",
+	}
+
+	ctx := context.Background()
+	postMock := mock.NewMockPost(ctrl)
+	postMock.EXPECT().Update(ctx, validPost).Return(nil)
+
+	sut := NewPostUsecase(postMock)
+	if err := sut.Update(ctx, validPost); err != nil {
+		t.Fatal(err)
+	}
+}

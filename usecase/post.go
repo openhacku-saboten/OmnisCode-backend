@@ -40,12 +40,15 @@ func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error)
 // Create は引数のpostエンティティをもとに投稿を1つ生成します
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 	if err := p.postRepo.Insert(ctx, post); err != nil {
-		return fmt.Errorf("failed Store Post entity: %w", err)
+		return fmt.Errorf("failed Create Post entity: %w", err)
 	}
 	return nil
 }
 
 // Update は引数のpostエンティティをもとに投稿を1つ更新します
 func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
+	if err := p.postRepo.Update(ctx, post); err != nil {
+		return fmt.Errorf("failed Update Post: %w", err)
+	}
 	return nil
 }
