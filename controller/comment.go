@@ -98,7 +98,7 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 
 	if err := ctrl.uc.Create(c.Request().Context(), comment); err != nil {
 		if errors.Is(err, entity.ErrCannotCommit) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotCommit.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
@@ -127,12 +127,6 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comment.ID, err = strconv.Atoi(c.Param("commentID"))
-	if err != nil {
-		logger.Info(err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-
 	var ok bool
 	comment.UserID, ok = c.Get("userID").(string)
 	if !ok {
@@ -142,7 +136,8 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 
 	if err := ctrl.uc.Update(c.Request().Context(), comment); err != nil {
 		if errors.Is(err, entity.ErrCannotCommit) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
+			// コミットできない場合は、StatusForbidden
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotCommit.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
@@ -151,5 +146,5 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return c.NoContent(http.StatusCreated)
+	return c.NoContent(http.StatusOK)
 }

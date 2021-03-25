@@ -76,8 +76,6 @@ func (ctrl *PostController) Create(c echo.Context) error {
 	logger := log.New()
 
 	post := &entity.Post{}
-
-	logger.Info(c)
 	if err := c.Bind(post); err != nil {
 		logger.Infof("failed c.Bind: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)

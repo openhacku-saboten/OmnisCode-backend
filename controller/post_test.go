@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -241,7 +240,6 @@ func TestPostController_Create(t *testing.T) {
 			tt.prepareMockPost(context.Background(), postRepo)
 
 			con := NewPostController(usecase.NewPostUsecase(postRepo))
-			fmt.Println(c)
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
