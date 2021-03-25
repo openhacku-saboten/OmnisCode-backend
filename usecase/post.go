@@ -18,6 +18,16 @@ func NewPostUsecase(postRepo repository.Post) *PostUsecase {
 	return &PostUsecase{postRepo: postRepo}
 }
 
+// GetAll は保存されている全ての投稿を取得します
+func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
+	posts, err := p.postRepo.GetAll(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to GetAll: %w", err)
+	}
+
+	return posts, nil
+}
+
 // Get はpost IDをもとに投稿情報を取得するというユースケースです
 func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
 	post, err := p.postRepo.FindByID(ctx, postID)
