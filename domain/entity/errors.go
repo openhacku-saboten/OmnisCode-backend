@@ -27,7 +27,7 @@ type ErrTooLong struct {
 	fieldName string
 }
 
-// ErrEmptyField はフィールドの内容が空のときのエラー
+// ErrEmpty はフィールドの内容が空のときのエラー
 type ErrEmpty struct {
 	fieldName string
 }
@@ -91,7 +91,7 @@ func (e ErrNotFound) Error() string {
 	return fmt.Sprintf("%s is not found", e.entityName)
 }
 
-// NewDuplicated はフィールド名が重複したときのエラーを生成します
+// NewErrorDuplicated はフィールド名が重複したときのエラーを生成します
 func NewErrorDuplicated(entityName string) error {
 	return ErrDuplicated{
 		entityName: entityName,

@@ -10,7 +10,7 @@ func Port() string {
 	return os.Getenv("PORT")
 }
 
-// DSN は環境変数の情報をもとに、DataSourceNameを返す関数です
+// DSN は環境変数に書かれている情報を元にDataSourceNameを返す関数です
 func DSN() string {
 	return fmt.Sprintf(
 		"%s:%s@tcp(%s:%s)/%s",
@@ -22,6 +22,7 @@ func DSN() string {
 	) + "?parseTime=true&collation=utf8mb4_bin"
 }
 
+// GoogleAppCredentials は環境変数に書かれているGOOGLE_APPLICATION_CREDENTIALSの値をstringで返す関数です
 func GoogleAppCredentials() string {
 	return os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
 }

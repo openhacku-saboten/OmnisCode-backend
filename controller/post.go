@@ -11,7 +11,8 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
-// PostController は投稿情報のHTTPリクエストをコントロールする構造体です
+// PostController は 投稿に関するハンドラに対してHTTPリクエストとして
+// 送られたデータを入力として、ユースケースに伝えるまでを責務とするコントローラです
 type PostController struct {
 	uc *usecase.PostUsecase
 }
@@ -22,10 +23,10 @@ func NewPostController(uc *usecase.PostUsecase) *PostController {
 }
 
 // GetAll は GET /postのためのハンドラです
-func (p *PostController) GetAll(c echo.Context) error {
+func (ctrl *PostController) GetAll(c echo.Context) error {
 	logger := log.New()
 
-	posts, err := p.uc.GetAll(c.Request().Context())
+	posts, err := ctrl.uc.GetAll(c.Request().Context())
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {

@@ -1,0 +1,23 @@
+linters-settings:
+  errcheck:
+    check-type-asserts: true
+    check-blank: true
+
+linters:
+  enable:
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - errcheck
+    - govet
+    - staticcheck
+
+issues:
+  exclude-use-default: false
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dupl
+        - funlen
+        - paralleltest

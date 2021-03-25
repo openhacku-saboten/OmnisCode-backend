@@ -29,7 +29,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			prepareMockComment: func(comment *mock.MockComment) {
 				comment.EXPECT().FindByPostID(1).Return(
 					[]*entity.Comment{
-						&entity.Comment{
+						{
 							ID:        1,
 							UserID:    "userid1",
 							PostID:    1,
@@ -37,15 +37,18 @@ func TestCommentController_GetByPostID(t *testing.T) {
 							Content:   "content1",
 							FirstLine: 10,
 							LastLine:  12,
+							Code:      "",
 							CreatedAt: "1970-01-01T09:01:40+09:00",
 							UpdatedAt: "1970-01-01T09:01:40+09:00",
 						},
-						&entity.Comment{
+						{
 							ID:        2,
 							UserID:    "userid2",
 							PostID:    1,
 							Type:      "commit",
 							Content:   "content2",
+							FirstLine: 0,
+							LastLine:  0,
 							Code:      "code2",
 							CreatedAt: "1970-01-01T09:01:40+09:00",
 							UpdatedAt: "1970-01-01T09:01:40+09:00",

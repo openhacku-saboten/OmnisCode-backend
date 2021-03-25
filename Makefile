@@ -36,3 +36,7 @@ local-db-up:
 .PHONY:migrate-up
 migrate-up:
 	$(ENV_TEST) sql-migrate up
+
+.PHONY:lint
+lint:
+	golangci-lint run ./...

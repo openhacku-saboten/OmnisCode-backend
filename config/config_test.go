@@ -20,6 +20,7 @@ func TestPort(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			if got := config.Port(); got != tc.want {
 				t.Errorf("Port() = %s, want = %s", got, tc.want)
 			}
@@ -41,6 +42,7 @@ func TestDSN(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			if got := config.DSN(); got != tc.want {
 				t.Errorf("DSN() = %s, want = %s", got, tc.want)
 			}
@@ -62,6 +64,7 @@ func TestGoogleAppCredentials(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
 			if got := config.GoogleAppCredentials(); got != tc.want {
 				t.Errorf("GoogleAppCredentials() = %s, want = %s", got, tc.want)
 			}

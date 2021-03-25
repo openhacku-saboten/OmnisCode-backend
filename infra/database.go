@@ -9,6 +9,7 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/config"
 	"github.com/openhacku-saboten/OmnisCode-backend/log"
 
+	// mysql
 	_ "github.com/go-sql-driver/mysql"
 )
 

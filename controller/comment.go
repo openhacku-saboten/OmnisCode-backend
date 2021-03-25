@@ -11,10 +11,13 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
 )
 
+// CommentController は コメントに関するハンドラに対してHTTPリクエストとして
+// 送られたデータを入力として、ユースケースに伝えるまでを責務とするコントローラです
 type CommentController struct {
 	uc *usecase.CommentUseCase
 }
 
+// NewCommentController はCommentControllerのポインタを生成する関数です
 func NewCommentController(uc *usecase.CommentUseCase) *CommentController {
 	return &CommentController{uc: uc}
 }

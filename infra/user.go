@@ -14,10 +14,12 @@ import (
 
 var _ repository.User = (*UserRepository)(nil)
 
+// UserRepository ユーザー情報の永続化と再構築のためのリポジトリです
 type UserRepository struct {
 	dbMap *gorp.DbMap
 }
 
+// NewUserRepository はユーザー情報のリポジトリのポインタを生成する関数です
 func NewUserRepository(dbMap *gorp.DbMap) *UserRepository {
 	dbMap.AddTableWithName(UserDTO{}, "users").SetKeys(false, "ID")
 	return &UserRepository{dbMap: dbMap}
