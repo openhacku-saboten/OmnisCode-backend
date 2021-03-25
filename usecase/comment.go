@@ -47,11 +47,3 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 	}
 	return nil
 }
-
-func (u *CommentUseCase) Get(postid, commentid int) (comment *entity.Comment, err error) {
-	comment, err = u.commentRepo.FindByID(postid, commentid)
-	if err != nil {
-		return nil, fmt.Errorf("failed to Get comment from DB: %w", err)
-	}
-	return
-}
