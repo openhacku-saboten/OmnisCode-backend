@@ -30,7 +30,7 @@ func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comments, err := ctrl.uc.GetByPostID(postID)
+	comments, err := ctrl.uc.GetByPostID(c.Request().Context(), postID)
 
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
@@ -95,7 +95,7 @@ func (ctrl *CommentController) Get(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comment, err := ctrl.uc.Get(postID, commentID)
+	comment, err := ctrl.uc.Get(c.Request().Context(), postID, commentID)
 
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
