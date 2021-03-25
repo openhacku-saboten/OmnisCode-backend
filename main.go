@@ -43,7 +43,7 @@ func main() {
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
 
-	userUseCase := usecase.NewUserUseCase(userRepo, authRepo)
+	userUseCase := usecase.NewUserUseCase(userRepo, authRepo, commentRepo)
 	userController := controller.NewUserController(userUseCase)
 
 	postUsecase := usecase.NewPostUsecase(postRepo)

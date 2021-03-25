@@ -86,8 +86,9 @@ func TestUserController_Get(t *testing.T) {
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
 			tt.prepareMockAuth(authRepo)
+			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
@@ -226,8 +227,9 @@ func TestUserController_Create(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -368,8 +370,9 @@ func TestUserController_Update(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
 			err := con.Update(c)
 
 			if (err != nil) != tt.wantErr {
