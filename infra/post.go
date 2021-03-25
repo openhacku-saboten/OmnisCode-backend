@@ -60,25 +60,30 @@ func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
 
 // FindByID はpostIDから投稿を取得します
 func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
-	var postDTO PostDTO
-	if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, entity.NewErrorNotFound("post")
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var postDTO PostDTO
+		if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, entity.NewErrorNotFound("post")
+			}
+			return nil, err
 		}
-		return nil, err
-	}
 
-	return &entity.Post{
-		ID:        postDTO.ID,
-		UserID:    postDTO.UserID,
-		Title:     postDTO.Title,
-		Code:      postDTO.Title,
-		Language:  postDTO.Language,
-		Content:   postDTO.Content,
-		Source:    postDTO.Source,
-		CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
-		UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
-	}, nil
+		return &entity.Post{
+			ID:        postDTO.ID,
+			UserID:    postDTO.UserID,
+			Title:     postDTO.Title,
+			Code:      postDTO.Title,
+			Language:  postDTO.Language,
+			Content:   postDTO.Content,
+			Source:    postDTO.Source,
+			CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
+		}, nil
+	}
 }
 
 // FindByUserID はユーザの投稿をDBから取得します

@@ -146,33 +146,38 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 // Update は引数で渡したエンティティのコメントでDBに保存されている情報を更新します
 // コメントした人以外が更新する場合、更新は行われません
 func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment) error {
-	// 該当するコメントが存在するか確認
-	gotComment, err := r.FindByID(comment.PostID, comment.ID)
-	if err != nil {
-		// そもそも取得できない場合は権限がないのと同義なのでErrIsNotAuthorを返す
-		return entity.ErrIsNotAuthor
-	}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当するコメントが存在するか確認
+		gotComment, err := r.FindByID(comment.PostID, comment.ID)
+		if err != nil {
+			// そもそも取得できない場合は権限がないのと同義なのでErrIsNotAuthorを返す
+			return entity.ErrIsNotAuthor
+		}
 
-	// 所有者でなければ更新処理は行わない
-	if !(gotComment.UserID == comment.UserID &&
-		gotComment.PostID == comment.PostID &&
-		gotComment.ID == comment.ID) {
-		return entity.ErrIsNotAuthor
-	}
+		// 所有者でなければ更新処理は行わない
+		if !(gotComment.UserID == comment.UserID &&
+			gotComment.PostID == comment.PostID &&
+			gotComment.ID == comment.ID) {
+			return entity.ErrIsNotAuthor
+		}
 
-	commentDTO := &CommentInsertDTO{
-		ID:        comment.ID,
-		UserID:    comment.UserID,
-		PostID:    comment.PostID,
-		Type:      comment.Type,
-		Content:   comment.Content,
-		FirstLine: comment.FirstLine,
-		LastLine:  comment.LastLine,
-		Code:      comment.Code,
-	}
+		commentDTO := &CommentInsertDTO{
+			ID:        comment.ID,
+			UserID:    comment.UserID,
+			PostID:    comment.PostID,
+			Type:      comment.Type,
+			Content:   comment.Content,
+			FirstLine: comment.FirstLine,
+			LastLine:  comment.LastLine,
+			Code:      comment.Code,
+		}
 
-	if _, err := r.dbMap.Update(commentDTO); err != nil {
-		return err
+		if _, err := r.dbMap.Update(commentDTO); err != nil {
+			return err
+		}
 	}
 	return nil
 }

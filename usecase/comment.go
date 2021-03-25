@@ -12,11 +12,12 @@ import (
 type CommentUseCase struct {
 	commentRepo repository.Comment
 	postRepo    repository.Post
+	userRepo    repository.User
 }
 
 // NewCommentUseCase はCommentUseCaseのポインタを生成する関数です
-func NewCommentUseCase(comment repository.Comment, post repository.Post) *CommentUseCase {
-	return &CommentUseCase{commentRepo: comment, postRepo: post}
+func NewCommentUseCase(comment repository.Comment, post repository.Post, user repository.User) *CommentUseCase {
+	return &CommentUseCase{commentRepo: comment, postRepo: post, userRepo: user}
 }
 
 // Get は引数のpostIDとcommentIDの両方を満たすコメントを1つ取得します
@@ -55,12 +56,10 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 }
 
 // Update は引数のCommentエンティティをもとにコメントを1つ更新します
-func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) error {
-	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のcommentIDを
-	// フロントでセットできてしまうので，ここらへんでcommentIDを初期化しておく
-	comment.ID = 0
-	if err := comment.IsValid(); err != nil {
-		return fmt.Errorf("invalid Comment fields: %w", err)
+func (u *CommentUseCase) Update(ctx context.Context, comment *entity.Comment) error {
+	// Userが存在しない場合は弾く
+	if _, err := u.userRepo.FindByID(comment.UserID); err != nil {
+		return fmt.Errorf("not found user(userID: %s): %w", comment.UserID, err)
 	}
 
 	// Postのオーナー以外によるcommitを弾く
@@ -72,7 +71,7 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 		return entity.ErrCannotCommit
 	}
 
-	if err := u.commentRepo.Insert(comment); err != nil {
+	if err := u.commentRepo.Update(ctx, comment); err != nil {
 		return fmt.Errorf("failed to Insert Comment into DB: %w", err)
 	}
 	return nil
