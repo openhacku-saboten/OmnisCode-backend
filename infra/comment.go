@@ -72,6 +72,10 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
 				return entity.NewErrorNotFound("post")
 			}
+			// 存在しないUserIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+				return entity.NewErrorNotFound("user")
+			}
 		}
 		return err
 	}

@@ -68,6 +68,10 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 		if errors.Is(err, entity.ErrCannotCommit) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
 		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
 		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
