@@ -150,7 +150,9 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 	}
 
 	// 所有者でなければ更新処理は行わない
-	if !(gotComment.PostID == comment.PostID && gotComment.ID == comment.ID) {
+	if !(gotComment.UserID == comment.UserID &&
+		gotComment.PostID == comment.PostID &&
+		gotComment.ID == comment.ID) {
 		return entity.ErrIsNotAuthor
 	}
 
