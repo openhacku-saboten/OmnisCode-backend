@@ -71,7 +71,7 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 
 	if err := ctrl.uc.Create(c.Request().Context(), comment); err != nil {
 		if errors.Is(err, entity.ErrCannotCommit) {
-			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrCannotCommit.Error())
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotCommit.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
@@ -108,4 +108,38 @@ func (ctrl *CommentController) Get(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, comment)
+}
+
+// Delete は DELETE /post/{postID}/comment/{commentID} のHandler
+func (ctrl *CommentController) Delete(c echo.Context) error {
+	logger := log.New()
+
+	commentID, err := strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	userID, ok := c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if err := ctrl.uc.Delete(userID, postID, commentID); err != nil {
+		if errors.Is(err, entity.ErrCannotDelete) {
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotDelete.Error())
+		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.NoContent(http.StatusOK)
 }
