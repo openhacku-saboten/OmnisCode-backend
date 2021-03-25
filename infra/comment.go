@@ -17,6 +17,7 @@ type CommentRepository struct {
 
 func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "ID")
+	dbMap.AddTableWithName(CommentInsertDTO{}, "comments").SetKeys(true, "ID")
 	return &CommentRepository{dbMap: dbMap}
 }
 
@@ -49,7 +50,7 @@ func (r *CommentRepository) FindByPostID(postid int) (comments []*entity.Comment
 
 // Insert は該当ユーザーをDBに保存する
 func (r *CommentRepository) Insert(comment *entity.Comment) error {
-	commentDTO := &CommentDTO{
+	commentDTO := &CommentInsertDTO{
 		ID:        comment.ID,
 		UserID:    comment.UserID,
 		PostID:    comment.PostID,
@@ -58,8 +59,6 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 		FirstLine: comment.FirstLine,
 		LastLine:  comment.LastLine,
 		Code:      comment.Code,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
 	}
 
 	if err := r.dbMap.Insert(commentDTO); err != nil {
@@ -90,4 +89,20 @@ type CommentDTO struct {
 	Code      string    `db:"code"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
+}
+
+// CommentInsertDTO はInsert用のDataTransferObject
+// timestamp系は参照しないようにしています
+// ref: https://github.com/go-gorp/gorp/issues/125
+type CommentInsertDTO struct {
+	ID        int       `db:"id"`
+	UserID    string    `db:"user_id"`
+	PostID    int       `db:"post_id"`
+	Type      string    `db:"type"`
+	Content   string    `db:"content"`
+	FirstLine int       `db:"first_line"`
+	LastLine  int       `db:"last_line"`
+	Code      string    `db:"code"`
+	CreatedAt time.Time `db:"-"`
+	UpdatedAt time.Time `db:"-"`
 }
