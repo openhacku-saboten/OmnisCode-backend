@@ -69,6 +69,7 @@ func main() {
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)
 	comment.POST("", commentController.Create, authMiddleware.Authenticate)
+	comment.GET("/:commentID", commentController.Get)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
