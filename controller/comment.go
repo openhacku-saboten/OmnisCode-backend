@@ -67,7 +67,7 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 	}
 	comment.UserID = userID
 
-	if err := ctrl.uc.Create(comment); err != nil {
+	if err := ctrl.uc.Create(c.Request().Context(), comment); err != nil {
 		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

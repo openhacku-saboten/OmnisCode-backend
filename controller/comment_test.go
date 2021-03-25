@@ -126,8 +126,9 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			defer ctrl.Finish()
 			commentRepo := mock.NewMockComment(ctrl)
 			tt.prepareMockComment(commentRepo)
+			postRepo := mock.NewMockPost(ctrl)
 
-			con := NewCommentController(usecase.NewCommentUseCase(commentRepo))
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
 			err := con.GetByPostID(c)
 
 			if (err != nil) != tt.wantErr {
