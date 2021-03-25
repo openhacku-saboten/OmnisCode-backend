@@ -4,12 +4,14 @@ linters-settings:
     check-blank: true
 
 linters:
-  enable-all: true
-  disable:
-    - whitespace
-    - wsl
-    - gomnd
-    - forbidigo
+  enable:
+    - gofmt
+    - goimports
+    - golint
+    - gosec
+    - errcheck
+    - govet
+    - staticcheck
 
 issues:
   exclude-rules:
