@@ -8,11 +8,13 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
 
+// CommentUseCase はコメントに関するユースケースです
 type CommentUseCase struct {
 	commentRepo repository.Comment
 	postRepo    repository.Post
 }
 
+// NewCommentUseCase はCommentUseCaseのポインタを生成する関数です
 func NewCommentUseCase(comment repository.Comment, post repository.Post) *CommentUseCase {
 	return &CommentUseCase{commentRepo: comment, postRepo: post}
 }
