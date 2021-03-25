@@ -139,6 +139,30 @@ func (r *CommentRepository) FindByID(postID, commentID int) (*entity.Comment, er
 	}, nil
 }
 
+// Delete は該当コメントをDBから削除する
+func (r *CommentRepository) Delete(postID, commentID int) error {
+	commentDTO := &CommentInsertDTO{
+		ID:     commentID,
+		PostID: postID,
+	}
+
+	_, err := r.dbMap.Delete(commentDTO)
+	if err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			// 存在しないPostIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
+				return entity.NewErrorNotFound("post")
+			}
+			// 存在しないUserIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+				return entity.NewErrorNotFound("user")
+			}
+		}
+		return err
+	}
+	return nil
+}
+
 // CommentDTO はDBとやり取りするためのDataTransferObject
 type CommentDTO struct {
 	ID        int       `db:"id"`
