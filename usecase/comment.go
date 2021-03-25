@@ -19,6 +19,7 @@ func NewCommentUseCase(comment repository.Comment, post repository.Post) *Commen
 	return &CommentUseCase{commentRepo: comment, postRepo: post}
 }
 
+// GetByPostID は引数のpostIDを満たす投稿にぶら下がるコメントを全て取得します
 func (u *CommentUseCase) GetByPostID(postID int) (comments []*entity.Comment, err error) {
 	comments, err = u.commentRepo.FindByPostID(postID)
 	if err != nil {
@@ -27,6 +28,7 @@ func (u *CommentUseCase) GetByPostID(postID int) (comments []*entity.Comment, er
 	return
 }
 
+// Create は引数のcommentエンティティをもとにコメントを1つ生成します
 func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) error {
 	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のcommentIDを
 	// フロントでセットできてしまうので，ここらへんでcommentIDを初期化しておく
@@ -50,6 +52,7 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 	return nil
 }
 
+// Get は引数のpostIDとcommentIDの両方を満たすコメントを1つ取得します
 func (u *CommentUseCase) Get(postID, commentID int) (comment *entity.Comment, err error) {
 	comment, err = u.commentRepo.FindByID(postID, commentID)
 	if err != nil {

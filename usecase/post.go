@@ -18,7 +18,7 @@ func NewPostUsecase(postRepo repository.Post) *PostUsecase {
 	return &PostUsecase{postRepo: postRepo}
 }
 
-// GetAll は保存されている全ての投稿を取得します
+// GetAll は保存されている投稿を全て取得します
 func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
 	posts, err := p.postRepo.GetAll(ctx)
 	if err != nil {
@@ -28,7 +28,7 @@ func (p *PostUsecase) GetAll(ctx context.Context) ([]*entity.Post, error) {
 	return posts, nil
 }
 
-// Get はpost IDをもとに投稿情報を取得するというユースケースです
+// Get はpostIDを満たす投稿を1つ取得します
 func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error) {
 	post, err := p.postRepo.FindByID(ctx, postID)
 	if err != nil {
@@ -37,7 +37,7 @@ func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error)
 	return post, nil
 }
 
-// Create は投稿の情報を保存するというユースケースです
+// Create は引数のpostエンティティをもとに投稿を1つ生成します
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを
 	// フロントでセットできてしまうので，ここらへんでpostIDを初期化しておく
