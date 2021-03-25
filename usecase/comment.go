@@ -19,8 +19,8 @@ func NewCommentUseCase(comment repository.Comment, post repository.Post) *Commen
 	return &CommentUseCase{commentRepo: comment, postRepo: post}
 }
 
-func (u *CommentUseCase) GetByPostID(postid int) (comments []*entity.Comment, err error) {
-	comments, err = u.commentRepo.FindByPostID(postid)
+func (u *CommentUseCase) GetByPostID(postID int) (comments []*entity.Comment, err error) {
+	comments, err = u.commentRepo.FindByPostID(postID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to GetByPostID from DB: %w", err)
 	}
@@ -48,4 +48,12 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 		return fmt.Errorf("failed to Insert Comment into DB: %w", err)
 	}
 	return nil
+}
+
+func (u *CommentUseCase) Get(postID, commentID int) (comment *entity.Comment, err error) {
+	comment, err = u.commentRepo.FindByID(postID, commentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to Get comment from DB: %w", err)
+	}
+	return
 }

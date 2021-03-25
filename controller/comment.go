@@ -82,3 +82,30 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 	}
 	return c.NoContent(http.StatusCreated)
 }
+
+// Get は GET /post/{postID}/comment/{commentID} のHandler
+func (ctrl *CommentController) Get(c echo.Context) error {
+	logger := log.New()
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	commentID, err := strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	comment, err := ctrl.uc.Get(postID, commentID)
+
+	if err != nil {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+
+		logger.Errorf("Unexpected error GET /post/{postID}/comment/{commentID}: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, comment)
+}
