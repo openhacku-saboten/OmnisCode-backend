@@ -33,19 +33,6 @@ func (_m *MockComment) EXPECT() *MockCommentMockRecorder {
 	return _m.recorder
 }
 
-// GetByPostID mocks base method
-func (_m *MockComment) GetByPostID(postid int) ([]*entity.Comment, error) {
-	ret := _m.ctrl.Call(_m, "GetByPostID", postid)
-	ret0, _ := ret[0].([]*entity.Comment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetByPostID indicates an expected call of GetByPostID
-func (_mr *MockCommentMockRecorder) GetByPostID(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "GetByPostID", reflect.TypeOf((*MockComment)(nil).GetByPostID), arg0)
-}
-
 // FindByUserID mocks base method
 func (_m *MockComment) FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error) {
 	ret := _m.ctrl.Call(_m, "FindByUserID", ctx, uid)
