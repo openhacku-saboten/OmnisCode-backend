@@ -106,7 +106,11 @@ func (ctrl *PostController) Update(c echo.Context) error {
 		logger.Errorf("failed c.Bind: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-
+	/* post, err := postJSON.Convert()
+	if err != nil {
+		logger.Errorf("failed strconv.Atoi: %s", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	} */
 	var ok bool
 	post.UserID, ok = c.Get("userID").(string)
 	if !ok {
@@ -114,8 +118,15 @@ func (ctrl *PostController) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
+	logger.Infof("POST: %+v", post)
+
 	ctx := c.Request().Context()
 	if err := ctrl.uc.Update(ctx, post); err != nil {
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			logger.Errorf("forbedden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+
 		logger.Errorf("error POST /post: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}

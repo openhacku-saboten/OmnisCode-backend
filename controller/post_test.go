@@ -271,6 +271,7 @@ func TestPostController_Update(t *testing.T) {
 			name:   "正しく投稿を更新できる",
 			userID: "user-id",
 			body: `{
+				"id": 1,
 				"title":"test title",
 				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				"language":"Go",
@@ -281,7 +282,7 @@ func TestPostController_Update(t *testing.T) {
 				}`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
 				post.EXPECT().Update(ctx, &entity.Post{
-					ID:        0,
+					ID:        1,
 					UserID:    "user-id",
 					Title:     "test title",
 					Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -315,9 +316,9 @@ func TestPostController_Update(t *testing.T) {
 		},
 		{
 			name:   "存在しないポストならばErrIsNotAuthorでForbidden",
-			userID: "invalid-user-id",
+			userID: "user-id",
 			body: `{
-				"ID":"100",
+				"id": 100,
 				"title":"test title",
 				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				"language":"Go",
@@ -339,7 +340,7 @@ func TestPostController_Update(t *testing.T) {
 					UpdatedAt: "2021-03-23T11:42:56+09:00",
 				}).Return(entity.ErrIsNotAuthor)
 			},
-			wantErr:  false,
+			wantErr:  true,
 			wantCode: http.StatusForbidden,
 		},
 	}
