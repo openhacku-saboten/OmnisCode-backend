@@ -88,8 +88,9 @@ func TestUserController_Get(t *testing.T) {
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
 			tt.prepareMockAuth(authRepo)
+			postRepo := mock.NewMockPost(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
@@ -125,7 +126,7 @@ func TestUserController_GetPosts(t *testing.T) {
 	tests := []struct {
 		name            string
 		userID          string
-		prepareMockUser func(ctx context.Context, uid string, user *mock.MockUser)
+		prepareMockPost func(ctx context.Context, uid string, post *mock.MockPost)
 		wantErr         bool
 		wantCode        int
 		wantBody        string
@@ -133,8 +134,8 @@ func TestUserController_GetPosts(t *testing.T) {
 		{
 			name:   "正しく投稿を取得できる",
 			userID: "user-id",
-			prepareMockUser: func(ctx context.Context, uid string, user *mock.MockUser) {
-				user.EXPECT().FindPostsByID(ctx, uid).Return([]*entity.Post{
+			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
+				post.EXPECT().FindByUserID(ctx, uid).Return([]*entity.Post{
 					{
 						ID:        1,
 						UserID:    "user-id",
@@ -167,8 +168,8 @@ func TestUserController_GetPosts(t *testing.T) {
 		{
 			name:   "1つも投稿が存在しないならErrUserNotFound",
 			userID: "user-id2",
-			prepareMockUser: func(ctx context.Context, uid string, user *mock.MockUser) {
-				user.EXPECT().FindPostsByID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
+			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
+				post.EXPECT().FindByUserID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
 			},
 			wantErr:  true,
 			wantCode: http.StatusNotFound,
@@ -188,9 +189,10 @@ func TestUserController_GetPosts(t *testing.T) {
 			ctx := context.Background()
 			authRepo := mock.NewMockAuth(ctrl)
 			userRepo := mock.NewMockUser(ctrl)
-			tt.prepareMockUser(ctx, tt.userID, userRepo)
+			postRepo := mock.NewMockPost(ctrl)
+			tt.prepareMockPost(ctx, tt.userID, postRepo)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo))
 			c.SetParamNames("userID")
 			c.SetParamValues(tt.userID)
 			err := con.GetPosts(c)
@@ -323,8 +325,9 @@ func TestUserController_Create(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -465,8 +468,9 @@ func TestUserController_Update(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo))
 			err := con.Update(c)
 
 			if (err != nil) != tt.wantErr {
