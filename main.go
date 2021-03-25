@@ -71,6 +71,7 @@ func main() {
 	comment.GET("", commentController.GetByPostID)
 	comment.POST("", commentController.Create, authMiddleware.Authenticate)
 	comment.GET("/:commentID", commentController.Get)
+	comment.DELETE("/:commentID", commentController.Delete, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
