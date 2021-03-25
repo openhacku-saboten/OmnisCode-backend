@@ -112,8 +112,12 @@ func (r *CommentRepository) FindByUserID(ctx context.Context, uid string) ([]*en
 
 // Insert は該当ユーザーをDBに保存する
 func (r *CommentRepository) Insert(comment *entity.Comment) error {
+	if err := comment.IsValid(); err != nil {
+		return fmt.Errorf("invalid Comment fields: %w", err)
+	}
+
 	commentDTO := &CommentInsertDTO{
-		ID:        comment.ID,
+		ID:        0, // auto incrementされるのでこれで良い
 		UserID:    comment.UserID,
 		PostID:    comment.PostID,
 		Type:      comment.Type,
