@@ -124,6 +124,8 @@ type PostDTO struct {
 }
 
 // PostInsertDTO はInsert用のDataTransferObjectです
+// timestamp系は参照しないようにしています
+// ref: https://github.com/go-gorp/gorp/issues/125
 type PostInsertDTO struct {
 	ID        int       `db:"id"`
 	UserID    string    `db:"user_id"`
