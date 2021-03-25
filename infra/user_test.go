@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -50,7 +51,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotUser, err := userRepo.FindByID(tt.userID)
+			gotUser, err := userRepo.FindByID(context.Background(), tt.userID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -108,7 +109,7 @@ func TestUserRepository_Insert(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := userRepo.Insert(tt.user)
+			err := userRepo.Insert(context.Background(), tt.user)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -176,7 +177,7 @@ func TestUserRepository_Update(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := userRepo.Update(tt.user)
+			err := userRepo.Update(context.Background(), tt.user)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
