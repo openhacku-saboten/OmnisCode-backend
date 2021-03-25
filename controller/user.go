@@ -40,6 +40,30 @@ func (ctrl *UserController) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// GetComments は GET /user/{userID}/comment
+func (ctrl *UserController) GetComments(c echo.Context) error {
+	logger := log.New()
+
+	userID := c.Param("userID")
+	if len(userID) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	ctx := c.Request().Context()
+	comments, err := ctrl.uc.GetComments(ctx, userID)
+	if err != nil {
+		errNF := &ErrorNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+
+		logger.Errorf("Unexpected error GET/user/{userID}/comment: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, comments)
+}
+
 // Create は POST /user のHandler
 func (ctrl *UserController) Create(c echo.Context) error {
 	logger := log.New()
