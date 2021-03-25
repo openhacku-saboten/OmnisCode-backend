@@ -39,9 +39,10 @@ func (ctrl *PostController) Get(c echo.Context) error {
 	post, err := ctrl.uc.Get(ctx, postIDInt)
 
 	if err != nil {
-		if errors.As(err, &entity.ErrNotFound{}) {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
 			logger.Error(entity.NewErrorNotFound("post").Error())
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("unexpected error GET /post/{postID}: %s", err.Error())
