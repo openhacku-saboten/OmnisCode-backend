@@ -11,5 +11,6 @@ import (
 // Post は永続化と再構築のためのリポジトリです
 type Post interface {
 	FindByID(ctx context.Context, postID int) (*entity.Post, error)
+	FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error)
 	Insert(ctx context.Context, post *entity.Post) error
 }
