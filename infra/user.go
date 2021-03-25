@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -26,22 +27,27 @@ func NewUserRepository(dbMap *gorp.DbMap) *UserRepository {
 }
 
 // FindByID は該当IDのユーザーの情報をDBから取得して返す
-func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
-	var userDTO UserDTO
-	err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, entity.ErrUserNotFound
+func (r *UserRepository) FindByID(ctx context.Context, uid string) (user *entity.User, err error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var userDTO UserDTO
+		err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, entity.ErrUserNotFound
+			}
+			return nil, err
 		}
-		return nil, err
+		user = entity.NewUser(
+			userDTO.ID,
+			userDTO.Name,
+			userDTO.Profile,
+			userDTO.TwitterID,
+			"",
+		)
 	}
-	user = entity.NewUser(
-		userDTO.ID,
-		userDTO.Name,
-		userDTO.Profile,
-		userDTO.TwitterID,
-		"",
-	)
 	return
 }
 

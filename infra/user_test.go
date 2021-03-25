@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"errors"
 	"testing"
 	"time"
@@ -50,7 +51,8 @@ func TestUserRepository_FindByID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotUser, err := userRepo.FindByID(tt.userID)
+			ctx := context.Background()
+			gotUser, err := userRepo.FindByID(ctx, tt.userID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
