@@ -51,7 +51,7 @@ func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
 
 // Update は引数のpostエンティティをもとに投稿を1つ更新します
 func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
-	if _, err := p.userRepo.FindByID(post.UserID); err != nil {
+	if _, err := p.userRepo.FindByID(ctx, post.UserID); err != nil {
 		return fmt.Errorf("failed find user(userID: %s): %w", post.UserID, err)
 	}
 

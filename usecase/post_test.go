@@ -135,7 +135,7 @@ func TestPost_Update_With_Mock(t *testing.T) {
 	postMock := mock.NewMockPost(ctrl)
 	postMock.EXPECT().Update(ctx, validPost).Return(nil)
 	userMock := mock.NewMockUser(ctrl)
-	userMock.EXPECT().FindByID(validPost.UserID).Return(nil, nil)
+	userMock.EXPECT().FindByID(ctx, validPost.UserID).Return(nil, nil)
 
 	sut := NewPostUsecase(postMock, userMock)
 	if err := sut.Update(ctx, validPost); err != nil {

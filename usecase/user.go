@@ -28,7 +28,7 @@ func NewUserUseCase(user repository.User, auth repository.Auth, post repository.
 
 // Get は引数のuidを満たすユーザを1つ取得します
 func (u *UserUseCase) Get(ctx context.Context, uid string) (user *entity.User, err error) {
-	user, err = u.userRepo.FindByID(uid)
+	user, err = u.userRepo.FindByID(ctx, uid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to Get User from DB: %w", err)
 	}
@@ -79,7 +79,8 @@ func (u *UserUseCase) Update(user *entity.User) error {
 	user.Format()
 
 	// Updateは存在しないユーザーの更新をしてもエラーにならないので，ここでユーザーの存在確認をする
-	if _, err := u.userRepo.FindByID(user.ID); err != nil {
+	// TODO: 最終的にc.Request().Context()をここに持たせる
+	if _, err := u.userRepo.FindByID(context.TODO(), user.ID); err != nil {
 		return fmt.Errorf("not found user %s in DB: %w", user.ID, err)
 	}
 
