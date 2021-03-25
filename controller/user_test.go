@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -87,9 +88,10 @@ func TestUserController_Get(t *testing.T) {
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
 			tt.prepareMockAuth(authRepo)
+			postRepo := mock.NewMockPost(ctrl)
 			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
@@ -212,12 +214,14 @@ func TestCommentController_GetByUserID(t *testing.T) {
 			wantBody: "",
 		},
 	}
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
 			req := httptest.NewRequest("GET", "/", nil)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+
 			c.SetParamNames("userID")
 			c.SetParamValues(tt.userID)
 
@@ -226,11 +230,119 @@ func TestCommentController_GetByUserID(t *testing.T) {
 			defer ctrl.Finish()
 			userRepo := mock.NewMockUser(ctrl)
 			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
 			commentRepo := mock.NewMockComment(ctrl)
 			tt.prepareMockComment(ctx, tt.userID, commentRepo)
 
-			userCon := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
-			_, err := userCon.uc.GetComments(ctx, tt.userID)
+			userCon := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
+			err := userCon.GetComments(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+
+			if !tt.wantErr {
+				var gotBody, wantBody []map[string]interface{}
+				if err = json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+					t.Fatal(err)
+				}
+				if err = json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+					t.Fatal(err)
+				}
+
+				if diff := cmp.Diff(wantBody, gotBody); diff != "" {
+					t.Errorf("body (-want +got) =\n%s\n", diff)
+				}
+			}
+		})
+	}
+}
+
+func TestUserController_GetPosts(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		prepareMockPost func(ctx context.Context, uid string, post *mock.MockPost)
+		wantErr         bool
+		wantCode        int
+		wantBody        string
+	}{
+		{
+			name:   "正しく投稿を取得できる",
+			userID: "user-id",
+			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
+				post.EXPECT().FindByUserID(ctx, uid).Return([]*entity.Post{
+					{
+						ID:        1,
+						UserID:    "user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					},
+					{
+						ID:        2,
+						UserID:    "user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					},
+				}, nil)
+			},
+			wantErr:  false,
+			wantCode: http.StatusOK,
+			wantBody: `[{"id":1,"user_id":"user-id","title":"test title","code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}","language":"Go","content":"Test code","source":"github.com","created_at":"2021-03-23T11:42:56+09:00","updated_at":"2021-03-23T11:42:56+09:00"},{"id":2,"user_id":"user-id","title":"test title","code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}","language":"Go","content":"Test code","source":"github.com","created_at":"2021-03-23T11:42:56+09:00","updated_at":"2021-03-23T11:42:56+09:00"}]
+`,
+		},
+		{
+			name:   "1つも投稿が存在しないならErrUserNotFound",
+			userID: "user-id2",
+			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
+				post.EXPECT().FindByUserID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
+			},
+			wantErr:  true,
+			wantCode: http.StatusNotFound,
+			wantBody: ``,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("GET", "/", nil)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			ctx := context.Background()
+			authRepo := mock.NewMockAuth(ctrl)
+			userRepo := mock.NewMockUser(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
+			tt.prepareMockPost(ctx, tt.userID, postRepo)
+			commentRepo := mock.NewMockComment(ctrl)
+
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
+			c.SetParamNames("userID")
+			c.SetParamValues(tt.userID)
+			err := con.GetPosts(c)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -287,7 +399,7 @@ func TestUserController_Create(t *testing.T) {
 				).Return(nil)
 			},
 			wantErr:  false,
-			wantCode: 200,
+			wantCode: 201,
 		},
 		{
 			name:   "TwitterIDに@が含まれていれば取り除いてユーザーを作成できる",
@@ -303,7 +415,7 @@ func TestUserController_Create(t *testing.T) {
 				).Return(nil)
 			},
 			wantErr:  false,
-			wantCode: 200,
+			wantCode: 201,
 		},
 		{
 			name:   "不正なbodyならBadRequest",
@@ -370,9 +482,10 @@ func TestUserController_Create(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
 			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -513,9 +626,10 @@ func TestUserController_Update(t *testing.T) {
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
 			commentRepo := mock.NewMockComment(ctrl)
 
-			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, commentRepo))
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
 			err := con.Update(c)
 
 			if (err != nil) != tt.wantErr {

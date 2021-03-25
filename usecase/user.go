@@ -11,13 +11,15 @@ import (
 type UserUseCase struct {
 	userRepo    repository.User
 	authRepo    repository.Auth
+	postRepo    repository.Post
 	commentRepo repository.Comment
 }
 
-func NewUserUseCase(user repository.User, auth repository.Auth, comment repository.Comment) *UserUseCase {
+func NewUserUseCase(user repository.User, auth repository.Auth, post repository.Post, comment repository.Comment) *UserUseCase {
 	return &UserUseCase{
 		userRepo:    user,
 		authRepo:    auth,
+		postRepo:    post,
 		commentRepo: comment,
 	}
 }
@@ -41,6 +43,14 @@ func (u *UserUseCase) GetComments(ctx context.Context, uid string) ([]*entity.Co
 		return nil, err
 	}
 	return comments, nil
+}
+
+func (u *UserUseCase) GetPosts(ctx context.Context, uid string) ([]*entity.Post, error) {
+	posts, err := u.postRepo.FindByUserID(ctx, uid)
+	if err != nil {
+		return nil, err
+	}
+	return posts, nil
 }
 
 func (u *UserUseCase) Create(user *entity.User) error {

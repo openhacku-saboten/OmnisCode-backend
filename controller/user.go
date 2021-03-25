@@ -40,6 +40,30 @@ func (ctrl *UserController) Get(c echo.Context) error {
 	return c.JSON(http.StatusOK, user)
 }
 
+// GetPosts は  GET /user/{userID}/post のHandler
+func (ctrl *UserController) GetPosts(c echo.Context) error {
+	logger := log.New()
+
+	userID := c.Param("userID")
+	if len(userID) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	ctx := c.Request().Context()
+
+	posts, err := ctrl.uc.GetPosts(ctx, userID)
+	if err != nil {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+		logger.Errorf("error GET /user/{userID}/post: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}
+
 // GetComments は GET /user/{userID}/comment
 func (ctrl *UserController) GetComments(c echo.Context) error {
 	logger := log.New()
@@ -52,7 +76,7 @@ func (ctrl *UserController) GetComments(c echo.Context) error {
 	ctx := c.Request().Context()
 	comments, err := ctrl.uc.GetComments(ctx, userID)
 	if err != nil {
-		errNF := &ErrorNotFound{}
+		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
 			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
@@ -93,7 +117,7 @@ func (ctrl *UserController) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return nil
+	return c.NoContent(http.StatusCreated)
 }
 
 // Update は PUT /user のHandler
@@ -130,5 +154,5 @@ func (ctrl *UserController) Update(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return nil
+	return c.NoContent(http.StatusOK)
 }

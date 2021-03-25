@@ -9,6 +9,7 @@ import (
 )
 
 type Comment interface {
-	GetByPostID(postid int) (comments []*entity.Comment, err error)
 	FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error)
+	FindByPostID(postid int) (comments []*entity.Comment, err error)
+	Insert(comment *entity.Comment) error
 }

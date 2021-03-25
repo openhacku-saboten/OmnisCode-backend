@@ -48,14 +48,15 @@ func TestComment_IsValid(t *testing.T) {
 			wantErr: nil,
 		},
 		{
-			name: "IDが空ならエラー",
+			name: "IDがマイナスならエラー",
 			comment: &Comment{
+				ID:      -1,
 				UserID:  "user-id",
 				PostID:  1,
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: NewErrorEmpty("comment ID"),
+			wantErr: NewErrorNegativeValue("comment ID"),
 		},
 		{
 			name: "UserIDが空ならエラー",

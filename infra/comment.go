@@ -2,24 +2,31 @@ package infra
 
 import (
 	"context"
+	"strings"
 	"time"
 
+	"github.com/VividCortex/mysqlerr"
 	"github.com/go-gorp/gorp"
+	"github.com/go-sql-driver/mysql"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/service"
+	"github.com/openhacku-saboten/OmnisCode-backend/repository"
 )
+
+var _ repository.Comment = (*CommentRepository)(nil)
 
 type CommentRepository struct {
 	dbMap *gorp.DbMap
 }
 
 func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
-	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(false, "ID")
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "ID")
+	dbMap.AddTableWithName(CommentInsertDTO{}, "comments").SetKeys(true, "ID")
 	return &CommentRepository{dbMap: dbMap}
 }
 
-// GetByPostID は該当PostIDに属するコメントのスライスを返す
-func (r *CommentRepository) GetByPostID(postid int) (comments []*entity.Comment, err error) {
+// FindByPostID は該当PostIDに属するコメントのスライスを返す
+func (r *CommentRepository) FindByPostID(postid int) (comments []*entity.Comment, err error) {
 	var commentDTOs []CommentDTO
 	if _, err = r.dbMap.Select(&commentDTOs, "SELECT * FROM comments WHERE post_id = ?", postid); err != nil {
 		return nil, err
@@ -74,6 +81,35 @@ func (r *CommentRepository) FindByUserID(ctx context.Context, uid string) ([]*en
 	return comments, nil
 }
 
+// Insert は該当ユーザーをDBに保存する
+func (r *CommentRepository) Insert(comment *entity.Comment) error {
+	commentDTO := &CommentInsertDTO{
+		ID:        comment.ID,
+		UserID:    comment.UserID,
+		PostID:    comment.PostID,
+		Type:      comment.Type,
+		Content:   comment.Content,
+		FirstLine: comment.FirstLine,
+		LastLine:  comment.LastLine,
+		Code:      comment.Code,
+	}
+
+	if err := r.dbMap.Insert(commentDTO); err != nil {
+		if sqlerr, ok := err.(*mysql.MySQLError); ok {
+			// 存在しないPostIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
+				return entity.NewErrorNotFound("post")
+			}
+			// 存在しないUserIDで登録した時のエラー
+			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+				return entity.NewErrorNotFound("user")
+			}
+		}
+		return err
+	}
+	return nil
+}
+
 // CommentDTO はDBとやり取りするためのDataTransferObject
 type CommentDTO struct {
 	ID        int       `db:"id"`
@@ -88,7 +124,9 @@ type CommentDTO struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
-// CommentInsertDTO はDBにInsertするためのDataTransferObject
+// CommentInsertDTO はInsert用のDataTransferObject
+// timestamp系は参照しないようにしています
+// ref: https://github.com/go-gorp/gorp/issues/125
 type CommentInsertDTO struct {
 	ID        int       `db:"id"`
 	UserID    string    `db:"user_id"`

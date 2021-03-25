@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -26,7 +27,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "正しくコメントを取得できる",
 			postID: "1",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().GetByPostID(1).Return(
+				comment.EXPECT().FindByPostID(1).Return(
 					[]*entity.Comment{
 						&entity.Comment{
 							ID:        1,
@@ -104,7 +105,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "取得したコメント数が0ならErrNotFound",
 			postID: "100",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().GetByPostID(100).Return(
+				comment.EXPECT().FindByPostID(100).Return(
 					nil, entity.NewErrorNotFound("comment"),
 				)
 			},
@@ -126,8 +127,9 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			defer ctrl.Finish()
 			commentRepo := mock.NewMockComment(ctrl)
 			tt.prepareMockComment(commentRepo)
+			postRepo := mock.NewMockPost(ctrl)
 
-			con := NewCommentController(usecase.NewCommentUseCase(commentRepo))
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
 			err := con.GetByPostID(c)
 
 			if (err != nil) != tt.wantErr {
@@ -155,6 +157,140 @@ func TestCommentController_GetByPostID(t *testing.T) {
 
 				if diff := cmp.Diff(wantBody, gotBody); diff != "" {
 					t.Errorf("body (-want +got) =\n%s\n", diff)
+				}
+			}
+		})
+	}
+}
+
+func TestCommentController_Create(t *testing.T) {
+	tests := []struct {
+		name               string
+		postID             string
+		userID             string
+		body               string
+		prepareMockComment func(comment *mock.MockComment)
+		prepareMockPost    func(post *mock.MockPost)
+		wantErr            bool
+		wantCode           int
+	}{
+		{
+			name:   "正しくコメントを作成できる",
+			postID: "1",
+			userID: "user-id",
+			body: `{
+				"type": "highlight",
+				"content": "content1",
+				"first_line": 10,
+				"last_line": 12
+			}`,
+			prepareMockComment: func(comment *mock.MockComment) {
+				comment.EXPECT().Insert(
+					&entity.Comment{
+						UserID:    "user-id",
+						PostID:    1,
+						Type:      "highlight",
+						Content:   "content1",
+						FirstLine: 10,
+						LastLine:  12,
+					}).Return(nil)
+			},
+			prepareMockPost: func(post *mock.MockPost) {
+				post.EXPECT().FindByID(gomock.Any(), 1).Return(
+					&entity.Post{
+						ID:        1,
+						UserID:    "user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					}, nil)
+			},
+			wantErr:  false,
+			wantCode: 201,
+		},
+		{
+			name:   "Postのオーナー以外によるcommitならErrCannotCommit",
+			postID: "1",
+			userID: "user-id",
+			body: `{
+				"type": "commit",
+				"content": "content1",
+				"code":"hello"
+			}`,
+			prepareMockComment: func(comment *mock.MockComment) {
+			},
+			prepareMockPost: func(post *mock.MockPost) {
+				post.EXPECT().FindByID(gomock.Any(), 1).Return(
+					&entity.Post{
+						ID:        1,
+						UserID:    "other-user-id",
+						Title:     "test title",
+						Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+						Language:  "Go",
+						Content:   "Test code",
+						Source:    "github.com",
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					}, nil)
+			},
+			wantErr:  true,
+			wantCode: 400,
+		},
+		{
+			name:   "存在しないPostIDならErrNotFound",
+			postID: "100",
+			userID: "user-id",
+			body: `{
+				"type": "highlight",
+				"content": "content1",
+				"first_line": 10,
+				"last_line": 12
+			}`,
+			prepareMockComment: func(comment *mock.MockComment) {
+			},
+			prepareMockPost: func(post *mock.MockPost) {
+				post.EXPECT().FindByID(gomock.Any(), 100).Return(nil, entity.NewErrorNotFound("post"))
+			},
+			wantErr:  true,
+			wantCode: 404,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("POST", "/", strings.NewReader(tt.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetParamNames("postID")
+			c.SetParamValues(tt.postID)
+			c.Set("userID", tt.userID)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			commentRepo := mock.NewMockComment(ctrl)
+			tt.prepareMockComment(commentRepo)
+			postRepo := mock.NewMockPost(ctrl)
+			tt.prepareMockPost(postRepo)
+
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo))
+			err := con.Create(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
 				}
 			}
 		})

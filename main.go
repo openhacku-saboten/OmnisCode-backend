@@ -43,13 +43,13 @@ func main() {
 	authUseCase := usecase.NewAuthUseCase(authRepo)
 	authMiddleware := controller.NewAuthMiddleware(authUseCase)
 
-	userUseCase := usecase.NewUserUseCase(userRepo, authRepo, commentRepo)
+	userUseCase := usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo)
 	userController := controller.NewUserController(userUseCase)
 
 	postUsecase := usecase.NewPostUsecase(postRepo)
 	postController := controller.NewPostController(postUsecase)
 
-	commentUseCase := usecase.NewCommentUseCase(commentRepo)
+	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo)
 	commentController := controller.NewCommentController(commentUseCase)
 
 	e := echo.New()
@@ -59,6 +59,7 @@ func main() {
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 	user.PUT("", userController.Update, authMiddleware.Authenticate)
+	user.GET("/:userID/post", userController.GetPosts)
 
 	post := v1.Group("/post")
 	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
@@ -67,6 +68,7 @@ func main() {
 
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)
+	comment.POST("", commentController.Create, authMiddleware.Authenticate)
 
 	if err := e.Start(fmt.Sprintf(":%s", config.Port())); err != nil {
 		logger.Infof("shutting down the server with error' %s", err.Error())
