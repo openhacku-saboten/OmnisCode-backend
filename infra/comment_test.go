@@ -62,18 +62,17 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 		}
 	}
 
-	dbMap.AddTableWithName(CommentDTO{}, "comments")
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "id")
+	dbMap.AddTableWithName(CommentInsertDTO{}, "comments").SetKeys(true, "id")
 	truncateTable(t, dbMap, "comments")
 
-	commentDTOs := []*CommentDTO{
+	commentDTOs := []*CommentInsertDTO{
 		{
-			ID:        1,
-			UserID:    "user-id",
-			PostID:    1,
-			Type:      "none",
-			Content:   "type none",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
-			UpdatedAt: time.Unix(100, 0),
+			ID:      1,
+			UserID:  "user-id",
+			PostID:  1,
+			Type:    "none",
+			Content: "type none",
 		},
 		{
 			ID:        2,
@@ -83,18 +82,14 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 			Content:   "type highlight",
 			FirstLine: 10,
 			LastLine:  11,
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
-			UpdatedAt: time.Unix(100, 0),
 		},
 		{
-			ID:        3,
-			UserID:    "user-id",
-			PostID:    2,
-			Type:      "commit",
-			Content:   "type commit",
-			Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-			CreatedAt: time.Unix(100, 0), // とりあえず入れる
-			UpdatedAt: time.Unix(100, 0),
+			ID:      3,
+			UserID:  "user-id",
+			PostID:  2,
+			Type:    "commit",
+			Content: "type commit",
+			Code:    "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 		},
 	}
 	for _, commentDTO := range commentDTOs {
@@ -155,9 +150,11 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 				return
 			}
 			if tt.wantErr == nil {
-				diff := cmp.Diff(tt.wantComments, gotComments)
-				if diff != "" {
-					t.Errorf("Data (-want +got) =\n%s\n", diff)
+				for idx := range gotComments {
+					diff := cmp.Diff(tt.wantComments[idx], gotComments[idx], cmpopts.IgnoreFields(entity.Comment{}, "CreatedAt", "UpdatedAt"))
+					if diff != "" {
+						t.Errorf("Data (-want +got) =\n%s\n", diff)
+					}
 				}
 			}
 		})
