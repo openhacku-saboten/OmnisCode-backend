@@ -34,21 +34,6 @@ func (m *MockComment) EXPECT() *MockCommentMockRecorder {
 	return m.recorder
 }
 
-// FindByID mocks base method.
-func (m *MockComment) FindByID(postid, commentid int) (*entity.Comment, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", postid, commentid)
-	ret0, _ := ret[0].(*entity.Comment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindByID indicates an expected call of FindByID.
-func (mr *MockCommentMockRecorder) FindByID(postid, commentid interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockComment)(nil).FindByID), postid, commentid)
-}
-
 // FindByPostID mocks base method.
 func (m *MockComment) FindByPostID(postid int) ([]*entity.Comment, error) {
 	m.ctrl.T.Helper()
