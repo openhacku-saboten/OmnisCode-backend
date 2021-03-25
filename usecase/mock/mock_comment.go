@@ -33,6 +33,19 @@ func (_m *MockComment) EXPECT() *MockCommentMockRecorder {
 	return _m.recorder
 }
 
+// FindByID mocks base method
+func (_m *MockComment) FindByID(postID int, commentID int) (*entity.Comment, error) {
+	ret := _m.ctrl.Call(_m, "FindByID", postID, commentID)
+	ret0, _ := ret[0].(*entity.Comment)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByID indicates an expected call of FindByID
+func (_mr *MockCommentMockRecorder) FindByID(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockComment)(nil).FindByID), arg0, arg1)
+}
+
 // FindByUserID mocks base method
 func (_m *MockComment) FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error) {
 	ret := _m.ctrl.Call(_m, "FindByUserID", ctx, uid)
@@ -71,15 +84,14 @@ func (_mr *MockCommentMockRecorder) Insert(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockComment)(nil).Insert), arg0)
 }
 
-// FindByID mocks base method
-func (_m *MockComment) FindByID(postID int, commentID int) (*entity.Comment, error) {
-	ret := _m.ctrl.Call(_m, "FindByID", postID, commentID)
-	ret0, _ := ret[0].(*entity.Comment)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+// Update mocks base method
+func (_m *MockComment) Update(ctx context.Context, postID int, commentID int) error {
+	ret := _m.ctrl.Call(_m, "Update", ctx, postID, commentID)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// FindByID indicates an expected call of FindByID
-func (_mr *MockCommentMockRecorder) FindByID(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockComment)(nil).FindByID), arg0, arg1)
+// Update indicates an expected call of Update
+func (_mr *MockCommentMockRecorder) Update(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockComment)(nil).Update), arg0, arg1, arg2)
 }
