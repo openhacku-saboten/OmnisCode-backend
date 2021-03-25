@@ -47,15 +47,16 @@ func TestUsecase_Get_Posts_By_ID(t *testing.T) {
 	authMock := mock.NewMockAuth(ctrl)
 	authMock.EXPECT().Authenticate(ctx, token).Return(userID, nil)
 	userMock := mock.NewMockUser(ctrl)
-	userMock.EXPECT().FindPostsByID(ctx, userID).Return(validPosts, nil)
+	postMock := mock.NewMockPost(ctrl)
+	postMock.EXPECT().FindByUserID(ctx, userID).Return(validPosts, nil)
 
-	sut := NewUserUseCase(userMock, authMock)
+	sut := NewUserUseCase(userMock, authMock, postMock)
 
 	uid, err := sut.authRepo.Authenticate(ctx, token)
 	if err != nil {
 		t.Fatal(err)
 	}
-	posts, err := sut.userRepo.FindPostsByID(ctx, uid)
+	posts, err := sut.postRepo.FindByUserID(ctx, uid)
 	if err != nil {
 		t.Fatal(err)
 	}
