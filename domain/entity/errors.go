@@ -18,6 +18,8 @@ var (
 	ErrInvalidCommentType = errors.New("invalid comment type")
 	// ErrCannotCommit はPostのオーナー以外がcommitしようとしたときのエラー
 	ErrCannotCommit = errors.New("non-post-owner cannot commit")
+	// ErrCannotDelete はオーナー以外がCommit,Post,Userを削除しようとしたときのエラー
+	ErrCannotDelete = errors.New("non-owner cannot delete")
 )
 
 // ErrTooLong はフィールドの内容が長すぎるときのエラー
