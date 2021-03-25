@@ -3,6 +3,7 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -16,7 +17,12 @@ func CreateJSON(fileName string, entityData interface{}) error {
 	}
 	defer fp.Close()
 
-	err = json.NewEncoder(fp).Encode(entityData)
+	return MapEntity(fp, entityData)
+}
+
+// MapEntity はio.WriterにentityDataを書き込みます
+func MapEntity(out io.Writer, entityData interface{}) error {
+	err := json.NewEncoder(out).Encode(entityData)
 	if err != nil {
 		return fmt.Errorf("failed to encode data: %w", err)
 	}

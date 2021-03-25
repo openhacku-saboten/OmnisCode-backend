@@ -62,6 +62,7 @@ func main() {
 	user.GET("/:userID/post", userController.GetPosts)
 
 	post := v1.Group("/post")
+	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
 	post.POST("", postController.Create, authMiddleware.Authenticate)
 	post.GET("/:postID", postController.Get)
 

@@ -21,6 +21,24 @@ func NewPostController(uc *usecase.PostUsecase) *PostController {
 	return &PostController{uc: uc}
 }
 
+// GetAll は GET /postのためのハンドラです
+func (p *PostController) GetAll(c echo.Context) error {
+	logger := log.New()
+
+	posts, err := p.uc.GetAll(c.Request().Context())
+	if err != nil {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+
+		logger.Errorf("error GET /post: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.JSON(http.StatusOK, posts)
+}
+
 // Get は GET /post/{postID}のハンドラです
 func (ctrl *PostController) Get(c echo.Context) error {
 	logger := log.New()
@@ -39,9 +57,10 @@ func (ctrl *PostController) Get(c echo.Context) error {
 	post, err := ctrl.uc.Get(ctx, postIDInt)
 
 	if err != nil {
-		if errors.As(err, &entity.ErrNotFound{}) {
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
 			logger.Error(entity.NewErrorNotFound("post").Error())
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("unexpected error GET /post/{postID}: %s", err.Error())
