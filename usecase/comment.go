@@ -18,7 +18,7 @@ func NewCommentUseCase(comment repository.Comment, post repository.Post) *Commen
 }
 
 func (u *CommentUseCase) GetByPostID(postid int) (comments []*entity.Comment, err error) {
-	comments, err = u.commentRepo.GetByPostID(postid)
+	comments, err = u.commentRepo.FindByPostID(postid)
 	if err != nil {
 		return nil, fmt.Errorf("failed to GetByPostID from DB: %w", err)
 	}

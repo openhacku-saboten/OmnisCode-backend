@@ -9,7 +9,7 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
-func TestCommentRepository_GetByPostID(t *testing.T) {
+func TestCommentRepository_FindByPostID(t *testing.T) {
 	dbMap, err := NewDB()
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -146,7 +146,7 @@ func TestCommentRepository_GetByPostID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotComments, err := commentRepo.GetByPostID(tt.postID)
+			gotComments, err := commentRepo.FindByPostID(tt.postID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)

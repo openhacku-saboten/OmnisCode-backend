@@ -27,7 +27,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "正しくコメントを取得できる",
 			postID: "1",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().GetByPostID(1).Return(
+				comment.EXPECT().FindByPostID(1).Return(
 					[]*entity.Comment{
 						&entity.Comment{
 							ID:        1,
@@ -105,7 +105,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "取得したコメント数が0ならErrNotFound",
 			postID: "100",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().GetByPostID(100).Return(
+				comment.EXPECT().FindByPostID(100).Return(
 					nil, entity.NewErrorNotFound("comment"),
 				)
 			},

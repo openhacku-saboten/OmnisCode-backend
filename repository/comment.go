@@ -5,6 +5,6 @@ package repository
 import "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 
 type Comment interface {
-	GetByPostID(postid int) (comments []*entity.Comment, err error)
+	FindByPostID(postid int) (comments []*entity.Comment, err error)
 	Insert(comment *entity.Comment) error
 }

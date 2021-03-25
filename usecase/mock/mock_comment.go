@@ -34,19 +34,19 @@ func (m *MockComment) EXPECT() *MockCommentMockRecorder {
 	return m.recorder
 }
 
-// GetByPostID mocks base method.
-func (m *MockComment) GetByPostID(postid int) ([]*entity.Comment, error) {
+// FindByPostID mocks base method.
+func (m *MockComment) FindByPostID(postid int) ([]*entity.Comment, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetByPostID", postid)
+	ret := m.ctrl.Call(m, "FindByPostID", postid)
 	ret0, _ := ret[0].([]*entity.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetByPostID indicates an expected call of GetByPostID.
-func (mr *MockCommentMockRecorder) GetByPostID(postid interface{}) *gomock.Call {
+// FindByPostID indicates an expected call of FindByPostID.
+func (mr *MockCommentMockRecorder) FindByPostID(postid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByPostID", reflect.TypeOf((*MockComment)(nil).GetByPostID), postid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByPostID", reflect.TypeOf((*MockComment)(nil).FindByPostID), postid)
 }
 
 // Insert mocks base method.
