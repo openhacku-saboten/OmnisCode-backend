@@ -19,8 +19,8 @@ func TestPostRepository_GetAll(t *testing.T) {
 	dbMap.AddTableWithName(UserDTO{}, "users")
 	truncateTable(t, dbMap, "users")
 
-	dbMap.AddTableWithName(PostDTO{}, "posts")
-	dbMap.AddTableWithName(PostInsertDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
 
 	if err := dbMap.Insert(&UserDTO{
 		ID:        "user-id",
@@ -124,7 +124,7 @@ func TestPostRepository_FindByID(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-	dbMap.AddTableWithName(PostDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
 
 	dbMap.AddTableWithName(UserDTO{}, "users")
@@ -139,8 +139,8 @@ func TestPostRepository_FindByID(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dbMap.AddTableWithName(PostDTO{}, "posts")
-	dbMap.AddTableWithName(PostInsertDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
 
 	validPost := &PostInsertDTO{
@@ -229,8 +229,8 @@ func TestPostRepository_Insert(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	dbMap.AddTableWithName(PostDTO{}, "posts")
-	dbMap.AddTableWithName(PostInsertDTO{}, "posts")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
 	truncateTable(t, dbMap, "posts")
 
 	// デフォルトの投稿追加

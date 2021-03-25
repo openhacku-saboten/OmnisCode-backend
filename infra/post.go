@@ -24,8 +24,8 @@ type PostRepository struct {
 
 // NewPostRepository は投稿情報のリポジトリのポインタを生成する関数です
 func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
-	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(false, "ID")
-	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(false, "ID")
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	dbMap.AddTableWithName(PostInsertDTO{}, "posts").SetKeys(true, "id")
 	return &PostRepository{dbMap: dbMap}
 }
 
