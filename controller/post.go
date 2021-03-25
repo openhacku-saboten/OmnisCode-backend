@@ -22,10 +22,10 @@ func NewPostController(uc *usecase.PostUsecase) *PostController {
 }
 
 // GetAll は GET /postのためのハンドラです
-func (p *PostController) GetAll(c echo.Context) error {
+func (ctrl *PostController) GetAll(c echo.Context) error {
 	logger := log.New()
 
-	posts, err := p.uc.GetAll(c.Request().Context())
+	posts, err := ctrl.uc.GetAll(c.Request().Context())
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {

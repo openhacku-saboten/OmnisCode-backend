@@ -82,9 +82,9 @@ func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post
 }
 
 // FindByUserID はユーザの投稿をDBから取得します
-func (r *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
+func (p *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
 	var postDTOs []PostDTO
-	if _, err := r.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
+	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
 		return nil, fmt.Errorf("failed PostRepository.FindByUserID: %w", err)
 	}
 

@@ -126,13 +126,13 @@ func TestUserRepository_Update(t *testing.T) {
 	dbMap.AddTableWithName(UserDTO{}, "users")
 	truncateUser(t, dbMap)
 	userDTOs := []*UserDTO{
-		&UserDTO{
+		{
 			ID:        "existing-id",
 			Name:      "existingUser",
 			Profile:   "existing",
 			TwitterID: "existing",
 		},
-		&UserDTO{
+		{
 			ID:        "existing-id2",
 			Name:      "existingUser2",
 			Profile:   "existing2",
