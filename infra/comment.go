@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"database/sql"
+	"errors"
 	"strings"
 	"time"
 
@@ -78,6 +80,30 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 		return err
 	}
 	return nil
+}
+
+// FindByID はpostID, commentIDからコメントを取得します
+func (r *CommentRepository) FindByID(postID, commentID int) (*entity.Comment, error) {
+	var commentDTO CommentDTO
+	if err := r.dbMap.SelectOne(&commentDTO, "SELECT * FROM comments WHERE post_id = ? AND id = ?", postID, commentID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, entity.NewErrorNotFound("comment")
+		}
+		return nil, err
+	}
+
+	return &entity.Comment{
+		ID:        commentDTO.ID,
+		UserID:    commentDTO.UserID,
+		PostID:    commentDTO.PostID,
+		Type:      commentDTO.Type,
+		Content:   commentDTO.Content,
+		FirstLine: commentDTO.FirstLine,
+		LastLine:  commentDTO.LastLine,
+		Code:      commentDTO.Code,
+		CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+		UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
+	}, nil
 }
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
