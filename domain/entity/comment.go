@@ -14,8 +14,8 @@ type Comment struct {
 }
 
 func (c *Comment) IsValid() error {
-	if c.ID == 0 {
-		return NewErrorEmpty("comment ID")
+	if c.ID < 0 {
+		return NewErrorNegativeValue("comment ID")
 	}
 	if len(c.UserID) == 0 {
 		return NewErrorEmpty("comment UserID")
