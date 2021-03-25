@@ -27,8 +27,9 @@ func (p *PostController) GetAll(c echo.Context) error {
 
 	posts, err := p.uc.GetAll(c.Request().Context())
 	if err != nil {
-		if errors.As(err, &entity.ErrNotFound{}) {
-			return echo.NewHTTPError(http.StatusNotFound, err.Error())
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("error GET /post: %s", err.Error())
