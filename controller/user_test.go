@@ -225,7 +225,7 @@ func TestCommentController_GetByUserID(t *testing.T) {
 			c.SetParamNames("userID")
 			c.SetParamValues(tt.userID)
 
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			userRepo := mock.NewMockUser(ctrl)
@@ -332,7 +332,7 @@ func TestUserController_GetPosts(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			authRepo := mock.NewMockAuth(ctrl)
 			userRepo := mock.NewMockUser(ctrl)
 			postRepo := mock.NewMockPost(ctrl)
@@ -630,6 +630,7 @@ func TestUserController_Update(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
+
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)

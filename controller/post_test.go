@@ -3,7 +3,6 @@ package controller
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -18,7 +17,6 @@ import (
 )
 
 func TestPostController_GetAll(t *testing.T) {
-
 	tests := []struct {
 		name            string
 		prepareMockPost func(ctx context.Context, post *mock.MockPost)
@@ -82,8 +80,9 @@ func TestPostController_GetAll(t *testing.T) {
 			ctx := c.Request().Context()
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.GetAll(c)
 
 			if (err != nil) != tt.wantErr {
@@ -169,8 +168,9 @@ func TestPostController_Get(t *testing.T) {
 			ctx := c.Request().Context()
 			postRepo := mock.NewMockPost(ctrl)
 			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.Get(c)
 
 			if (err != nil) != tt.wantErr {
@@ -214,7 +214,6 @@ func TestPostController_Create(t *testing.T) {
 				}`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
 				post.EXPECT().Insert(ctx, &entity.Post{
-					ID:        0,
 					UserID:    "user-id",
 					Title:     "test title",
 					Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -255,10 +254,11 @@ func TestPostController_Create(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			postRepo := mock.NewMockPost(ctrl)
-			tt.prepareMockPost(context.Background(), postRepo)
+			ctx := context.Background()
+			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
 
-			con := NewPostController(usecase.NewPostUsecase(postRepo))
-			fmt.Println(c)
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
 			err := con.Create(c)
 
 			if (err != nil) != tt.wantErr {
@@ -286,6 +286,157 @@ func TestPostController_Create(t *testing.T) {
 
 				if diff := cmp.Diff(wantBody, gotBody); diff != "" {
 					t.Errorf("body (-want +got) =\n%s\n", diff)
+				}
+			}
+		})
+	}
+}
+
+func TestPostController_Update(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		body            string
+		prepareMockPost func(ctx context.Context, post *mock.MockPost)
+		wantErr         bool
+		wantCode        int
+	}{
+		{
+			name:   "正しく投稿を更新できる",
+			userID: "user-id",
+			body: `{
+				"id": 1,
+				"title":"test title",
+				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				"language":"Go",
+				"content":"Test code",
+				"source":"github.com",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+				}`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Update(ctx, &entity.Post{
+					ID:        1,
+					UserID:    "user-id",
+					Title:     "test title",
+					Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+					Language:  "Go",
+					Content:   "Test code",
+					Source:    "github.com",
+					CreatedAt: "2021-03-23T11:42:56+09:00",
+					UpdatedAt: "2021-03-23T11:42:56+09:00",
+				}).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "不正なBodyならBadRequest",
+			userID: "user-id",
+			body: `{
+				"aaaa":"test title",
+				}`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
+			wantErr:         true,
+			wantCode:        http.StatusBadRequest,
+		},
+		{
+			name:            "bodyがJSON形式でないならBadRequest",
+			userID:          "user-id",
+			body:            `aaaaa`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
+			wantErr:         true,
+			wantCode:        http.StatusBadRequest,
+		},
+		{
+			name:   "存在しないポストならばErrIsNotAuthorでForbidden",
+			userID: "user-id",
+			body: `{
+				"id": 100,
+				"title":"test title",
+				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				"language":"Go",
+				"content":"Test code",
+				"source":"github.com",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+				}`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Update(ctx, &entity.Post{
+					ID:        100,
+					UserID:    "user-id",
+					Title:     "test title",
+					Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+					Language:  "Go",
+					Content:   "Test code",
+					Source:    "github.com",
+					CreatedAt: "2021-03-23T11:42:56+09:00",
+					UpdatedAt: "2021-03-23T11:42:56+09:00",
+				}).Return(entity.ErrIsNotAuthor)
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+		{
+			name:   "存在しないユーザならばErrNotFoundでForbidden",
+			userID: "user-id2002",
+			body: `{
+				"id": 1,
+				"title":"test title",
+				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				"language":"Go",
+				"content":"Test code",
+				"source":"github.com",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+				}`,
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Update(ctx, &entity.Post{
+					ID:        1,
+					UserID:    "user-id2002",
+					Title:     "test title",
+					Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+					Language:  "Go",
+					Content:   "Test code",
+					Source:    "github.com",
+					CreatedAt: "2021-03-23T11:42:56+09:00",
+					UpdatedAt: "2021-03-23T11:42:56+09:00",
+				}).Return(entity.NewErrorNotFound("user"))
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("PUT", "/", strings.NewReader(tt.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.Set("userID", tt.userID)
+
+			ctx := context.Background()
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			postRepo := mock.NewMockPost(ctrl)
+			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
+
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
+			err := con.Update(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
 				}
 			}
 		})

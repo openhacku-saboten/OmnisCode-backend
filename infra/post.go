@@ -130,6 +130,12 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if err := post.IsValid(); err != nil {
+			return fmt.Errorf("invalid post field: %w", err)
+		}
+
+		// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDをフロントで
+		// セットできてしまうので，DTOに変換する時に0でIDを初期化しておく
 		postDTO := &PostInsertDTO{
 			ID:       0,
 			UserID:   post.UserID,
@@ -156,6 +162,44 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 		post.ID = postDTO.ID
 		return nil
 	}
+}
+
+// Update は引数で渡したエンティティの投稿でDBに保存されている情報を更新します
+// 投稿の所有者以外が更新する場合、更新は行われません
+func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
+	select {
+	// echoのリクエストが途切れた場合は早めにリソースを開放するために処理を中断する
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当するポストがあるか確認
+		getPost, err := p.FindByID(ctx, post.ID)
+		if err != nil {
+			// Update出来ない理由は権限がないことなのでErrIsNotAuthorを返す
+			return entity.NewErrorNotFound("user")
+		}
+
+		// 所有者でなければ更新処理は行わない
+		if getPost.UserID != post.UserID {
+			return entity.ErrIsNotAuthor
+		}
+
+		postDTO := &PostInsertDTO{
+			ID:       post.ID,
+			UserID:   post.UserID,
+			Title:    post.Title,
+			Code:     post.Code,
+			Language: post.Language,
+			Content:  post.Content,
+			Source:   post.Source,
+		}
+
+		if _, err := p.dbMap.Update(postDTO); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // PostDTO はDBとやりとりするためのDataTransferObjectです

@@ -49,7 +49,7 @@ func main() {
 	userUseCase := usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo)
 	userController := controller.NewUserController(userUseCase)
 
-	postUsecase := usecase.NewPostUsecase(postRepo)
+	postUsecase := usecase.NewPostUsecase(postRepo, userRepo)
 	postController := controller.NewPostController(postUsecase)
 
 	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo)
@@ -69,6 +69,7 @@ func main() {
 	post.GET("", postController.GetAll) // 記事の閲覧はログインの必要なし
 	post.POST("", postController.Create, authMiddleware.Authenticate)
 	post.GET("/:postID", postController.Get)
+	post.PUT("/:postID", postController.Update, authMiddleware.Authenticate)
 
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)

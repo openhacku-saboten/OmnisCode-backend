@@ -11,11 +11,15 @@ import (
 // PostUsecase は投稿に関するユースケースの構造体です
 type PostUsecase struct {
 	postRepo repository.Post
+	userRepo repository.User
 }
 
 // NewPostUsecase は投稿に関するユースケースのポインタを生成します
-func NewPostUsecase(postRepo repository.Post) *PostUsecase {
-	return &PostUsecase{postRepo: postRepo}
+func NewPostUsecase(postRepo repository.Post, userRepo repository.User) *PostUsecase {
+	return &PostUsecase{
+		postRepo: postRepo,
+		userRepo: userRepo,
+	}
 }
 
 // GetAll は保存されている投稿を全て取得します
@@ -39,15 +43,16 @@ func (p *PostUsecase) Get(ctx context.Context, postID int) (*entity.Post, error)
 
 // Create は引数のpostエンティティをもとに投稿を1つ生成します
 func (p *PostUsecase) Create(ctx context.Context, post *entity.Post) error {
-	// リクエストにAPI仕様にないフィールドidが含まれていたら任意のpostIDを
-	// フロントでセットできてしまうので，ここらへんでpostIDを初期化しておく
-	post.ID = 0
-	if err := post.IsValid(); err != nil {
-		return fmt.Errorf("invalid post field: %w", err)
-	}
-
 	if err := p.postRepo.Insert(ctx, post); err != nil {
-		return fmt.Errorf("failed Store Post entity: %w", err)
+		return fmt.Errorf("failed Create Post entity: %w", err)
+	}
+	return nil
+}
+
+// Update は引数のpostエンティティをもとに投稿を1つ更新します
+func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
+	if err := p.postRepo.Update(ctx, post); err != nil {
+		return fmt.Errorf("failed Update Post: %w", err)
 	}
 	return nil
 }
