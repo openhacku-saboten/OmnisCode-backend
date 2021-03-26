@@ -21,3 +21,7 @@
 |2|Dockerコンテナ|Dockerコンテナ|
 
 実行すべきコマンドや設定方法の詳細は、[こちら](https://github.com/openhacku-saboten/OmnisCode-backend/blob/main/docs/setup.md)のドキュメントをご覧ください。
+
+## 利用したアーキテクチャについて
+クリーンアーキテクチャを採用しました。
+アーキテクチャの詳細は、[こちら](https://github.com/openhacku-saboten/OmnisCode-backend/blob/main/docs/architecture.md)のドキュメントをご覧ください。
