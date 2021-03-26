@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -202,7 +203,7 @@ func TestCommentController_Create(t *testing.T) {
 						LastLine:  12,
 						CreatedAt: "2021-03-23T11:42:56+09:00",
 						UpdatedAt: "2021-03-23T11:42:56+09:00",
-					}).DoAndReturn(func(comment *entity.Comment) error {
+					}).DoAndReturn(func(ctx context.Context, comment *entity.Comment) error {
 					comment.ID = 1
 					return nil
 				})
