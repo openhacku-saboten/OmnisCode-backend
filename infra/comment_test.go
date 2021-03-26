@@ -625,7 +625,7 @@ func TestCommentRepository_Delete(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := commentRepo.Delete(tt.postID, tt.commentID)
+			err := commentRepo.Delete(context.Background(), tt.postID, tt.commentID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)

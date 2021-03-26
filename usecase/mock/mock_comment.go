@@ -36,17 +36,17 @@ func (m *MockComment) EXPECT() *MockCommentMockRecorder {
 }
 
 // Delete mocks base method.
-func (m *MockComment) Delete(postID, commentID int) error {
+func (m *MockComment) Delete(ctx context.Context, postID, commentID int) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Delete", postID, commentID)
+	ret := m.ctrl.Call(m, "Delete", ctx, postID, commentID)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Delete indicates an expected call of Delete.
-func (mr *MockCommentMockRecorder) Delete(postID, commentID interface{}) *gomock.Call {
+func (mr *MockCommentMockRecorder) Delete(ctx, postID, commentID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockComment)(nil).Delete), postID, commentID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockComment)(nil).Delete), ctx, postID, commentID)
 }
 
 // FindByID mocks base method.

@@ -130,7 +130,7 @@ func (ctrl *CommentController) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if err := ctrl.uc.Delete(userID, postID, commentID); err != nil {
+	if err := ctrl.uc.Delete(c.Request().Context(), userID, postID, commentID); err != nil {
 		if errors.Is(err, entity.ErrIsNotAuthor) {
 			return echo.NewHTTPError(http.StatusForbidden, entity.ErrIsNotAuthor.Error())
 		}

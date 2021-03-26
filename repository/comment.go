@@ -14,5 +14,5 @@ type Comment interface {
 	FindByPostID(postID int) (comments []*entity.Comment, err error)
 	Insert(comment *entity.Comment) error
 	FindByID(postID, commentID int) (comment *entity.Comment, err error)
-	Delete(postID, commentID int) error
+	Delete(ctx context.Context, postID, commentID int) error
 }
