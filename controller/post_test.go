@@ -296,6 +296,7 @@ func TestPostController_Update(t *testing.T) {
 	tests := []struct {
 		name            string
 		userID          string
+		postID          string
 		body            string
 		prepareMockPost func(ctx context.Context, post *mock.MockPost)
 		wantErr         bool
@@ -304,8 +305,8 @@ func TestPostController_Update(t *testing.T) {
 		{
 			name:   "正しく投稿を更新できる",
 			userID: "user-id",
+			postID: "1",
 			body: `{
-				"id": 1,
 				"title":"test title",
 				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				"language":"Go",
@@ -333,6 +334,7 @@ func TestPostController_Update(t *testing.T) {
 		{
 			name:   "不正なBodyならBadRequest",
 			userID: "user-id",
+			postID: "1",
 			body: `{
 				"aaaa":"test title",
 				}`,
@@ -343,6 +345,7 @@ func TestPostController_Update(t *testing.T) {
 		{
 			name:            "bodyがJSON形式でないならBadRequest",
 			userID:          "user-id",
+			postID:          "1",
 			body:            `aaaaa`,
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {},
 			wantErr:         true,
@@ -351,8 +354,8 @@ func TestPostController_Update(t *testing.T) {
 		{
 			name:   "存在しないポストならばErrIsNotAuthorでForbidden",
 			userID: "user-id",
+			postID: "100",
 			body: `{
-				"id": 100,
 				"title":"test title",
 				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				"language":"Go",
@@ -380,8 +383,8 @@ func TestPostController_Update(t *testing.T) {
 		{
 			name:   "存在しないユーザならばErrNotFoundでForbidden",
 			userID: "user-id2002",
+			postID: "1",
 			body: `{
-				"id": 1,
 				"title":"test title",
 				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
 				"language":"Go",
@@ -414,6 +417,8 @@ func TestPostController_Update(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
+			c.SetParamNames("postID")
+			c.SetParamValues(tt.postID)
 			c.Set("userID", tt.userID)
 
 			ctx := context.Background()

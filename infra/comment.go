@@ -201,6 +201,45 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 	return nil
 }
 
+// Delete は該当コメントをDBから削除する
+func (r *CommentRepository) Delete(ctx context.Context, comment *entity.Comment) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当するコメントが存在するか確認
+		gotComment, err := r.FindByID(ctx, comment.PostID, comment.ID)
+		if err != nil {
+			return entity.NewErrorNotFound("comment")
+		}
+
+		// 所有者でないなら、削除処理は行わない
+		if gotComment.UserID != comment.UserID {
+			return entity.ErrIsNotAuthor
+		}
+
+		commentDTO := &CommentInsertDTO{
+			ID:     comment.ID,
+			PostID: comment.PostID,
+		}
+
+		if _, err := r.dbMap.Delete(commentDTO); err != nil {
+			if sqlerr, ok := err.(*mysql.MySQLError); ok {
+				// 存在しないPostIDで登録した時のエラー
+				if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "post_id") {
+					return entity.NewErrorNotFound("post")
+				}
+				// 存在しないUserIDで登録した時のエラー
+				if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+					return entity.NewErrorNotFound("user")
+				}
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 // CommentDTO はDBとやり取りするためのDataTransferObject
 type CommentDTO struct {
 	ID        int       `db:"id"`

@@ -114,18 +114,21 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 func (ctrl *CommentController) Update(c echo.Context) error {
 	logger := log.New()
 
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	commentID, err := strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	comment := &entity.Comment{}
 	if err := c.Bind(comment); err != nil {
 		logger.Info(err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-
-	var err error
-	comment.PostID, err = strconv.Atoi(c.Param("postID"))
-	if err != nil {
-		logger.Info(err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+	comment.ID = commentID
+	comment.PostID = postID
 
 	var ok bool
 	comment.UserID, ok = c.Get("userID").(string)
@@ -138,6 +141,43 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 		if errors.Is(err, entity.ErrCannotCommit) {
 			// コミットできない場合は、StatusForbidden
 			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotCommit.Error())
+		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.NoContent(http.StatusOK)
+}
+
+// Delete は DELETE /post/{postID}/comment/{commentID} のHandler
+func (ctrl *CommentController) Delete(c echo.Context) error {
+	logger := log.New()
+
+	var err error
+	comment := &entity.Comment{}
+	comment.ID, err = strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	comment.PostID, err = strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	var ok bool
+	comment.UserID, ok = c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if err := ctrl.uc.Delete(c.Request().Context(), comment); err != nil {
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrIsNotAuthor.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {

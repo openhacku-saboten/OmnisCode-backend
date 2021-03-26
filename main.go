@@ -77,6 +77,7 @@ func main() {
 	comment.POST("", commentController.Create, authMiddleware.Authenticate)
 	comment.GET("/:commentID", commentController.Get)
 	comment.PUT("/:commentID", commentController.Update, authMiddleware.Authenticate)
+	comment.DELETE("/:commentID", commentController.Delete, authMiddleware.Authenticate)
 
 	// ref: https://echo.labstack.com/cookbook/graceful-shutdown
 	// Start server
