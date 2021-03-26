@@ -20,7 +20,7 @@ func TestUserController_Get(t *testing.T) {
 	tests := []struct {
 		name            string
 		userID          string
-		prepareMockUser func(ctx context.Context, user *mock.MockUser)
+		prepareMockUser func(user *mock.MockUser)
 		prepareMockAuth func(auth *mock.MockAuth)
 		wantErr         bool
 		wantCode        int
@@ -29,8 +29,8 @@ func TestUserController_Get(t *testing.T) {
 		{
 			name:   "正しくユーザーを取得できる",
 			userID: "user-id",
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
@@ -51,8 +51,8 @@ func TestUserController_Get(t *testing.T) {
 		{
 			name:   "存在しないユーザーIDならErrUserNotFound",
 			userID: "invalid-user-id",
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "invalid-user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
 					entity.ErrUserNotFound,
 				)
@@ -65,7 +65,7 @@ func TestUserController_Get(t *testing.T) {
 		{
 			name:   "ユーザーIDが空ならBadRequest",
 			userID: "",
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
+			prepareMockUser: func(user *mock.MockUser) {
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
 			wantErr:         true,
@@ -85,7 +85,7 @@ func TestUserController_Get(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			userRepo := mock.NewMockUser(ctrl)
-			tt.prepareMockUser(c.Request().Context(), userRepo)
+			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
 			tt.prepareMockAuth(authRepo)
 			postRepo := mock.NewMockPost(ctrl)
@@ -395,6 +395,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(nil)
 			},
@@ -411,6 +412,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(nil)
 			},
@@ -445,6 +447,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedUser)
 			},
@@ -461,6 +464,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedTwitterID)
 			},
@@ -510,7 +514,7 @@ func TestUserController_Update(t *testing.T) {
 		name            string
 		userID          string
 		body            string
-		prepareMockUser func(ctx context.Context, user *mock.MockUser)
+		prepareMockUser func(user *mock.MockUser)
 		prepareMockAuth func(auth *mock.MockAuth)
 		wantErr         bool
 		wantCode        int
@@ -523,12 +527,13 @@ func TestUserController_Update(t *testing.T) {
 				"profile":"newprofile",
 				"twitter_id":"newtwitter"
 			}`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(nil)
 			},
@@ -543,12 +548,13 @@ func TestUserController_Update(t *testing.T) {
 				"profile":"newprofile",
 				"twitter_id":"@newtwitter"
 			}`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(nil)
 			},
@@ -561,7 +567,7 @@ func TestUserController_Update(t *testing.T) {
 			body: `{
 				"aaa":"test"
 			}`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {},
+			prepareMockUser: func(user *mock.MockUser) {},
 			wantErr:         true,
 			wantCode:        400,
 		},
@@ -569,7 +575,7 @@ func TestUserController_Update(t *testing.T) {
 			name:            "bodyがJSON形式でないならBadRequest",
 			userID:          "user-id",
 			body:            `aaaaa`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {},
+			prepareMockUser: func(user *mock.MockUser) {},
 			wantErr:         true,
 			wantCode:        400,
 		},
@@ -581,8 +587,8 @@ func TestUserController_Update(t *testing.T) {
 				"profile":"profile",
 				"twitter_id":"twitter"
 			}`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "invalid-user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
 					entity.ErrUserNotFound,
 				)
@@ -599,12 +605,13 @@ func TestUserController_Update(t *testing.T) {
 				"profile":"newprofile",
 				"twitter_id":"newtwitter"
 			}`,
-			prepareMockUser: func(ctx context.Context, user *mock.MockUser) {
-				user.EXPECT().FindByID(ctx, "user-id").Return(
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(entity.NewErrorDuplicated("user TwitterID"))
 			},
@@ -624,9 +631,8 @@ func TestUserController_Update(t *testing.T) {
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 
-			ctx := c.Request().Context()
 			userRepo := mock.NewMockUser(ctrl)
-			tt.prepareMockUser(ctx, userRepo)
+			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)
 			postRepo := mock.NewMockPost(ctrl)
 			commentRepo := mock.NewMockComment(ctrl)

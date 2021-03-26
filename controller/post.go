@@ -94,7 +94,7 @@ func (ctrl *PostController) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.NoContent(http.StatusCreated)
+	return c.JSON(http.StatusCreated, post)
 }
 
 // Update は Post /post/{postID}のハンドラです

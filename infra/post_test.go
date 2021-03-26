@@ -383,14 +383,14 @@ func TestPostRepository_Insert(t *testing.T) {
 	postRepo := NewPostRepository(dbMap)
 
 	tests := []struct {
-		name    string
-		post    *entity.Post
-		wantErr error
+		name       string
+		post       *entity.Post
+		wantErr    error
+		wantPostID int
 	}{
 		{
 			name: "正常に追加できる",
 			post: &entity.Post{
-				ID:       2,
 				UserID:   "user-id",
 				Title:    "test title",
 				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -398,12 +398,12 @@ func TestPostRepository_Insert(t *testing.T) {
 				Content:  "Test code",
 				Source:   "github.com",
 			},
-			wantErr: nil,
+			wantErr:    nil,
+			wantPostID: 2,
 		},
 		{
 			name: "存在しないユーザで登録するとエラー",
 			post: &entity.Post{
-				ID:       3,
 				UserID:   "user-id2",
 				Title:    "test title",
 				Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -411,7 +411,8 @@ func TestPostRepository_Insert(t *testing.T) {
 				Content:  "Test code",
 				Source:   "github.com",
 			},
-			wantErr: errors.New("unexisted user"),
+			wantErr:    errors.New("unexisted user"),
+			wantPostID: 0,
 		},
 		{
 			name: "重複したpostIDで登録しても、auto incrementが働いてエラーは発生しない",
@@ -424,7 +425,8 @@ func TestPostRepository_Insert(t *testing.T) {
 				Content:  "Test code",
 				Source:   "github.com",
 			},
-			wantErr: nil,
+			wantErr:    nil,
+			wantPostID: 4,
 		},
 	}
 	for _, tt := range tests {
@@ -432,6 +434,10 @@ func TestPostRepository_Insert(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			ctx := context.Background()
 			err := postRepo.Insert(ctx, tt.post)
+
+			if tt.post.ID != tt.wantPostID {
+				t.Errorf("gotPostID = %d, want = %d", tt.post.ID, tt.wantPostID)
+			}
 
 			if err == nil || tt.wantErr == nil {
 				if err == tt.wantErr {

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"net/http/httptest"
 	"strings"
@@ -27,7 +28,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "正しくコメントを取得できる",
 			postID: "1",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().FindByPostID(1).Return(
+				comment.EXPECT().FindByPostID(gomock.Any(), 1).Return(
 					[]*entity.Comment{
 						{
 							ID:        1,
@@ -108,7 +109,7 @@ func TestCommentController_GetByPostID(t *testing.T) {
 			name:   "取得したコメント数が0ならErrNotFound",
 			postID: "100",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().FindByPostID(100).Return(
+				comment.EXPECT().FindByPostID(gomock.Any(), 100).Return(
 					nil, entity.NewErrorNotFound("comment"),
 				)
 			},
@@ -176,6 +177,7 @@ func TestCommentController_Create(t *testing.T) {
 		prepareMockPost    func(post *mock.MockPost)
 		wantErr            bool
 		wantCode           int
+		wantBody           string
 	}{
 		{
 			name:   "正しくコメントを作成できる",
@@ -185,10 +187,13 @@ func TestCommentController_Create(t *testing.T) {
 				"type": "highlight",
 				"content": "content1",
 				"first_line": 10,
-				"last_line": 12
+				"last_line": 12,
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
 			}`,
 			prepareMockComment: func(comment *mock.MockComment) {
 				comment.EXPECT().Insert(
+					gomock.Any(),
 					&entity.Comment{
 						UserID:    "user-id",
 						PostID:    1,
@@ -196,7 +201,12 @@ func TestCommentController_Create(t *testing.T) {
 						Content:   "content1",
 						FirstLine: 10,
 						LastLine:  12,
-					}).Return(nil)
+						CreatedAt: "2021-03-23T11:42:56+09:00",
+						UpdatedAt: "2021-03-23T11:42:56+09:00",
+					}).DoAndReturn(func(ctx context.Context, comment *entity.Comment) error {
+					comment.ID = 1
+					return nil
+				})
 			},
 			prepareMockPost: func(post *mock.MockPost) {
 				post.EXPECT().FindByID(gomock.Any(), 1).Return(
@@ -214,6 +224,18 @@ func TestCommentController_Create(t *testing.T) {
 			},
 			wantErr:  false,
 			wantCode: 201,
+			wantBody: `{
+				"id": 1,
+				"user_id": "user-id",
+				"post_id": 1,
+				"type": "highlight",
+				"content": "content1",
+				"first_line": 10,
+				"last_line": 12,
+				"code":"",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+			}`,
 		},
 		{
 			name:   "Postのオーナー以外によるcommitならErrCannotCommit",
@@ -296,6 +318,20 @@ func TestCommentController_Create(t *testing.T) {
 					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
 				}
 			}
+
+			if !tt.wantErr {
+				var gotBody, wantBody map[string]interface{}
+				if err = json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+					t.Fatal(err)
+				}
+				if err = json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+					t.Fatal(err)
+				}
+
+				if diff := cmp.Diff(wantBody, gotBody); diff != "" {
+					t.Errorf("body (-want +got) =\n%s\n", diff)
+				}
+			}
 		})
 	}
 }
@@ -315,7 +351,7 @@ func TestCommentController_Get(t *testing.T) {
 			postID:    "1",
 			commentID: "1",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().FindByID(1, 1).Return(
+				comment.EXPECT().FindByID(gomock.Any(), 1, 1).Return(
 					&entity.Comment{
 						ID:        1,
 						UserID:    "userid1",
@@ -388,7 +424,7 @@ func TestCommentController_Get(t *testing.T) {
 			postID:    "1",
 			commentID: "1",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().FindByID(1, 1).Return(
+				comment.EXPECT().FindByID(gomock.Any(), 1, 1).Return(
 					nil, entity.NewErrorNotFound("comment"))
 			},
 			wantErr:  true,

@@ -20,8 +20,8 @@ func NewCommentUseCase(comment repository.Comment, post repository.Post) *Commen
 }
 
 // GetByPostID は引数のpostIDを満たす投稿にぶら下がるコメントを全て取得します
-func (u *CommentUseCase) GetByPostID(postID int) (comments []*entity.Comment, err error) {
-	comments, err = u.commentRepo.FindByPostID(postID)
+func (u *CommentUseCase) GetByPostID(ctx context.Context, postID int) (comments []*entity.Comment, err error) {
+	comments, err = u.commentRepo.FindByPostID(ctx, postID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to GetByPostID from DB: %w", err)
 	}
@@ -46,15 +46,15 @@ func (u *CommentUseCase) Create(ctx context.Context, comment *entity.Comment) er
 		return entity.ErrCannotCommit
 	}
 
-	if err := u.commentRepo.Insert(comment); err != nil {
+	if err := u.commentRepo.Insert(ctx, comment); err != nil {
 		return fmt.Errorf("failed to Insert Comment into DB: %w", err)
 	}
 	return nil
 }
 
 // Get は引数のpostIDとcommentIDの両方を満たすコメントを1つ取得します
-func (u *CommentUseCase) Get(postID, commentID int) (comment *entity.Comment, err error) {
-	comment, err = u.commentRepo.FindByID(postID, commentID)
+func (u *CommentUseCase) Get(ctx context.Context, postID, commentID int) (comment *entity.Comment, err error) {
+	comment, err = u.commentRepo.FindByID(ctx, postID, commentID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to Get comment from DB: %w", err)
 	}

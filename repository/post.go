@@ -8,7 +8,7 @@ import (
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
-// Post は投稿に関する永続化と再構築のためのリポジトリです
+// Post は投稿に関する永続化と再構成のためのリポジトリです
 type Post interface {
 	GetAll(ctx context.Context) ([]*entity.Post, error)
 	FindByID(ctx context.Context, postID int) (*entity.Post, error)
