@@ -48,5 +48,4 @@ func (p *Post) IsValid() error {
 	}
 
 	return nil
-
 }

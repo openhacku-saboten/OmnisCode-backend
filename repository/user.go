@@ -3,12 +3,14 @@
 package repository
 
 import (
+	"context"
+
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
 
-// User はユーザに関する永続化と再構築のためのリポジトリです
+// User はユーザに関する永続化と再構成のためのリポジトリです
 type User interface {
-	FindByID(uid string) (user *entity.User, err error)
-	Insert(user *entity.User) error
-	Update(user *entity.User) error
+	FindByID(ctx context.Context, uid string) (user *entity.User, err error)
+	Insert(ctx context.Context, user *entity.User) error
+	Update(ctx context.Context, user *entity.User) error
 }

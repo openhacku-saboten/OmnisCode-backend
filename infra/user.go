@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"strings"
@@ -14,7 +15,7 @@ import (
 
 var _ repository.User = (*UserRepository)(nil)
 
-// UserRepository ユーザー情報の永続化と再構築のためのリポジトリです
+// UserRepository ユーザー情報の永続化と再構成のためのリポジトリです
 type UserRepository struct {
 	dbMap *gorp.DbMap
 }
@@ -26,69 +27,84 @@ func NewUserRepository(dbMap *gorp.DbMap) *UserRepository {
 }
 
 // FindByID は該当IDのユーザーの情報をDBから取得して返す
-func (r *UserRepository) FindByID(uid string) (user *entity.User, err error) {
-	var userDTO UserDTO
-	err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, entity.ErrUserNotFound
+func (r *UserRepository) FindByID(ctx context.Context, uid string) (user *entity.User, err error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var userDTO UserDTO
+		err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, entity.ErrUserNotFound
+			}
+			return nil, err
 		}
-		return nil, err
+		user = entity.NewUser(
+			userDTO.ID,
+			userDTO.Name,
+			userDTO.Profile,
+			userDTO.TwitterID,
+			"",
+		)
+		return
 	}
-	user = entity.NewUser(
-		userDTO.ID,
-		userDTO.Name,
-		userDTO.Profile,
-		userDTO.TwitterID,
-		"",
-	)
-	return
 }
 
 // Insert は該当ユーザーをDBに保存する
-func (r *UserRepository) Insert(user *entity.User) error {
-	userDTO := &UserDTO{
-		ID:        user.ID,
-		Name:      user.Name,
-		Profile:   user.Profile,
-		TwitterID: user.TwitterID,
-	}
-
-	if err := r.dbMap.Insert(userDTO); err != nil {
-		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			// userIDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "users.PRIMARY") {
-				return entity.ErrDuplicatedUser
-			}
-			// twitterIDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
-				return entity.ErrDuplicatedTwitterID
-			}
+func (r *UserRepository) Insert(ctx context.Context, user *entity.User) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		userDTO := &UserDTO{
+			ID:        user.ID,
+			Name:      user.Name,
+			Profile:   user.Profile,
+			TwitterID: user.TwitterID,
 		}
-		return err
+
+		if err := r.dbMap.Insert(userDTO); err != nil {
+			if sqlerr, ok := err.(*mysql.MySQLError); ok {
+				// userIDが重複したときのエラー
+				if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "users.PRIMARY") {
+					return entity.ErrDuplicatedUser
+				}
+				// twitterIDが重複したときのエラー
+				if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
+					return entity.ErrDuplicatedTwitterID
+				}
+			}
+			return err
+		}
+		return nil
 	}
-	return nil
 }
 
 // Update は該当ユーザーをDBに保存する
-func (r *UserRepository) Update(user *entity.User) error {
-	userDTO := &UserDTO{
-		ID:        user.ID,
-		Name:      user.Name,
-		Profile:   user.Profile,
-		TwitterID: user.TwitterID,
-	}
-
-	if _, err := r.dbMap.Update(userDTO); err != nil {
-		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			// twitterIDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
-				return entity.NewErrorDuplicated("user TwitterID")
-			}
+func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		userDTO := &UserDTO{
+			ID:        user.ID,
+			Name:      user.Name,
+			Profile:   user.Profile,
+			TwitterID: user.TwitterID,
 		}
-		return err
+
+		if _, err := r.dbMap.Update(userDTO); err != nil {
+			if sqlerr, ok := err.(*mysql.MySQLError); ok {
+				// twitterIDが重複したときのエラー
+				if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "twitter_id") {
+					return entity.NewErrorDuplicated("user TwitterID")
+				}
+			}
+			return err
+		}
+		return nil
 	}
-	return nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject

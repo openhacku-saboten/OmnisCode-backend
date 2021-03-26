@@ -93,3 +93,17 @@ func (mr *MockPostMockRecorder) Insert(ctx, post interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockPost)(nil).Insert), ctx, post)
 }
+
+// Update mocks base method.
+func (m *MockPost) Update(ctx context.Context, post *entity.Post) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Update", ctx, post)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Update indicates an expected call of Update.
+func (mr *MockPostMockRecorder) Update(ctx, post interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockPost)(nil).Update), ctx, post)
+}

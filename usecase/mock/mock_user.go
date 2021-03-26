@@ -5,6 +5,7 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
@@ -35,44 +36,44 @@ func (m *MockUser) EXPECT() *MockUserMockRecorder {
 }
 
 // FindByID mocks base method.
-func (m *MockUser) FindByID(uid string) (*entity.User, error) {
+func (m *MockUser) FindByID(ctx context.Context, uid string) (*entity.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByID", uid)
+	ret := m.ctrl.Call(m, "FindByID", ctx, uid)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID.
-func (mr *MockUserMockRecorder) FindByID(uid interface{}) *gomock.Call {
+func (mr *MockUserMockRecorder) FindByID(ctx, uid interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockUser)(nil).FindByID), uid)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByID", reflect.TypeOf((*MockUser)(nil).FindByID), ctx, uid)
 }
 
 // Insert mocks base method.
-func (m *MockUser) Insert(user *entity.User) error {
+func (m *MockUser) Insert(ctx context.Context, user *entity.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", user)
+	ret := m.ctrl.Call(m, "Insert", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert.
-func (mr *MockUserMockRecorder) Insert(user interface{}) *gomock.Call {
+func (mr *MockUserMockRecorder) Insert(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockUser)(nil).Insert), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockUser)(nil).Insert), ctx, user)
 }
 
 // Update mocks base method.
-func (m *MockUser) Update(user *entity.User) error {
+func (m *MockUser) Update(ctx context.Context, user *entity.User) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", user)
+	ret := m.ctrl.Call(m, "Update", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update.
-func (mr *MockUserMockRecorder) Update(user interface{}) *gomock.Call {
+func (mr *MockUserMockRecorder) Update(ctx, user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), ctx, user)
 }
