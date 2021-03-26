@@ -130,12 +130,6 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 	comment.ID = commentID
 	comment.PostID = postID
 
-	comment.PostID, err = strconv.Atoi(c.Param("postID"))
-	if err != nil {
-		logger.Info(err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-
 	var ok bool
 	comment.UserID, ok = c.Get("userID").(string)
 	if !ok {
