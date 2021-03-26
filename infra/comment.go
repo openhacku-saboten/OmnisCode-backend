@@ -157,10 +157,8 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 			return entity.ErrIsNotAuthor
 		}
 
-		// 所有者でなければ更新処理は行わない
-		if !(gotComment.UserID == comment.UserID &&
-			gotComment.PostID == comment.PostID &&
-			gotComment.ID == comment.ID) {
+		// 所有者でないなら、更新処理は行わない
+		if gotComment.UserID != comment.UserID {
 			return entity.ErrIsNotAuthor
 		}
 
