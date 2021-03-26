@@ -77,7 +77,7 @@ func (ctrl *PostController) Create(c echo.Context) error {
 
 	post := &entity.Post{}
 	if err := c.Bind(post); err != nil {
-		logger.Infof("failed c.Bind: %s", err.Error())
+		logger.Errorf("failed c.Bind: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
@@ -88,10 +88,46 @@ func (ctrl *PostController) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if err := ctrl.uc.Create(c.Request().Context(), post); err != nil {
+	ctx := c.Request().Context()
+	if err := ctrl.uc.Create(ctx, post); err != nil {
 		logger.Errorf("error POST /post: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.NoContent(http.StatusCreated)
+	return c.JSON(http.StatusCreated, post)
+}
+
+// Update は Post /post/{postID}のハンドラです
+func (ctrl *PostController) Update(c echo.Context) error {
+	logger := log.New()
+
+	post := &entity.Post{}
+	if err := c.Bind(post); err != nil {
+		logger.Errorf("failed c.Bind: %s", err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	var ok bool
+	post.UserID, ok = c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	ctx := c.Request().Context()
+	if err := ctrl.uc.Update(ctx, post); err != nil {
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			logger.Errorf("forbidden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			logger.Errorf("forbidden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
+		}
+
+		logger.Errorf("error POST /post: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.NoContent(http.StatusOK)
 }

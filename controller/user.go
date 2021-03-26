@@ -106,7 +106,7 @@ func (ctrl *UserController) Create(c echo.Context) error {
 	}
 	user.ID = userID
 
-	if err := ctrl.uc.Create(user); err != nil {
+	if err := ctrl.uc.Create(c.Request().Context(), user); err != nil {
 		if errors.Is(err, entity.ErrDuplicatedUser) {
 			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedUser.Error())
 		}
@@ -138,7 +138,7 @@ func (ctrl *UserController) Update(c echo.Context) error {
 	}
 	user.ID = userID
 
-	if err := ctrl.uc.Update(user); err != nil {
+	if err := ctrl.uc.Update(c.Request().Context(), user); err != nil {
 		if errors.Is(err, entity.ErrUserNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
 		}

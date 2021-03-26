@@ -7,7 +7,7 @@ import (
 	"firebase.google.com/go/auth"
 )
 
-// AuthRepository は認証情報の永続化と再構築のためのリポジトリです
+// AuthRepository は認証情報の永続化と再構成のためのリポジトリです
 type AuthRepository struct {
 	firebase *auth.Client
 }

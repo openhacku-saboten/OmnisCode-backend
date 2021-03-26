@@ -1,0 +1,2 @@
+# Package controller
+controller パッケージは、HTTPリクエストを受け取りentityをusecaseパッケージに渡すことと、entityをusecaseパッケージから受け取ったエンティティをHTTPレスポンスとして返却するまでが責務です。

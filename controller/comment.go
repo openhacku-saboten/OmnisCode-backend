@@ -34,7 +34,7 @@ func (ctrl *CommentController) Get(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comment, err := ctrl.uc.Get(postID, commentID)
+	comment, err := ctrl.uc.Get(c.Request().Context(), postID, commentID)
 
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
@@ -57,7 +57,7 @@ func (ctrl *CommentController) GetByPostID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	comments, err := ctrl.uc.GetByPostID(postID)
+	comments, err := ctrl.uc.GetByPostID(c.Request().Context(), postID)
 
 	if err != nil {
 		errNF := &entity.ErrNotFound{}
@@ -107,7 +107,7 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return c.NoContent(http.StatusCreated)
+	return c.JSON(http.StatusCreated, comment)
 }
 
 // Update は PUT /post/{postID}/comment/{commentID} のHandler

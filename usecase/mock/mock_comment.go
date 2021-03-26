@@ -34,16 +34,16 @@ func (_m *MockComment) EXPECT() *MockCommentMockRecorder {
 }
 
 // FindByID mocks base method
-func (_m *MockComment) FindByID(postID int, commentID int) (*entity.Comment, error) {
-	ret := _m.ctrl.Call(_m, "FindByID", postID, commentID)
+func (_m *MockComment) FindByID(ctx context.Context, postID int, commentID int) (*entity.Comment, error) {
+	ret := _m.ctrl.Call(_m, "FindByID", ctx, postID, commentID)
 	ret0, _ := ret[0].(*entity.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID
-func (_mr *MockCommentMockRecorder) FindByID(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockComment)(nil).FindByID), arg0, arg1)
+func (_mr *MockCommentMockRecorder) FindByID(arg0, arg1, arg2 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockComment)(nil).FindByID), arg0, arg1, arg2)
 }
 
 // FindByUserID mocks base method
@@ -60,28 +60,28 @@ func (_mr *MockCommentMockRecorder) FindByUserID(arg0, arg1 interface{}) *gomock
 }
 
 // FindByPostID mocks base method
-func (_m *MockComment) FindByPostID(postID int) ([]*entity.Comment, error) {
-	ret := _m.ctrl.Call(_m, "FindByPostID", postID)
+func (_m *MockComment) FindByPostID(ctx context.Context, postID int) ([]*entity.Comment, error) {
+	ret := _m.ctrl.Call(_m, "FindByPostID", ctx, postID)
 	ret0, _ := ret[0].([]*entity.Comment)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByPostID indicates an expected call of FindByPostID
-func (_mr *MockCommentMockRecorder) FindByPostID(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByPostID", reflect.TypeOf((*MockComment)(nil).FindByPostID), arg0)
+func (_mr *MockCommentMockRecorder) FindByPostID(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByPostID", reflect.TypeOf((*MockComment)(nil).FindByPostID), arg0, arg1)
 }
 
 // Insert mocks base method
-func (_m *MockComment) Insert(comment *entity.Comment) error {
-	ret := _m.ctrl.Call(_m, "Insert", comment)
+func (_m *MockComment) Insert(ctx context.Context, comment *entity.Comment) error {
+	ret := _m.ctrl.Call(_m, "Insert", ctx, comment)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert
-func (_mr *MockCommentMockRecorder) Insert(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockComment)(nil).Insert), arg0)
+func (_mr *MockCommentMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockComment)(nil).Insert), arg0, arg1)
 }
 
 // Update mocks base method

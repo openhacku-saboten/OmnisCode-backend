@@ -103,7 +103,7 @@ func TestCommentRepository_FindByID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotComment, err := commentRepo.FindByID(tt.postID, tt.commentID)
+			gotComment, err := commentRepo.FindByID(context.Background(), tt.postID, tt.commentID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -250,7 +250,8 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotComments, err := commentRepo.FindByPostID(tt.postID)
+			ctx := context.Background()
+			gotComments, err := commentRepo.FindByPostID(ctx, tt.postID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -423,7 +424,7 @@ func TestUserRepository_GetByUserID(t *testing.T) {
 	}
 }
 
-func TestCommentRepository_Create(t *testing.T) {
+func TestCommentRepository_Insert(t *testing.T) {
 	dbMap, err := NewDB()
 	if err != nil {
 		t.Fatalf(err.Error())
@@ -476,9 +477,10 @@ func TestCommentRepository_Create(t *testing.T) {
 	commentRepo := NewCommentRepository(dbMap)
 
 	tests := []struct {
-		name    string
-		comment *entity.Comment
-		wantErr error
+		name          string
+		comment       *entity.Comment
+		wantErr       error
+		wantCommentID int
 	}{
 		{
 			name: "正しくコメントを作成できる",
@@ -488,7 +490,8 @@ func TestCommentRepository_Create(t *testing.T) {
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: nil,
+			wantErr:       nil,
+			wantCommentID: 2,
 		},
 		{
 			name: "IDが重複していてもAUTO_INCREMENTしてくれる",
@@ -499,7 +502,8 @@ func TestCommentRepository_Create(t *testing.T) {
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: nil,
+			wantErr:       nil,
+			wantCommentID: 3,
 		},
 		{
 			name: "PostIDが存在しなければErrNotFound",
@@ -509,7 +513,8 @@ func TestCommentRepository_Create(t *testing.T) {
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: entity.NewErrorNotFound("post"),
+			wantErr:       entity.NewErrorNotFound("post"),
+			wantCommentID: 0,
 		},
 		{
 			name: "UserIDが存在しなければErrNotFound",
@@ -519,13 +524,19 @@ func TestCommentRepository_Create(t *testing.T) {
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: entity.NewErrorNotFound("user"),
+			wantErr:       entity.NewErrorNotFound("user"),
+			wantCommentID: 0,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := commentRepo.Insert(tt.comment)
+			ctx := context.Background()
+			err := commentRepo.Insert(ctx, tt.comment)
+
+			if tt.comment.ID != tt.wantCommentID {
+				t.Errorf("gotCommentID = %d, want = %d", tt.comment.ID, tt.wantCommentID)
+			}
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
