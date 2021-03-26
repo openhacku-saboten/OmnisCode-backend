@@ -607,12 +607,6 @@ func TestPostRepository_Delete(t *testing.T) {
 			Profile:   "test profile",
 			TwitterID: "twitter",
 		},
-		{
-			ID:        "user-id2",
-			Name:      "test user2",
-			Profile:   "test profile2",
-			TwitterID: "twitter2",
-		},
 	}
 
 	for _, user := range preparedUsers {
@@ -637,15 +631,6 @@ func TestPostRepository_Delete(t *testing.T) {
 		},
 		{
 			ID:       2,
-			UserID:   "user-id2",
-			Title:    "test title",
-			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
-			Language: "Go",
-			Content:  "Test code",
-			Source:   "github.com",
-		},
-		{
-			ID:       3,
 			UserID:   "user-id",
 			Title:    "test title",
 			Code:     "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
@@ -687,7 +672,7 @@ func TestPostRepository_Delete(t *testing.T) {
 		{
 			name: "投稿元のユーザ以外が削除するとエラー",
 			post: &entity.Post{
-				ID:     3,
+				ID:     2,
 				UserID: "user-id100",
 			},
 			wantErr: entity.ErrIsNotAuthor,
