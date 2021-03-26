@@ -101,11 +101,18 @@ func (ctrl *PostController) Create(c echo.Context) error {
 func (ctrl *PostController) Update(c echo.Context) error {
 	logger := log.New()
 
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
 	post := &entity.Post{}
 	if err := c.Bind(post); err != nil {
 		logger.Errorf("failed c.Bind: %s", err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
+	post.ID = postID
+
 	var ok bool
 	post.UserID, ok = c.Get("userID").(string)
 	if !ok {

@@ -490,6 +490,7 @@ func TestCommentController_Update(t *testing.T) {
 		name               string
 		postID             string
 		userID             string
+		commentID          string
 		body               string
 		prepareMockComment func(comment *mock.MockComment)
 		prepareMockPost    func(post *mock.MockPost)
@@ -498,11 +499,11 @@ func TestCommentController_Update(t *testing.T) {
 		wantCode           int
 	}{
 		{
-			name:   "正しくコメントを更新できる",
-			postID: "1",
-			userID: "user-id",
+			name:      "正しくコメントを更新できる",
+			postID:    "1",
+			userID:    "user-id",
+			commentID: "1",
 			body: `{
-				"id": 1,
 				"type": "highlight",
 				"content": "content1",
 				"first_line": 10,
@@ -542,9 +543,10 @@ func TestCommentController_Update(t *testing.T) {
 			wantCode: http.StatusOK,
 		},
 		{
-			name:   "Postのオーナー以外によるcommitならErrCannotCommit",
-			postID: "1",
-			userID: "user-id200",
+			name:      "Postのオーナー以外によるcommitならErrCannotCommit",
+			postID:    "1",
+			userID:    "user-id200",
+			commentID: "1",
 			body: `{
 				"type": "commit",
 				"content": "content1",
@@ -573,9 +575,10 @@ func TestCommentController_Update(t *testing.T) {
 			wantCode: http.StatusForbidden,
 		},
 		{
-			name:   "存在しないユーザによるcommitならErrNotFound",
-			postID: "1",
-			userID: "other-user-id",
+			name:      "存在しないユーザによるcommitならErrNotFound",
+			postID:    "1",
+			userID:    "other-user-id",
+			commentID: "1",
 			body: `{
 				"type": "commit",
 				"content": "content1",
@@ -591,9 +594,10 @@ func TestCommentController_Update(t *testing.T) {
 			wantCode: http.StatusNotFound,
 		},
 		{
-			name:   "存在しないPostIDならErrNotFound",
-			postID: "100",
-			userID: "user-id",
+			name:      "存在しないPostIDならErrNotFound",
+			postID:    "100",
+			userID:    "user-id",
+			commentID: "1",
 			body: `{
 				"type": "highlight",
 				"content": "content1",
@@ -619,8 +623,8 @@ func TestCommentController_Update(t *testing.T) {
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
-			c.SetParamNames("postID")
-			c.SetParamValues(tt.postID)
+			c.SetParamNames("postID", "commentID")
+			c.SetParamValues(tt.postID, tt.commentID)
 			c.Set("userID", tt.userID)
 
 			ctrl := gomock.NewController(t)

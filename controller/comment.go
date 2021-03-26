@@ -114,18 +114,21 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 func (ctrl *CommentController) Update(c echo.Context) error {
 	logger := log.New()
 
+	postID, err := strconv.Atoi(c.Param("postID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+	commentID, err := strconv.Atoi(c.Param("commentID"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	comment := &entity.Comment{}
 	if err := c.Bind(comment); err != nil {
 		logger.Info(err.Error())
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
-
-	var err error
-	comment.PostID, err = strconv.Atoi(c.Param("postID"))
-	if err != nil {
-		logger.Info(err.Error())
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
+	comment.ID = commentID
+	comment.PostID = postID
 
 	var ok bool
 	comment.UserID, ok = c.Get("userID").(string)
