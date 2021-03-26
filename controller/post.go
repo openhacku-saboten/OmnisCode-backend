@@ -143,17 +143,20 @@ func (ctrl *PostController) Update(c echo.Context) error {
 func (ctrl *PostController) Delete(c echo.Context) error {
 	logger := log.New()
 
-	if userID, ok := c.Get("userID").(string); !ok {
+	post := &entity.Post{}
+	var ok bool
+	if post.UserID, ok = c.Get("userID").(string); !ok {
 		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if postID, err := strconv.Atoi(c.Param("postID")); err != nil {
+	var err error
+	if post.ID, err = strconv.Atoi(c.Param("postID")); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
 	ctx := c.Request().Context()
-	if err := ctrl.uc.Delete(ctx, userID, postID); err != nil {
+	if err := ctrl.uc.Delete(ctx, post); err != nil {
 		if errors.Is(err, entity.ErrIsNotAuthor) {
 			logger.Errorf("forbidden update occurs: %s", err.Error())
 			return echo.NewHTTPError(http.StatusForbidden, err.Error())
