@@ -114,19 +114,13 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 		return ctx.Err()
 	default:
 		// 該当ユーザの存在確認
-		gotUser, err := r.FindByID(ctx, user.ID)
+		_, err := r.FindByID(ctx, user.ID)
 		if err != nil {
 			return entity.NewErrorNotFound("user")
 		}
 
-		// IDとTwitterIDはユニークなので、それらを比較する
-		if user.TwitterID != gotUser.TwitterID {
-			return entity.ErrIsNotAuthor
-		}
-
 		userDTO := &UserDTO{
-			ID:        user.ID,
-			TwitterID: user.TwitterID,
+			ID: user.ID,
 		}
 
 		if _, err := r.dbMap.Delete(userDTO); err != nil {
