@@ -57,9 +57,9 @@ func (p *PostUsecase) Update(ctx context.Context, post *entity.Post) error {
 	return nil
 }
 
-// Delete は引数のIDをもとに投稿を削除します．
-func (p *PostUsecase) Delete(ctx context.Context, userID string, postID int) error {
-	if err := p.postRepo.Delete(ctx, userID, postID); err != nil {
+// Delete は引数のpostエンティティをもとに投稿を削除します．
+func (p *PostUsecase) Delete(ctx context.Context, post *entity.Post) error {
+	if err := p.postRepo.Delete(ctx, post); err != nil {
 		return fmt.Errorf("failed Update Post: %w", err)
 	}
 	return nil
