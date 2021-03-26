@@ -9,8 +9,8 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/labstack/echo/v4"
+	"github.com/openhacku-saboten/OmnisCode-backend/infra/mock"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
-	"github.com/openhacku-saboten/OmnisCode-backend/usecase/mock"
 )
 
 func TestAuthMiddleware_Authenticate(t *testing.T) {

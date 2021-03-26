@@ -12,8 +12,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/labstack/echo/v4"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	"github.com/openhacku-saboten/OmnisCode-backend/infra/mock"
 	"github.com/openhacku-saboten/OmnisCode-backend/usecase"
-	"github.com/openhacku-saboten/OmnisCode-backend/usecase/mock"
 )
 
 func TestPostController_GetAll(t *testing.T) {

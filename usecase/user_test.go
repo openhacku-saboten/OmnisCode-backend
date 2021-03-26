@@ -7,7 +7,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/go-cmp/cmp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
-	"github.com/openhacku-saboten/OmnisCode-backend/usecase/mock"
+	"github.com/openhacku-saboten/OmnisCode-backend/infra/mock"
 )
 
 func TestUsecase_Get_Posts_By_ID(t *testing.T) {
