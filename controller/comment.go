@@ -131,8 +131,8 @@ func (ctrl *CommentController) Delete(c echo.Context) error {
 	}
 
 	if err := ctrl.uc.Delete(userID, postID, commentID); err != nil {
-		if errors.Is(err, entity.ErrCannotDelete) {
-			return echo.NewHTTPError(http.StatusForbidden, entity.ErrCannotDelete.Error())
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			return echo.NewHTTPError(http.StatusForbidden, entity.ErrIsNotAuthor.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {

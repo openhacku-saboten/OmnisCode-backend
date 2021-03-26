@@ -70,7 +70,7 @@ func (u *CommentUseCase) Delete(userID string, postID, commentID int) error {
 	}
 	// Commentのオーナー以外による削除を弾く
 	if comment.UserID != userID {
-		return entity.ErrCannotDelete
+		return entity.ErrIsNotAuthor
 	}
 
 	if err := u.commentRepo.Delete(postID, commentID); err != nil {
