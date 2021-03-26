@@ -31,114 +31,131 @@ func NewPostRepository(dbMap *gorp.DbMap) *PostRepository {
 }
 
 // GetAll はMySQLサーバに接続して、全てのPostを取得して返すメソッドです
-func (p *PostRepository) GetAll(context.Context) ([]*entity.Post, error) {
-	var postDTOs []PostDTO
-	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts"); err != nil {
-		return nil, fmt.Errorf("failed PostRepository.GetAll: %w", err)
-	}
+func (p *PostRepository) GetAll(ctx context.Context) ([]*entity.Post, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var postDTOs []PostDTO
+		if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts"); err != nil {
+			return nil, fmt.Errorf("failed PostRepository.GetAll: %w", err)
+		}
 
-	var posts []*entity.Post
-	for _, dto := range postDTOs {
-		posts = append(posts, &entity.Post{
-			ID:        dto.ID,
-			UserID:    dto.UserID,
-			Title:     dto.Title,
-			Code:      dto.Code,
-			Language:  dto.Language,
-			Content:   dto.Content,
-			Source:    dto.Source,
-			CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
-			UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
-		})
+		var posts []*entity.Post
+		for _, dto := range postDTOs {
+			posts = append(posts, &entity.Post{
+				ID:        dto.ID,
+				UserID:    dto.UserID,
+				Title:     dto.Title,
+				Code:      dto.Code,
+				Language:  dto.Language,
+				Content:   dto.Content,
+				Source:    dto.Source,
+				CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
+				UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
+			})
+		}
+		if posts == nil {
+			return nil, entity.NewErrorNotFound("post")
+		}
+		return posts, nil
 	}
-	if posts == nil {
-		return nil, entity.NewErrorNotFound("post")
-	}
-
-	return posts, nil
 }
 
 // FindByID はpostIDから投稿を取得します
 func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
-	var postDTO PostDTO
-	if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, entity.NewErrorNotFound("post")
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var postDTO PostDTO
+		if err := p.dbMap.SelectOne(&postDTO, "SELECT * FROM posts WHERE id = ?", postID); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, entity.NewErrorNotFound("post")
+			}
+			return nil, err
 		}
-		return nil, err
-	}
 
-	return &entity.Post{
-		ID:        postDTO.ID,
-		UserID:    postDTO.UserID,
-		Title:     postDTO.Title,
-		Code:      postDTO.Title,
-		Language:  postDTO.Language,
-		Content:   postDTO.Content,
-		Source:    postDTO.Source,
-		CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
-		UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
-	}, nil
+		return &entity.Post{
+			ID:        postDTO.ID,
+			UserID:    postDTO.UserID,
+			Title:     postDTO.Title,
+			Code:      postDTO.Title,
+			Language:  postDTO.Language,
+			Content:   postDTO.Content,
+			Source:    postDTO.Source,
+			CreatedAt: service.ConvertTimeToStr(postDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(postDTO.UpdatedAt),
+		}, nil
+	}
 }
 
 // FindByUserID はユーザの投稿をDBから取得します
 func (p *PostRepository) FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error) {
-	var postDTOs []PostDTO
-	if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
-		return nil, fmt.Errorf("failed PostRepository.FindByUserID: %w", err)
-	}
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var postDTOs []PostDTO
+		if _, err := p.dbMap.Select(&postDTOs, "SELECT * FROM posts WHERE user_id = ?", uid); err != nil {
+			return nil, fmt.Errorf("failed PostRepository.FindByUserID: %w", err)
+		}
 
-	var posts []*entity.Post
+		var posts []*entity.Post
 
-	for _, dto := range postDTOs {
-		posts = append(posts, &entity.Post{
-			ID:        dto.ID,
-			UserID:    dto.UserID,
-			Title:     dto.Title,
-			Code:      dto.Code,
-			Language:  dto.Language,
-			Content:   dto.Content,
-			Source:    dto.Source,
-			CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
-			UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
-		})
-	}
-	if posts == nil {
-		return nil, entity.NewErrorNotFound("post")
-	}
+		for _, dto := range postDTOs {
+			posts = append(posts, &entity.Post{
+				ID:        dto.ID,
+				UserID:    dto.UserID,
+				Title:     dto.Title,
+				Code:      dto.Code,
+				Language:  dto.Language,
+				Content:   dto.Content,
+				Source:    dto.Source,
+				CreatedAt: service.ConvertTimeToStr(dto.CreatedAt),
+				UpdatedAt: service.ConvertTimeToStr(dto.UpdatedAt),
+			})
+		}
+		if posts == nil {
+			return nil, entity.NewErrorNotFound("post")
+		}
 
-	return posts, nil
+		return posts, nil
+	}
 }
 
 // Insert は引数で渡したエンティティの投稿をDBに保存します
 func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
-	postDTO := &PostInsertDTO{
-		ID:       0,
-		UserID:   post.UserID,
-		Title:    post.Title,
-		Code:     post.Code,
-		Language: post.Language,
-		Content:  post.Content,
-		Source:   post.Source,
-	}
-
-	if err := p.dbMap.Insert(postDTO); err != nil {
-		if sqlerr, ok := err.(*mysql.MySQLError); ok {
-			// 存在しないユーザIDで登録した時のエラー
-			if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
-				return errors.New("unexisted user")
-			}
-			// postIDが重複したときのエラー
-			if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "posts.PRIMARY") {
-				return errors.New("post ID is duplicated")
-			}
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		postDTO := &PostInsertDTO{
+			ID:       0,
+			UserID:   post.UserID,
+			Title:    post.Title,
+			Code:     post.Code,
+			Language: post.Language,
+			Content:  post.Content,
+			Source:   post.Source,
 		}
-		return err
+
+		if err := p.dbMap.Insert(postDTO); err != nil {
+			if sqlerr, ok := err.(*mysql.MySQLError); ok {
+				// 存在しないユーザIDで登録した時のエラー
+				if sqlerr.Number == mysqlerr.ER_NO_REFERENCED_ROW_2 && strings.Contains(sqlerr.Message, "user_id") {
+					return errors.New("unexisted user")
+				}
+				// postIDが重複したときのエラー
+				if sqlerr.Number == mysqlerr.ER_DUP_ENTRY && strings.Contains(sqlerr.Message, "posts.PRIMARY") {
+					return errors.New("post ID is duplicated")
+				}
+			}
+			return err
+		}
+		post.ID = postDTO.ID
+		return nil
 	}
-
-	post.ID = postDTO.ID
-
-	return nil
 }
 
 // PostDTO はDBとやりとりするためのDataTransferObjectです
