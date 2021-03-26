@@ -88,3 +88,11 @@ func (u *UserUseCase) Update(ctx context.Context, user *entity.User) error {
 	}
 	return nil
 }
+
+// Delete は引数のuserエンティティをもとにユーザを削除します
+func (u *UserUseCase) Delete(ctx context.Context, user *entity.User) error {
+	if err := u.userRepo.Delete(ctx, user); err != nil {
+		return fmt.Errorf("failed Delete user: %w", err)
+	}
+	return nil
+}
