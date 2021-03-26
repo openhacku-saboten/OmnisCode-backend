@@ -664,10 +664,10 @@ func TestCommentController_Delete(t *testing.T) {
 		wantCode           int
 	}{
 		{
-			name:   "正しくコメントを削除できる",
-			postID: "1",
+			name:      "正しくコメントを削除できる",
+			postID:    "1",
 			commentID: "1",
-			userID: "user-id",
+			userID:    "user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
 				comment.EXPECT().Delete(gomock.Any(), "user-id", 1, 1).Return(nil)
 			},
@@ -675,10 +675,10 @@ func TestCommentController_Delete(t *testing.T) {
 			wantCode: http.StatusOK,
 		},
 		{
-			name:   "存在しないCommentならErrNotFound",
-			postID: "100",
+			name:      "存在しないCommentならErrNotFound",
+			postID:    "100",
 			commentID: "1",
-			userID: "user-id",
+			userID:    "user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
 				comment.EXPECT().Delete(gomock.Any(), "user-id", 100, 1).Return(entity.NewErrorNotFound("comment"))
 			},
@@ -686,10 +686,10 @@ func TestCommentController_Delete(t *testing.T) {
 			wantCode: 404,
 		},
 		{
-			name:   "ユーザーに削除権限がないならForbidden",
-			postID: "1",
+			name:      "ユーザーに削除権限がないならForbidden",
+			postID:    "1",
 			commentID: "1",
-			userID: "other-user-id",
+			userID:    "other-user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
 				comment.EXPECT().Delete(gomock.Any(), "other-user-id", 1, 1).Return(entity.ErrIsNotAuthor)
 			},
