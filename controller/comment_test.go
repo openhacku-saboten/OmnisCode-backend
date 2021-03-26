@@ -669,7 +669,13 @@ func TestCommentController_Delete(t *testing.T) {
 			commentID: "1",
 			userID:    "user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().Delete(gomock.Any(), "user-id", 1, 1).Return(nil)
+				comment.EXPECT().Delete(
+					gomock.Any(),
+					&entity.Comment{
+						ID:     1,
+						PostID: 1,
+						UserID: "user-id",
+					}).Return(nil)
 			},
 			wantErr:  false,
 			wantCode: http.StatusOK,
@@ -680,7 +686,13 @@ func TestCommentController_Delete(t *testing.T) {
 			commentID: "1",
 			userID:    "user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().Delete(gomock.Any(), "user-id", 100, 1).Return(entity.NewErrorNotFound("comment"))
+				comment.EXPECT().Delete(
+					gomock.Any(),
+					&entity.Comment{
+						ID:     1,
+						PostID: 100,
+						UserID: "user-id",
+					}).Return(entity.NewErrorNotFound("comment"))
 			},
 			wantErr:  true,
 			wantCode: 404,
@@ -691,7 +703,13 @@ func TestCommentController_Delete(t *testing.T) {
 			commentID: "1",
 			userID:    "other-user-id",
 			prepareMockComment: func(comment *mock.MockComment) {
-				comment.EXPECT().Delete(gomock.Any(), "other-user-id", 1, 1).Return(entity.ErrIsNotAuthor)
+				comment.EXPECT().Delete(
+					gomock.Any(),
+					&entity.Comment{
+						ID:     1,
+						PostID: 1,
+						UserID: "other-user-id",
+					}).Return(entity.ErrIsNotAuthor)
 			},
 			wantErr:  true,
 			wantCode: 403,

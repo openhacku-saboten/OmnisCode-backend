@@ -153,23 +153,26 @@ func (ctrl *CommentController) Update(c echo.Context) error {
 func (ctrl *CommentController) Delete(c echo.Context) error {
 	logger := log.New()
 
-	commentID, err := strconv.Atoi(c.Param("commentID"))
+	var err error
+	comment := &entity.Comment{}
+	comment.ID, err = strconv.Atoi(c.Param("commentID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	postID, err := strconv.Atoi(c.Param("postID"))
+	comment.PostID, err = strconv.Atoi(c.Param("postID"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest)
 	}
 
-	userID, ok := c.Get("userID").(string)
+	var ok bool
+	comment.UserID, ok = c.Get("userID").(string)
 	if !ok {
 		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if err := ctrl.uc.Delete(c.Request().Context(), userID, postID, commentID); err != nil {
+	if err := ctrl.uc.Delete(c.Request().Context(), comment); err != nil {
 		if errors.Is(err, entity.ErrIsNotAuthor) {
 			return echo.NewHTTPError(http.StatusForbidden, entity.ErrIsNotAuthor.Error())
 		}

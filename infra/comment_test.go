@@ -771,38 +771,42 @@ func TestCommentRepository_Delete(t *testing.T) {
 	commentRepo := NewCommentRepository(dbMap)
 
 	tests := []struct {
-		name      string
-		commentID int
-		postID    int
-		userID    string
-		wantErr   error
+		name    string
+		comment *entity.Comment
+		wantErr error
 	}{
 		{
-			name:      "正しくコメントを削除できる",
-			commentID: 1,
-			postID:    1,
-			userID:    "user-id",
-			wantErr:   nil,
+			name: "正しくコメントを削除できる",
+			comment: &entity.Comment{
+				ID:     1,
+				PostID: 1,
+				UserID: "user-id",
+			},
+			wantErr: nil,
 		},
 		{
-			name:      "コメントが存在しないならErrNotFound",
-			commentID: 100,
-			postID:    1,
-			userID:    "user-id",
-			wantErr:   entity.NewErrorNotFound("comment"),
+			name: "コメントが存在しないならErrNotFound",
+			comment: &entity.Comment{
+				ID:     100,
+				PostID: 1,
+				UserID: "user-id",
+			},
+			wantErr: entity.NewErrorNotFound("comment"),
 		},
 		{
-			name:      "ユーザーが違うならErrIsNotAuthor",
-			commentID: 2,
-			postID:    1,
-			userID:    "other-user-id",
-			wantErr:   entity.ErrIsNotAuthor,
+			name: "ユーザーが違うならErrIsNotAuthor",
+			comment: &entity.Comment{
+				ID:     2,
+				PostID: 1,
+				UserID: "other-user-id",
+			},
+			wantErr: entity.ErrIsNotAuthor,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := commentRepo.Delete(context.Background(), tt.userID, tt.postID, tt.commentID)
+			err := commentRepo.Delete(context.Background(), tt.comment)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)

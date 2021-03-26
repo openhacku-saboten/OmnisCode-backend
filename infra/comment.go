@@ -202,25 +202,25 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 }
 
 // Delete は該当コメントをDBから削除する
-func (r *CommentRepository) Delete(ctx context.Context, userID string, postID, commentID int) error {
+func (r *CommentRepository) Delete(ctx context.Context, comment *entity.Comment) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
 		// 該当するコメントが存在するか確認
-		gotComment, err := r.FindByID(ctx, postID, commentID)
+		gotComment, err := r.FindByID(ctx, comment.PostID, comment.ID)
 		if err != nil {
 			return entity.NewErrorNotFound("comment")
 		}
 
 		// 所有者でないなら、削除処理は行わない
-		if gotComment.UserID != userID {
+		if gotComment.UserID != comment.UserID {
 			return entity.ErrIsNotAuthor
 		}
 
 		commentDTO := &CommentInsertDTO{
-			ID:     commentID,
-			PostID: postID,
+			ID:     comment.ID,
+			PostID: comment.PostID,
 		}
 
 		if _, err := r.dbMap.Delete(commentDTO); err != nil {
