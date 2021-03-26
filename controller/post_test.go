@@ -442,3 +442,90 @@ func TestPostController_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestPostController_Delete(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		postID          string
+		prepareMockPost func(ctx context.Context, post *mock.MockPost)
+		wantErr         bool
+		wantCode        int
+	}{
+		{
+			name:   "正しく投稿を削除できる",
+			userID: "user-id",
+			postID: "1",
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Delete(ctx, &entity.Post{
+					ID:     1,
+					UserID: "user-id",
+				}).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "存在しないポストならばErrNotFound",
+			userID: "user-id",
+			postID: "100",
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Delete(ctx, &entity.Post{
+					ID:     100,
+					UserID: "user-id",
+				}).Return(entity.NewErrorNotFound("post"))
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+		{
+			name:   "ユーザーに削除権限がないならばErrIsNotAuthor",
+			userID: "other-user-id",
+			postID: "1",
+			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
+				post.EXPECT().Delete(ctx, &entity.Post{
+					ID:     1,
+					UserID: "other-user-id",
+				}).Return(entity.ErrIsNotAuthor)
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("DELETE", "/", nil)
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetParamNames("postID")
+			c.SetParamValues(tt.postID)
+			c.Set("userID", tt.userID)
+
+			ctx := context.Background()
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+			postRepo := mock.NewMockPost(ctrl)
+			tt.prepareMockPost(ctx, postRepo)
+			userRepo := mock.NewMockUser(ctrl)
+
+			con := NewPostController(usecase.NewPostUsecase(postRepo, userRepo))
+			err := con.Delete(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+		})
+	}
+}
