@@ -116,12 +116,12 @@ func (ctrl *PostController) Update(c echo.Context) error {
 	ctx := c.Request().Context()
 	if err := ctrl.uc.Update(ctx, post); err != nil {
 		if errors.Is(err, entity.ErrIsNotAuthor) {
-			logger.Errorf("forbedden update occurs: %s", err.Error())
+			logger.Errorf("forbidden update occurs: %s", err.Error())
 			return echo.NewHTTPError(http.StatusForbidden, err.Error())
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
-			logger.Errorf("forbedden update occurs: %s", err.Error())
+			logger.Errorf("forbidden update occurs: %s", err.Error())
 			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
 		}
 
