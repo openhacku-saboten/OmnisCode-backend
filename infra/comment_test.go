@@ -701,3 +701,117 @@ func TestCommentRepository_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestCommentRepository_Delete(t *testing.T) {
+	dbMap, err := NewDB()
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateTable(t, dbMap, "users")
+
+	if err := dbMap.Insert(&UserDTO{
+		ID:        "user-id",
+		Name:      "test user",
+		Profile:   "test profile",
+		TwitterID: "twitter",
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	dbMap.AddTableWithName(PostDTO{}, "posts").SetKeys(true, "id")
+	truncateTable(t, dbMap, "posts")
+
+	if err := dbMap.Insert(&PostDTO{
+		ID:        1,
+		UserID:    "user-id",
+		Title:     "test title",
+		Code:      "package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+		Language:  "Go",
+		Content:   "Test code",
+		Source:    "github.com",
+		CreatedAt: time.Unix(100, 0),
+		UpdatedAt: time.Unix(100, 0),
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	dbMap.AddTableWithName(CommentDTO{}, "comments").SetKeys(true, "id")
+	truncateTable(t, dbMap, "comments")
+
+	commentDTOs := []*CommentDTO{
+		{
+			ID:        1,
+			UserID:    "user-id",
+			PostID:    1,
+			Type:      "none",
+			Content:   "type none",
+			CreatedAt: time.Unix(100, 0),
+			UpdatedAt: time.Unix(100, 0),
+		},
+		{
+			ID:        2,
+			UserID:    "user-id",
+			PostID:    1,
+			Type:      "highlight",
+			Content:   "type highlight",
+			FirstLine: 10,
+			LastLine:  11,
+			CreatedAt: time.Unix(100, 0),
+			UpdatedAt: time.Unix(100, 0),
+		},
+	}
+	for _, commentDTO := range commentDTOs {
+		if err := dbMap.Insert(commentDTO); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	commentRepo := NewCommentRepository(dbMap)
+
+	tests := []struct {
+		name    string
+		comment *entity.Comment
+		wantErr error
+	}{
+		{
+			name: "正しくコメントを削除できる",
+			comment: &entity.Comment{
+				ID:     1,
+				PostID: 1,
+				UserID: "user-id",
+			},
+			wantErr: nil,
+		},
+		{
+			name: "コメントが存在しないならErrNotFound",
+			comment: &entity.Comment{
+				ID:     100,
+				PostID: 1,
+				UserID: "user-id",
+			},
+			wantErr: entity.NewErrorNotFound("comment"),
+		},
+		{
+			name: "ユーザーが違うならErrIsNotAuthor",
+			comment: &entity.Comment{
+				ID:     2,
+				PostID: 1,
+				UserID: "other-user-id",
+			},
+			wantErr: entity.ErrIsNotAuthor,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := commentRepo.Delete(context.Background(), tt.comment)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+		})
+	}
+}

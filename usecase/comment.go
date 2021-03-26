@@ -76,3 +76,11 @@ func (u *CommentUseCase) Update(ctx context.Context, comment *entity.Comment) er
 	}
 	return nil
 }
+
+// Delete はコメントを削除します
+func (u *CommentUseCase) Delete(ctx context.Context, comment *entity.Comment) error {
+	if err := u.commentRepo.Delete(ctx, comment); err != nil {
+		return fmt.Errorf("failed to Delete Comment into DB: %w", err)
+	}
+	return nil
+}
