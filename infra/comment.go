@@ -171,6 +171,10 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if err := comment.IsValid(); err != nil {
+			return fmt.Errorf("invalid Comment fields: %w", err)
+		}
+
 		// 該当するコメントが存在するか確認
 		gotComment, err := r.FindByID(ctx, comment.PostID, comment.ID)
 		if err != nil {

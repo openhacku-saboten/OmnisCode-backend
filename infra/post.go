@@ -172,6 +172,10 @@ func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if err := post.IsValid(); err != nil {
+			return fmt.Errorf("invalid Post fields: %w", err)
+		}
+
 		// 該当するポストがあるか確認
 		getPost, err := p.FindByID(ctx, post.ID)
 		if err != nil {
