@@ -18,7 +18,7 @@ import (
 
 var _ repository.Comment = (*CommentRepository)(nil)
 
-// CommentRepository は認証情報の永続化と再構築のためのリポジトリです
+// CommentRepository は認証情報の永続化と再構成のためのリポジトリです
 type CommentRepository struct {
 	dbMap *gorp.DbMap
 }

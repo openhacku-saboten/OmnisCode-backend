@@ -18,7 +18,7 @@ import (
 
 var _ repository.Post = (*PostRepository)(nil)
 
-// PostRepository は投稿情報の永続化と再構築のためのリポジトリです
+// PostRepository は投稿情報の永続化と再構成のためのリポジトリです
 type PostRepository struct {
 	dbMap *gorp.DbMap
 }

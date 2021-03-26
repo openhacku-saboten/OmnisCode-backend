@@ -14,7 +14,7 @@ import (
 
 var _ repository.User = (*UserRepository)(nil)
 
-// UserRepository ユーザー情報の永続化と再構築のためのリポジトリです
+// UserRepository ユーザー情報の永続化と再構成のためのリポジトリです
 type UserRepository struct {
 	dbMap *gorp.DbMap
 }
