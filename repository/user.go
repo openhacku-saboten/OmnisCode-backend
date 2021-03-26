@@ -13,4 +13,5 @@ type User interface {
 	FindByID(ctx context.Context, uid string) (user *entity.User, err error)
 	Insert(ctx context.Context, user *entity.User) error
 	Update(ctx context.Context, user *entity.User) error
+	Delete(ctx context.Context, user *entity.User) error
 }
