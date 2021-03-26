@@ -221,17 +221,12 @@ func TestUserRepository_Delete(t *testing.T) {
 	}{
 		{
 			name:    "ユーザーIDが存在しないならErrNotFound",
-			user:    entity.NewUser("new-id", "existingUser", "existing", "existing", ""),
+			user:    entity.NewUser("new-id", "", "", "", ""),
 			wantErr: entity.NewErrorNotFound("user"),
 		},
 		{
-			name:    "ユーザIDとTwitterIDが合致指定ない場合、削除せずに終わる",
-			user:    entity.NewUser("existing-id", "existingUser", "existing", "existing2", ""),
-			wantErr: entity.ErrIsNotAuthor,
-		},
-		{
 			name:    "正しくユーザーを削除できる",
-			user:    entity.NewUser("existing-id", "existingUser", "existing", "existing", ""),
+			user:    entity.NewUser("existing-id", "", "", "", ""),
 			wantErr: nil,
 		},
 	}
