@@ -202,6 +202,37 @@ func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
 	return nil
 }
 
+// Delete は引数で渡したIDの投稿を削除します
+// 投稿の所有者以外が削除する場合、削除は行われません
+func (p *PostRepository) Delete(ctx context.Context, userID string, postID int) error {
+	select {
+	// echoのリクエストが途切れた場合は早めにリソースを開放するために処理を中断する
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当するポストがあるか確認
+		getPost, err := p.FindByID(ctx, postID)
+		if err != nil {
+			return entity.NewErrorNotFound("post")
+		}
+
+		// 所有者でなければ削除処理は行わない
+		if getPost.UserID != userID {
+			return entity.ErrIsNotAuthor
+		}
+
+		postDTO := &PostInsertDTO{
+			ID: postID,
+		}
+
+		if _, err := p.dbMap.Delete(postDTO); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // PostDTO はDBとやりとりするためのDataTransferObjectです
 // ref: migrations/20210319141439-CreatePosts.sql
 type PostDTO struct {
