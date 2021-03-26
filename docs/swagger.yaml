@@ -194,6 +194,8 @@ paths:
       responses:
         "201":
           description: "successful operation"
+          schema:
+            $ref: "#/definitions/PostResponse"
       security:
       - Bearer: []
   /post/{postID}:
