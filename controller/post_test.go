@@ -381,7 +381,7 @@ func TestPostController_Update(t *testing.T) {
 			wantCode: http.StatusForbidden,
 		},
 		{
-			name:   "存在しないユーザならばErrNotFoundでForbidden",
+			name:   "存在しないユーザならばErrNotFoundでNotFound",
 			userID: "user-id2002",
 			postID: "1",
 			body: `{
@@ -407,7 +407,7 @@ func TestPostController_Update(t *testing.T) {
 				}).Return(entity.NewErrorNotFound("user"))
 			},
 			wantErr:  true,
-			wantCode: http.StatusForbidden,
+			wantCode: http.StatusNotFound,
 		},
 	}
 	for _, tt := range tests {
@@ -481,7 +481,7 @@ func TestPostController_Delete(t *testing.T) {
 				}).Return(entity.NewErrorNotFound("post"))
 			},
 			wantErr:  true,
-			wantCode: http.StatusForbidden,
+			wantCode: http.StatusNotFound,
 		},
 		{
 			name:   "ユーザーに削除権限がないならばErrIsNotAuthor",
