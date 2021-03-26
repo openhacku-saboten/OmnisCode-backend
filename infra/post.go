@@ -131,7 +131,7 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 		return ctx.Err()
 	default:
 		postDTO := &PostInsertDTO{
-			ID:       post.ID,
+			ID:       0,
 			UserID:   post.UserID,
 			Title:    post.Title,
 			Code:     post.Code,
@@ -153,6 +153,7 @@ func (p *PostRepository) Insert(ctx context.Context, post *entity.Post) error {
 			}
 			return err
 		}
+		post.ID = postDTO.ID
 		return nil
 	}
 }
