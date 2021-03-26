@@ -6,4 +6,4 @@ COPY . .
 
 RUN apt-get update && apt-get install -y netcat
 
-CMD [ "./script/run.sh" ]
+CMD [ "./docker/run.sh" ]
