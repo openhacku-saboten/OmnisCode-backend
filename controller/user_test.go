@@ -30,7 +30,7 @@ func TestUserController_Get(t *testing.T) {
 			name:   "正しくユーザーを取得できる",
 			userID: "user-id",
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
@@ -52,7 +52,7 @@ func TestUserController_Get(t *testing.T) {
 			name:   "存在しないユーザーIDならErrUserNotFound",
 			userID: "invalid-user-id",
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("invalid-user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
 					entity.ErrUserNotFound,
 				)
@@ -225,7 +225,7 @@ func TestCommentController_GetByUserID(t *testing.T) {
 			c.SetParamNames("userID")
 			c.SetParamValues(tt.userID)
 
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
 			userRepo := mock.NewMockUser(ctrl)
@@ -332,7 +332,7 @@ func TestUserController_GetPosts(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
-			ctx := context.Background()
+			ctx := c.Request().Context()
 			authRepo := mock.NewMockAuth(ctrl)
 			userRepo := mock.NewMockUser(ctrl)
 			postRepo := mock.NewMockPost(ctrl)
@@ -395,6 +395,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(nil)
 			},
@@ -411,6 +412,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(nil)
 			},
@@ -445,6 +447,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedUser)
 			},
@@ -461,6 +464,7 @@ func TestUserController_Create(t *testing.T) {
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Insert(
+					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
 				).Return(entity.ErrDuplicatedTwitterID)
 			},
@@ -524,11 +528,12 @@ func TestUserController_Update(t *testing.T) {
 				"twitter_id":"newtwitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(nil)
 			},
@@ -544,11 +549,12 @@ func TestUserController_Update(t *testing.T) {
 				"twitter_id":"@newtwitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(nil)
 			},
@@ -582,7 +588,7 @@ func TestUserController_Update(t *testing.T) {
 				"twitter_id":"twitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("invalid-user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
 					entity.ErrUserNotFound,
 				)
@@ -600,11 +606,12 @@ func TestUserController_Update(t *testing.T) {
 				"twitter_id":"newtwitter"
 			}`,
 			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().FindByID("user-id").Return(
+				user.EXPECT().FindByID(gomock.Any(), "user-id").Return(
 					entity.NewUser("user-id", "name", "profile", "twitter", ""),
 					nil,
 				)
 				user.EXPECT().Update(
+					gomock.Any(),
 					entity.NewUser("user-id", "newname", "newprofile", "newtwitter", ""),
 				).Return(entity.NewErrorDuplicated("user TwitterID"))
 			},
@@ -623,6 +630,7 @@ func TestUserController_Update(t *testing.T) {
 
 			ctrl := gomock.NewController(t)
 			defer ctrl.Finish()
+
 			userRepo := mock.NewMockUser(ctrl)
 			tt.prepareMockUser(userRepo)
 			authRepo := mock.NewMockAuth(ctrl)

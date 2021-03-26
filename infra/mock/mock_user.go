@@ -4,10 +4,10 @@
 package mock
 
 import (
-	reflect "reflect"
-
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	entity "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
+	reflect "reflect"
 )
 
 // MockUser is a mock of User interface
@@ -34,38 +34,38 @@ func (_m *MockUser) EXPECT() *MockUserMockRecorder {
 }
 
 // FindByID mocks base method
-func (_m *MockUser) FindByID(uid string) (*entity.User, error) {
-	ret := _m.ctrl.Call(_m, "FindByID", uid)
+func (_m *MockUser) FindByID(ctx context.Context, uid string) (*entity.User, error) {
+	ret := _m.ctrl.Call(_m, "FindByID", ctx, uid)
 	ret0, _ := ret[0].(*entity.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // FindByID indicates an expected call of FindByID
-func (_mr *MockUserMockRecorder) FindByID(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockUser)(nil).FindByID), arg0)
+func (_mr *MockUserMockRecorder) FindByID(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "FindByID", reflect.TypeOf((*MockUser)(nil).FindByID), arg0, arg1)
 }
 
 // Insert mocks base method
-func (_m *MockUser) Insert(user *entity.User) error {
-	ret := _m.ctrl.Call(_m, "Insert", user)
+func (_m *MockUser) Insert(ctx context.Context, user *entity.User) error {
+	ret := _m.ctrl.Call(_m, "Insert", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Insert indicates an expected call of Insert
-func (_mr *MockUserMockRecorder) Insert(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockUser)(nil).Insert), arg0)
+func (_mr *MockUserMockRecorder) Insert(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Insert", reflect.TypeOf((*MockUser)(nil).Insert), arg0, arg1)
 }
 
 // Update mocks base method
-func (_m *MockUser) Update(user *entity.User) error {
-	ret := _m.ctrl.Call(_m, "Update", user)
+func (_m *MockUser) Update(ctx context.Context, user *entity.User) error {
+	ret := _m.ctrl.Call(_m, "Update", ctx, user)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Update indicates an expected call of Update
-func (_mr *MockUserMockRecorder) Update(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), arg0)
+func (_mr *MockUserMockRecorder) Update(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Update", reflect.TypeOf((*MockUser)(nil).Update), arg0, arg1)
 }

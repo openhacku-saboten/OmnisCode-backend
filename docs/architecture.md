@@ -13,23 +13,28 @@ DBサーバ
 ```
 
 ## API仕様
-のえさんが書いてくれたyamlのリンクをここに入れる
+下記の2種類のフォーマットで提供しています。
+
+- [Web版(GitHub Pages)](https://openhacku-saboten.github.io/OmnisCode-backend/index.html)
+- [YAML版](https://github.com/openhacku-saboten/OmnisCode-backend/blob/main/docs/swagger.yaml)
 
 ## アプリケーションアーキテクチャ
-クリーンアーキテクチャを用いました。
+クリーンアーキテクチャを採用しました。
 
 ### ディレクトリ構成
 ```
-.
-├── controller  # HTTP(S)リクエストを捌く責務をおいます
-├── docs        # ドキュメント類
-├── domain      # ドメイン
-│   └── entity  # エンティティ
-├── errors      # ロガーとエラー定義
-├── infra       # 永続化と再構築の実装(DBとの通信)
-├── repository  # 永続化のためのインタフェース定義
-└── usecase     # ハンドラの処理を細分化して処理するユースケース
-    └── mock    # モック
+├── config       # 環境変数の再構成までが責務です
+├── controller   # HTTPリクエストを受け取り、エンティティとしてユースケースに渡すまでが責務です
+├── docker       # Dockerに関する操作の設定ファイル群が含まれます
+├── docs         # ドキュメント類が含まれます
+├── domain
+│   ├── entity   # 対象とそれを操作するロジックであるエンティティの定義が含まれます
+│   └── service  # エンティティ自体が主体となる操作ではないエンティティの操作が責務です
+├── infra        # 永続化と再構成が責務です
+├── log          # ロガー定義が含まれます
+├── migrations   # DBのマイグレーションファイル群が含まれます
+├── repository   # 依存関係の逆転のためのインタフェース定義が含まれます
+└── usecase      # コントローラから受け取ったエンティティを適切なレポジトリに振り分けるまでが責務です
 ```
 
 ### HTTPリクエストからDBアクセスをしてレスポンスを返すまでの流れ
