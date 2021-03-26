@@ -80,7 +80,7 @@ func (p *PostRepository) FindByID(ctx context.Context, postID int) (*entity.Post
 			ID:        postDTO.ID,
 			UserID:    postDTO.UserID,
 			Title:     postDTO.Title,
-			Code:      postDTO.Title,
+			Code:      postDTO.Code,
 			Language:  postDTO.Language,
 			Content:   postDTO.Content,
 			Source:    postDTO.Source,
