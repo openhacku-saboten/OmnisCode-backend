@@ -32,9 +32,8 @@ func (ctrl *UserController) Get(c echo.Context) error {
 	user, err := ctrl.uc.Get(c.Request().Context(), userID)
 
 	if err != nil {
-		errNF := &entity.ErrNotFound{}
-		if errors.As(err, errNF) {
-			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		if errors.Is(err, entity.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
 		}
 
 		logger.Errorf("Unexpected error GET/user/{userID}: %s", err.Error())
@@ -108,13 +107,14 @@ func (ctrl *UserController) Create(c echo.Context) error {
 	user.ID = userID
 
 	if err := ctrl.uc.Create(c.Request().Context(), user); err != nil {
-		errDup := &entity.ErrDuplicated{}
-		if errors.As(err, errDup) {
-			return echo.NewHTTPError(http.StatusBadRequest, errDup.Error())
+		if errors.Is(err, entity.ErrDuplicatedUser) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedUser.Error())
 		}
-		errEmpty := &entity.ErrEmpty{}
-		if errors.As(err, errEmpty) {
-			return echo.NewHTTPError(http.StatusBadRequest, errEmpty.Error())
+		if errors.Is(err, entity.ErrDuplicatedTwitterID) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrDuplicatedTwitterID.Error())
+		}
+		if errors.Is(err, entity.ErrEmptyUserName) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
 		}
 		logger.Errorf("Unexpected error POST/user: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
@@ -139,14 +139,11 @@ func (ctrl *UserController) Update(c echo.Context) error {
 	user.ID = userID
 
 	if err := ctrl.uc.Update(c.Request().Context(), user); err != nil {
-		errNF := &entity.ErrNotFound{}
-		if errors.As(err, errNF) {
-			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		if errors.Is(err, entity.ErrUserNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, entity.ErrUserNotFound.Error())
 		}
-
-		errEmpty := &entity.ErrEmpty{}
-		if errors.As(err, errEmpty) {
-			return echo.NewHTTPError(http.StatusBadRequest, errEmpty.Error())
+		if errors.Is(err, entity.ErrEmptyUserName) {
+			return echo.NewHTTPError(http.StatusBadRequest, entity.ErrEmptyUserName.Error())
 		}
 		errDup := &entity.ErrDuplicated{}
 		if errors.As(err, errDup) {

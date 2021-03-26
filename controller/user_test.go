@@ -49,12 +49,12 @@ func TestUserController_Get(t *testing.T) {
 			},
 		},
 		{
-			name:   "存在しないユーザーIDならErrNewErrorNotFound",
+			name:   "存在しないユーザーIDならErrUserNotFound",
 			userID: "invalid-user-id",
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
-					entity.NewErrorNotFound("user"),
+					entity.ErrUserNotFound,
 				)
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
@@ -312,7 +312,7 @@ func TestUserController_GetPosts(t *testing.T) {
 `,
 		},
 		{
-			name:   "1つも投稿が存在しないならErrNewErrorNotFound",
+			name:   "1つも投稿が存在しないならErrUserNotFound",
 			userID: "user-id2",
 			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
 				post.EXPECT().FindByUserID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
@@ -449,7 +449,7 @@ func TestUserController_Create(t *testing.T) {
 				user.EXPECT().Insert(
 					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
-				).Return(entity.NewErrorDuplicated("user ID"))
+				).Return(entity.ErrDuplicatedUser)
 			},
 			wantErr:  true,
 			wantCode: 400,
@@ -466,7 +466,7 @@ func TestUserController_Create(t *testing.T) {
 				user.EXPECT().Insert(
 					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
-				).Return(entity.NewErrorDuplicated("user TwitterID"))
+				).Return(entity.ErrDuplicatedTwitterID)
 			},
 			wantErr:  true,
 			wantCode: 400,
@@ -580,7 +580,7 @@ func TestUserController_Update(t *testing.T) {
 			wantCode:        400,
 		},
 		{
-			name:   "存在しないユーザーIDならErrNewErrorNotFound",
+			name:   "存在しないユーザーIDならErrUserNotFound",
 			userID: "invalid-user-id",
 			body: `{
 				"name":"username",
@@ -590,7 +590,7 @@ func TestUserController_Update(t *testing.T) {
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
-					entity.NewErrorNotFound("user"),
+					entity.ErrUserNotFound,
 				)
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
@@ -622,7 +622,7 @@ func TestUserController_Update(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest("PUT", "/", strings.NewReader(tt.body))
+			req := httptest.NewRequest("POST", "/", strings.NewReader(tt.body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -661,7 +661,6 @@ func TestUserController_Delete(t *testing.T) {
 	tests := []struct {
 		name            string
 		userID          string
-		body            string
 		prepareMockUser func(user *mock.MockUser)
 		prepareMockAuth func(auth *mock.MockAuth)
 		wantErr         bool
@@ -670,55 +669,22 @@ func TestUserController_Delete(t *testing.T) {
 		{
 			name:   "正しくユーザーを削除できる",
 			userID: "user-id",
-			body: `{
-				"name":"name",
-				"profile":"profile",
-				"twitter_id":"twitter"
-			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Delete(
 					gomock.Any(),
-					entity.NewUser("user-id", "name", "profile", "twitter", ""),
+					entity.NewUser("user-id", "", "", "", ""),
 				).Return(nil)
 			},
 			wantErr:  false,
 			wantCode: 200,
 		},
 		{
-			name:   "不正なbodyならBadRequest",
-			userID: "user-id",
-			body: `{
-				"aaa":"test"
-			}`,
-			prepareMockUser: func(user *mock.MockUser) {
-				user.EXPECT().Delete(
-					gomock.Any(),
-					entity.NewUser("user-id", "", "", "", ""),
-				).Return(entity.NewUser("user-id", "", "", "", "").IsValid())
-			},
-			wantErr:  true,
-			wantCode: 400,
-		},
-		{
-			name:            "bodyがJSON形式でないならBadRequest",
-			userID:          "user-id",
-			body:            `aaaaa`,
-			prepareMockUser: func(user *mock.MockUser) {},
-			wantErr:         true,
-			wantCode:        400,
-		},
-		{
 			name:   "存在しないユーザーIDならErrNewErrorNotFound",
 			userID: "invalid-user-id",
-			body: `{
-				"name":"username",
-				"profile":"profile",
-				"twitter_id":"twitter"
-			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Delete(
 					gomock.Any(),
-					entity.NewUser("invalid-user-id", "username", "profile", "twitter", ""),
+					entity.NewUser("invalid-user-id", "", "", "", ""),
 				).Return(entity.NewErrorNotFound("user"))
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
@@ -728,15 +694,10 @@ func TestUserController_Delete(t *testing.T) {
 		{
 			name:   "別のユーザが削除しようとしているならErrIsNotAuthorでStatusForbidden",
 			userID: "user-id2",
-			body: `{
-				"name":"name",
-				"profile":"profile",
-				"twitter_id":"twitter"
-			}`,
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().Delete(
 					gomock.Any(),
-					entity.NewUser("user-id2", "name", "profile", "twitter", ""),
+					entity.NewUser("user-id2", "", "", "", ""),
 				).Return(entity.ErrIsNotAuthor)
 			},
 			wantErr:  true,
@@ -746,7 +707,7 @@ func TestUserController_Delete(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest("DELETE", "/", strings.NewReader(tt.body))
+			req := httptest.NewRequest("DELETE", "/", nil)
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
