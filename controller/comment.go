@@ -80,7 +80,7 @@ func (ctrl *CommentController) Create(c echo.Context) error {
 		logger.Errorf("error POST /post/{postID}/comment: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return c.NoContent(http.StatusCreated)
+	return c.JSON(http.StatusCreated, comment)
 }
 
 // Get は GET /post/{postID}/comment/{commentID} のHandler

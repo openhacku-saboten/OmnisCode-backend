@@ -89,7 +89,7 @@ func (r *CommentRepository) FindByUserID(ctx context.Context, uid string) ([]*en
 // Insert は該当ユーザーをDBに保存する
 func (r *CommentRepository) Insert(comment *entity.Comment) error {
 	commentDTO := &CommentInsertDTO{
-		ID:        comment.ID,
+		ID:        0,
 		UserID:    comment.UserID,
 		PostID:    comment.PostID,
 		Type:      comment.Type,
@@ -112,6 +112,9 @@ func (r *CommentRepository) Insert(comment *entity.Comment) error {
 		}
 		return err
 	}
+
+	comment.ID = commentDTO.ID
+
 	return nil
 }
 
