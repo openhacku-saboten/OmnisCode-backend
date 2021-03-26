@@ -661,21 +661,27 @@ func TestCommentRepository_Update(t *testing.T) {
 			wantErr: entity.ErrIsNotAuthor,
 		},
 		{
-			name: `PostIDが存在しなければErrNotFoundにしたいが、
-			これはUseCaseで実現するのでひとまずErrIsNotAuthorにしておく`,
+			name: `PostIDが存在しなければErrNotFound`,
 			comment: &entity.Comment{
 				UserID:  "user-id",
 				PostID:  100,
 				Type:    "none",
 				Content: "type none",
 			},
-			wantErr: entity.ErrIsNotAuthor,
+			wantErr: entity.NewErrorNotFound("commnent"),
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err := commentRepo.Update(context.Background(), tt.comment)
+
+			errNF := &entity.ErrNotFound{}
+			if errors.As(err, errNF) {
+				if errors.As(tt.wantErr, errNF) {
+					return
+				}
+			}
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)

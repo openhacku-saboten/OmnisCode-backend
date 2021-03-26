@@ -153,8 +153,8 @@ func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment)
 		// 該当するコメントが存在するか確認
 		gotComment, err := r.FindByID(comment.PostID, comment.ID)
 		if err != nil {
-			// そもそも取得できない場合は権限がないのと同義なのでErrIsNotAuthorを返す
-			return entity.ErrIsNotAuthor
+			// そもそも取得できない場合は権限がないのと同義なのでErrNotFoundを返す
+			return entity.NewErrorNotFound("comment")
 		}
 
 		// 所有者でないなら、更新処理は行わない
