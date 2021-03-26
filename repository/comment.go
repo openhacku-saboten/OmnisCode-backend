@@ -14,4 +14,5 @@ type Comment interface {
 	FindByUserID(ctx context.Context, uid string) ([]*entity.Comment, error)
 	FindByPostID(ctx context.Context, postID int) (comments []*entity.Comment, err error)
 	Insert(ctx context.Context, comment *entity.Comment) error
+	Update(ctx context.Context, comment *entity.Comment) error
 }

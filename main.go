@@ -52,7 +52,7 @@ func main() {
 	postUsecase := usecase.NewPostUsecase(postRepo, userRepo)
 	postController := controller.NewPostController(postUsecase)
 
-	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo)
+	commentUseCase := usecase.NewCommentUseCase(commentRepo, postRepo, userRepo)
 	commentController := controller.NewCommentController(commentUseCase)
 
 	e := echo.New()
@@ -75,6 +75,7 @@ func main() {
 	comment.GET("", commentController.GetByPostID)
 	comment.POST("", commentController.Create, authMiddleware.Authenticate)
 	comment.GET("/:commentID", commentController.Get)
+	comment.PUT("/:commentID", commentController.Update, authMiddleware.Authenticate)
 
 	// ref: https://echo.labstack.com/cookbook/graceful-shutdown
 	// Start server

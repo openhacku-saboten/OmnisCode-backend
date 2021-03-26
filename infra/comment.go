@@ -30,6 +30,35 @@ func NewCommentRepository(dbMap *gorp.DbMap) *CommentRepository {
 	return &CommentRepository{dbMap: dbMap}
 }
 
+// FindByID はpostID, commentIDからコメントを取得します
+func (r *CommentRepository) FindByID(ctx context.Context, postID, commentID int) (*entity.Comment, error) {
+	select {
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	default:
+		var commentDTO CommentDTO
+		if err := r.dbMap.SelectOne(&commentDTO, "SELECT * FROM comments WHERE post_id = ? AND id = ?", postID, commentID); err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, entity.NewErrorNotFound("comment")
+			}
+			return nil, err
+		}
+
+		return &entity.Comment{
+			ID:        commentDTO.ID,
+			UserID:    commentDTO.UserID,
+			PostID:    commentDTO.PostID,
+			Type:      commentDTO.Type,
+			Content:   commentDTO.Content,
+			FirstLine: commentDTO.FirstLine,
+			LastLine:  commentDTO.LastLine,
+			Code:      commentDTO.Code,
+			CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
+			UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
+		}, nil
+	}
+}
+
 // FindByPostID は該当PostIDに属するコメントのスライスを返す
 func (r *CommentRepository) FindByPostID(ctx context.Context, postID int) (comments []*entity.Comment, err error) {
 	select {
@@ -102,8 +131,12 @@ func (r *CommentRepository) Insert(ctx context.Context, comment *entity.Comment)
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if err := comment.IsValid(); err != nil {
+			return fmt.Errorf("invalid Comment fields: %w", err)
+		}
+
 		commentDTO := &CommentInsertDTO{
-			ID:        0,
+			ID:        0, // auto incrementされるのでこれで良い
 			UserID:    comment.UserID,
 			PostID:    comment.PostID,
 			Type:      comment.Type,
@@ -131,33 +164,41 @@ func (r *CommentRepository) Insert(ctx context.Context, comment *entity.Comment)
 	}
 }
 
-// FindByID はpostID, commentIDからコメントを取得します
-func (r *CommentRepository) FindByID(ctx context.Context, postID, commentID int) (*entity.Comment, error) {
+// Update は引数で渡したエンティティのコメントでDBに保存されている情報を更新します
+// コメントした人以外が更新する場合、更新は行われません
+func (r *CommentRepository) Update(ctx context.Context, comment *entity.Comment) error {
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return ctx.Err()
 	default:
-		var commentDTO CommentDTO
-		if err := r.dbMap.SelectOne(&commentDTO, "SELECT * FROM comments WHERE post_id = ? AND id = ?", postID, commentID); err != nil {
-			if errors.Is(err, sql.ErrNoRows) {
-				return nil, entity.NewErrorNotFound("comment")
-			}
-			return nil, err
+		// 該当するコメントが存在するか確認
+		gotComment, err := r.FindByID(ctx, comment.PostID, comment.ID)
+		if err != nil {
+			// そもそも取得できない場合は権限がないのと同義なのでErrNotFoundを返す
+			return entity.NewErrorNotFound("comment")
 		}
 
-		return &entity.Comment{
-			ID:        commentDTO.ID,
-			UserID:    commentDTO.UserID,
-			PostID:    commentDTO.PostID,
-			Type:      commentDTO.Type,
-			Content:   commentDTO.Content,
-			FirstLine: commentDTO.FirstLine,
-			LastLine:  commentDTO.LastLine,
-			Code:      commentDTO.Code,
-			CreatedAt: service.ConvertTimeToStr(commentDTO.CreatedAt),
-			UpdatedAt: service.ConvertTimeToStr(commentDTO.UpdatedAt),
-		}, nil
+		// 所有者でないなら、更新処理は行わない
+		if gotComment.UserID != comment.UserID {
+			return entity.ErrIsNotAuthor
+		}
+
+		commentDTO := &CommentInsertDTO{
+			ID:        comment.ID,
+			UserID:    comment.UserID,
+			PostID:    comment.PostID,
+			Type:      comment.Type,
+			Content:   comment.Content,
+			FirstLine: comment.FirstLine,
+			LastLine:  comment.LastLine,
+			Code:      comment.Code,
+		}
+
+		if _, err := r.dbMap.Update(commentDTO); err != nil {
+			return err
+		}
 	}
+	return nil
 }
 
 // CommentDTO はDBとやり取りするためのDataTransferObject
