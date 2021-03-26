@@ -157,7 +157,7 @@ func (p *PostRepository) Update(ctx context.Context, post *entity.Post) error {
 		getPost, err := p.FindByID(ctx, post.ID)
 		if err != nil {
 			// Update出来ない理由は権限がないことなのでErrIsNotAuthorを返す
-			return entity.ErrIsNotAuthor
+			return entity.NewErrorNotFound("user")
 		}
 
 		// 所有者でなければ更新処理は行わない
