@@ -49,12 +49,12 @@ func TestUserController_Get(t *testing.T) {
 			},
 		},
 		{
-			name:   "存在しないユーザーIDならErrUserNotFound",
+			name:   "存在しないユーザーIDならErrNewErrorNotFound",
 			userID: "invalid-user-id",
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
-					entity.ErrUserNotFound,
+					entity.NewErrorNotFound("user"),
 				)
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
@@ -312,7 +312,7 @@ func TestUserController_GetPosts(t *testing.T) {
 `,
 		},
 		{
-			name:   "1つも投稿が存在しないならErrUserNotFound",
+			name:   "1つも投稿が存在しないならErrNewErrorNotFound",
 			userID: "user-id2",
 			prepareMockPost: func(ctx context.Context, uid string, post *mock.MockPost) {
 				post.EXPECT().FindByUserID(ctx, uid).Return(nil, entity.NewErrorNotFound("post"))
@@ -449,7 +449,7 @@ func TestUserController_Create(t *testing.T) {
 				user.EXPECT().Insert(
 					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
-				).Return(entity.ErrDuplicatedUser)
+				).Return(entity.NewErrorDuplicated("user ID"))
 			},
 			wantErr:  true,
 			wantCode: 400,
@@ -466,7 +466,7 @@ func TestUserController_Create(t *testing.T) {
 				user.EXPECT().Insert(
 					gomock.Any(),
 					entity.NewUser("user-id", "username", "profile", "twitter", ""),
-				).Return(entity.ErrDuplicatedTwitterID)
+				).Return(entity.NewErrorDuplicated("user TwitterID"))
 			},
 			wantErr:  true,
 			wantCode: 400,
@@ -580,7 +580,7 @@ func TestUserController_Update(t *testing.T) {
 			wantCode:        400,
 		},
 		{
-			name:   "存在しないユーザーIDならErrUserNotFound",
+			name:   "存在しないユーザーIDならErrNewErrorNotFound",
 			userID: "invalid-user-id",
 			body: `{
 				"name":"username",
@@ -590,7 +590,7 @@ func TestUserController_Update(t *testing.T) {
 			prepareMockUser: func(user *mock.MockUser) {
 				user.EXPECT().FindByID(gomock.Any(), "invalid-user-id").Return(
 					nil,
-					entity.ErrUserNotFound,
+					entity.NewErrorNotFound("user"),
 				)
 			},
 			prepareMockAuth: func(auth *mock.MockAuth) {},
@@ -622,7 +622,7 @@ func TestUserController_Update(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			e := echo.New()
-			req := httptest.NewRequest("POST", "/", strings.NewReader(tt.body))
+			req := httptest.NewRequest("PUT", "/", strings.NewReader(tt.body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
@@ -639,6 +639,130 @@ func TestUserController_Update(t *testing.T) {
 
 			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
 			err := con.Update(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+		})
+	}
+}
+
+func TestUserController_Delete(t *testing.T) {
+	tests := []struct {
+		name            string
+		userID          string
+		body            string
+		prepareMockUser func(user *mock.MockUser)
+		prepareMockAuth func(auth *mock.MockAuth)
+		wantErr         bool
+		wantCode        int
+	}{
+		{
+			name:   "正しくユーザーを削除できる",
+			userID: "user-id",
+			body: `{
+				"name":"name",
+				"profile":"profile",
+				"twitter_id":"twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Delete(
+					gomock.Any(),
+					entity.NewUser("user-id", "name", "profile", "twitter", ""),
+				).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: 200,
+		},
+		{
+			name:   "不正なbodyならBadRequest",
+			userID: "user-id",
+			body: `{
+				"aaa":"test"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Delete(
+					gomock.Any(),
+					entity.NewUser("user-id", "", "", "", ""),
+				).Return(entity.NewUser("user-id", "", "", "", "").IsValid())
+			},
+			wantErr:  true,
+			wantCode: 400,
+		},
+		{
+			name:            "bodyがJSON形式でないならBadRequest",
+			userID:          "user-id",
+			body:            `aaaaa`,
+			prepareMockUser: func(user *mock.MockUser) {},
+			wantErr:         true,
+			wantCode:        400,
+		},
+		{
+			name:   "存在しないユーザーIDならErrNewErrorNotFound",
+			userID: "invalid-user-id",
+			body: `{
+				"name":"username",
+				"profile":"profile",
+				"twitter_id":"twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Delete(
+					gomock.Any(),
+					entity.NewUser("invalid-user-id", "username", "profile", "twitter", ""),
+				).Return(entity.NewErrorNotFound("user"))
+			},
+			prepareMockAuth: func(auth *mock.MockAuth) {},
+			wantErr:         true,
+			wantCode:        404,
+		},
+		{
+			name:   "別のユーザが削除しようとしているならErrIsNotAuthorでStatusForbidden",
+			userID: "user-id2",
+			body: `{
+				"name":"name",
+				"profile":"profile",
+				"twitter_id":"twitter"
+			}`,
+			prepareMockUser: func(user *mock.MockUser) {
+				user.EXPECT().Delete(
+					gomock.Any(),
+					entity.NewUser("user-id2", "name", "profile", "twitter", ""),
+				).Return(entity.ErrIsNotAuthor)
+			},
+			wantErr:  true,
+			wantCode: http.StatusForbidden,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("DELETE", "/", strings.NewReader(tt.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.Set("userID", tt.userID)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			userRepo := mock.NewMockUser(ctrl)
+			tt.prepareMockUser(userRepo)
+			authRepo := mock.NewMockAuth(ctrl)
+			postRepo := mock.NewMockPost(ctrl)
+			commentRepo := mock.NewMockComment(ctrl)
+
+			con := NewUserController(usecase.NewUserUseCase(userRepo, authRepo, postRepo, commentRepo))
+			err := con.Delete(c)
 
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
