@@ -2,7 +2,9 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -196,6 +198,7 @@ func TestPostController_Create(t *testing.T) {
 		prepareMockPost func(ctx context.Context, post *mock.MockPost)
 		wantErr         bool
 		wantCode        int
+		wantBody        string
 	}{
 		{
 			name:   "正しく投稿を作成できる",
@@ -220,10 +223,24 @@ func TestPostController_Create(t *testing.T) {
 					Source:    "github.com",
 					CreatedAt: "2021-03-23T11:42:56+09:00",
 					UpdatedAt: "2021-03-23T11:42:56+09:00",
-				}).Return(nil)
+				}).DoAndReturn(func(ctx context.Context, user *entity.Post) error {
+					user.ID = 1
+					return nil
+				})
 			},
 			wantErr:  false,
 			wantCode: 201,
+			wantBody: `{
+				"id": 1,
+				"user_id":"user-id",
+				"title":"test title",
+				"code":"package main\n\nimport \"fmt\"\n\nfunc main(){fmt.Println(\"This is test.\")}",
+				"language":"Go",
+				"content":"Test code",
+				"source":"github.com",
+				"created_at":"2021-03-23T11:42:56+09:00",
+				"updated_at":"2021-03-23T11:42:56+09:00"
+				}`,
 		},
 	}
 	for _, tt := range tests {
@@ -255,6 +272,20 @@ func TestPostController_Create(t *testing.T) {
 			} else {
 				if rec.Code != tt.wantCode {
 					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+
+			if !tt.wantErr {
+				var gotBody, wantBody map[string]interface{}
+				if err = json.Unmarshal(rec.Body.Bytes(), &gotBody); err != nil {
+					t.Fatal(err)
+				}
+				if err = json.Unmarshal([]byte(tt.wantBody), &wantBody); err != nil {
+					t.Fatal(err)
+				}
+
+				if diff := cmp.Diff(wantBody, gotBody); diff != "" {
+					t.Errorf("body (-want +got) =\n%s\n", diff)
 				}
 			}
 		})
