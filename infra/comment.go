@@ -103,7 +103,7 @@ func (r *CommentRepository) Insert(ctx context.Context, comment *entity.Comment)
 		return ctx.Err()
 	default:
 		commentDTO := &CommentInsertDTO{
-			ID:        comment.ID,
+			ID:        0,
 			UserID:    comment.UserID,
 			PostID:    comment.PostID,
 			Type:      comment.Type,
@@ -126,6 +126,7 @@ func (r *CommentRepository) Insert(ctx context.Context, comment *entity.Comment)
 			}
 			return err
 		}
+		comment.ID = commentDTO.ID
 		return nil
 	}
 }
