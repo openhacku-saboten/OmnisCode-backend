@@ -128,8 +128,8 @@ func (ctrl *PostController) Update(c echo.Context) error {
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
-			logger.Errorf("forbidden update occurs: %s", err.Error())
-			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
+			logger.Errorf("not found: %s", err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("error PUT /post/{postID}: %s", err.Error())
@@ -163,8 +163,8 @@ func (ctrl *PostController) Delete(c echo.Context) error {
 		}
 		errNF := &entity.ErrNotFound{}
 		if errors.As(err, errNF) {
-			logger.Errorf("forbidden update occurs: %s", err.Error())
-			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
+			logger.Errorf("not found: %s", err.Error())
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
 		}
 
 		logger.Errorf("error DELETE /post/{postID}: %s", err.Error())
