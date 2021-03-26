@@ -143,7 +143,8 @@ func TestCommentRepository_FindByPostID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotComments, err := commentRepo.FindByPostID(tt.postID)
+			ctx := context.Background()
+			gotComments, err := commentRepo.FindByPostID(ctx, tt.postID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -418,7 +419,8 @@ func TestCommentRepository_Create(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := commentRepo.Insert(tt.comment)
+			ctx := context.Background()
+			err := commentRepo.Insert(ctx, tt.comment)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
@@ -520,7 +522,7 @@ func TestCommentRepository_FindByID(t *testing.T) {
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			gotComment, err := commentRepo.FindByID(tt.postID, tt.commentID)
+			gotComment, err := commentRepo.FindByID(context.Background(), tt.postID, tt.commentID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
