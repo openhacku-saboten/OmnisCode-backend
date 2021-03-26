@@ -652,3 +652,85 @@ func TestCommentController_Update(t *testing.T) {
 		})
 	}
 }
+
+func TestCommentController_Delete(t *testing.T) {
+	tests := []struct {
+		name               string
+		postID             string
+		commentID          string
+		userID             string
+		prepareMockComment func(comment *mock.MockComment)
+		wantErr            bool
+		wantCode           int
+	}{
+		{
+			name:   "正しくコメントを削除できる",
+			postID: "1",
+			commentID: "1",
+			userID: "user-id",
+			prepareMockComment: func(comment *mock.MockComment) {
+				comment.EXPECT().Delete(gomock.Any(), "user-id", 1, 1).Return(nil)
+			},
+			wantErr:  false,
+			wantCode: http.StatusOK,
+		},
+		{
+			name:   "存在しないCommentならErrNotFound",
+			postID: "100",
+			commentID: "1",
+			userID: "user-id",
+			prepareMockComment: func(comment *mock.MockComment) {
+				comment.EXPECT().Delete(gomock.Any(), "user-id", 100, 1).Return(entity.NewErrorNotFound("comment"))
+			},
+			wantErr:  true,
+			wantCode: 404,
+		},
+		{
+			name:   "ユーザーに削除権限がないならForbidden",
+			postID: "1",
+			commentID: "1",
+			userID: "other-user-id",
+			prepareMockComment: func(comment *mock.MockComment) {
+				comment.EXPECT().Delete(gomock.Any(), "other-user-id", 1, 1).Return(entity.ErrIsNotAuthor)
+			},
+			wantErr:  true,
+			wantCode: 403,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			e := echo.New()
+			req := httptest.NewRequest("DELETE", "/", nil)
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+			rec := httptest.NewRecorder()
+			c := e.NewContext(req, rec)
+			c.SetParamNames("postID", "commentID")
+			c.SetParamValues(tt.postID, tt.commentID)
+			c.Set("userID", tt.userID)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			commentRepo := mock.NewMockComment(ctrl)
+			tt.prepareMockComment(commentRepo)
+			postRepo := mock.NewMockPost(ctrl)
+			userRepo := mock.NewMockUser(ctrl)
+			con := NewCommentController(usecase.NewCommentUseCase(commentRepo, postRepo, userRepo))
+			err := con.Delete(c)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+			}
+
+			if he, ok := err.(*echo.HTTPError); ok {
+				if he.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", he.Code, tt.wantCode)
+				}
+			} else {
+				if rec.Code != tt.wantCode {
+					t.Errorf("code = %d, want = %d", rec.Code, tt.wantCode)
+				}
+			}
+		})
+	}
+}

@@ -774,25 +774,35 @@ func TestCommentRepository_Delete(t *testing.T) {
 		name      string
 		commentID int
 		postID    int
+		userID    string
 		wantErr   error
 	}{
 		{
 			name:      "正しくコメントを削除できる",
 			commentID: 1,
 			postID:    1,
+			userID:    "user-id",
 			wantErr:   nil,
 		},
 		{
-			name:      "コメントが存在しないなら何もしない",
+			name:      "コメントが存在しないならErrNotFound",
 			commentID: 100,
 			postID:    1,
-			wantErr:   nil,
+			userID:    "user-id",
+			wantErr:   entity.NewErrorNotFound("comment"),
+		},
+		{
+			name:      "ユーザーが違うならErrIsNotAuthor",
+			commentID: 2,
+			postID:    1,
+			userID:    "other-user-id",
+			wantErr:   entity.ErrIsNotAuthor,
 		},
 	}
 	for _, tt := range tests {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			err := commentRepo.Delete(context.Background(), tt.postID, tt.commentID)
+			err := commentRepo.Delete(context.Background(), tt.userID, tt.postID, tt.commentID)
 
 			if !errors.Is(err, tt.wantErr) {
 				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)

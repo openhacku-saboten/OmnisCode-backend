@@ -79,17 +79,7 @@ func (u *CommentUseCase) Update(ctx context.Context, comment *entity.Comment) er
 
 // Delete はコメントを削除します
 func (u *CommentUseCase) Delete(ctx context.Context, userID string, postID, commentID int) error {
-	// Commentの存在確認
-	comment, err := u.commentRepo.FindByID(ctx, postID, commentID)
-	if err != nil {
-		return fmt.Errorf("not found comment in DB: %w", err)
-	}
-	// Commentのオーナー以外による削除を弾く
-	if comment.UserID != userID {
-		return entity.ErrIsNotAuthor
-	}
-
-	if err := u.commentRepo.Delete(ctx, postID, commentID); err != nil {
+	if err := u.commentRepo.Delete(ctx, userID, postID, commentID); err != nil {
 		return fmt.Errorf("failed to Delete Comment into DB: %w", err)
 	}
 	return nil
