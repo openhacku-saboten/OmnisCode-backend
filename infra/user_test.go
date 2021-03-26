@@ -43,7 +43,7 @@ func TestUserRepository_FindByID(t *testing.T) {
 			name:     "存在しないユーザーの場合はErrNoRows",
 			userID:   "not-existing-id",
 			wantUser: nil,
-			wantErr:  entity.ErrUserNotFound,
+			wantErr:  entity.NewErrorNotFound("user"),
 		},
 	}
 	for _, tt := range tests {

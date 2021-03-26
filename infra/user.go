@@ -36,7 +36,7 @@ func (r *UserRepository) FindByID(ctx context.Context, uid string) (user *entity
 		err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return nil, entity.ErrUserNotFound
+				return nil, entity.NewErrorNotFound("user")
 			}
 			return nil, err
 		}
@@ -113,6 +113,9 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		if err := user.IsValid(); err != nil {
+			return err
+		}
 		// 該当ユーザの存在確認
 		gotUser, err := r.FindByID(ctx, user.ID)
 		if err != nil {
