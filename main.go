@@ -70,6 +70,7 @@ func main() {
 	post.POST("", postController.Create, authMiddleware.Authenticate)
 	post.GET("/:postID", postController.Get)
 	post.PUT("/:postID", postController.Update, authMiddleware.Authenticate)
+	post.DELETE("/:postID", postController.Delete, authMiddleware.Authenticate)
 
 	comment := v1.Group("/post/:postID/comment")
 	comment.GET("", commentController.GetByPostID)
