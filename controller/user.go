@@ -167,19 +167,16 @@ func (ctrl *UserController) Update(c echo.Context) error {
 func (ctrl *UserController) Delete(c echo.Context) error {
 	logger := log.New()
 
-	user := &entity.User{}
-	if err := c.Bind(user); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest)
-	}
-
-	var ok bool
-	user.ID, ok = c.Get("userID").(string)
+	userID, ok := c.Get("userID").(string)
 	if !ok {
 		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	if err := ctrl.uc.Delete(c.Request().Context(), user); err != nil {
+	if err := ctrl.uc.Delete(
+		c.Request().Context(),
+		entity.NewUser(userID, "", "", "", ""),
+	); err != nil {
 		errEmpty := &entity.ErrEmpty{}
 		if errors.As(err, errEmpty) {
 			return echo.NewHTTPError(http.StatusBadRequest, errEmpty.Error())
