@@ -113,9 +113,6 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
-		if err := user.IsValid(); err != nil {
-			return err
-		}
 		// 該当ユーザの存在確認
 		gotUser, err := r.FindByID(ctx, user.ID)
 		if err != nil {
