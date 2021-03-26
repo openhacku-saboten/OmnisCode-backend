@@ -4,9 +4,7 @@ import (
 	"context"
 	"errors"
 	"testing"
-	"time"
 
-	"github.com/go-gorp/gorp"
 	"github.com/google/go-cmp/cmp"
 	"github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 )
@@ -125,7 +123,7 @@ func TestUserRepository_Update(t *testing.T) {
 		t.Fatalf(err.Error())
 	}
 	dbMap.AddTableWithName(UserDTO{}, "users")
-	truncateUser(t, dbMap)
+	truncateTable(t, dbMap, "users")
 	userDTOs := []*UserDTO{
 		{
 			ID:        "existing-id",
@@ -187,25 +185,65 @@ func TestUserRepository_Update(t *testing.T) {
 	}
 }
 
-func truncateUser(t *testing.T, dbMap *gorp.DbMap) {
-	t.Helper()
-
-	// databaseを初期化する
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 0"); err != nil {
-		t.Fatal(err)
+func TestUserRepository_Delete(t *testing.T) {
+	dbMap, err := NewDB()
+	if err != nil {
+		t.Fatalf(err.Error())
 	}
-	// タイミングの問題でTruncateが失敗することがあるので成功するまで試みる
-	for i := 0; i < 5; i++ {
-		_, err := dbMap.Exec("TRUNCATE TABLE users")
-		if err == nil {
-			break
-		}
-		if i == 4 {
+	dbMap.AddTableWithName(UserDTO{}, "users")
+	truncateTable(t, dbMap, "users")
+	userDTOs := []*UserDTO{
+		{
+			ID:        "existing-id",
+			Name:      "existingUser",
+			Profile:   "existing",
+			TwitterID: "existing",
+		},
+		{
+			ID:        "existing-id2",
+			Name:      "existingUser2",
+			Profile:   "existing2",
+			TwitterID: "existing2",
+		},
+	}
+	for _, userDTO := range userDTOs {
+		if err := dbMap.Insert(userDTO); err != nil {
 			t.Fatal(err)
 		}
-		time.Sleep(time.Second * 1)
 	}
-	if _, err := dbMap.Exec("SET FOREIGN_KEY_CHECKS = 1"); err != nil {
-		t.Fatal(err)
+
+	userRepo := NewUserRepository(dbMap)
+
+	tests := []struct {
+		name    string
+		user    *entity.User
+		wantErr error
+	}{
+		{
+			name:    "ユーザーIDが存在しないならErrNotFound",
+			user:    entity.NewUser("new-id", "existingUser", "existing", "existing", ""),
+			wantErr: entity.NewErrorNotFound("user"),
+		},
+		{
+			name:    "ユーザIDとTwitterIDが合致指定ない場合、削除せずに終わる",
+			user:    entity.NewUser("existing-id", "existingUser", "existing", "existing2", ""),
+			wantErr: entity.ErrIsNotAuthor,
+		},
+		{
+			name:    "正しくユーザーを削除できる",
+			user:    entity.NewUser("existing-id", "existingUser", "existing", "existing", ""),
+			wantErr: nil,
+		},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := userRepo.Delete(context.Background(), tt.user)
+
+			if !errors.Is(err, tt.wantErr) {
+				t.Errorf("error = %v, wantErr = %v", err, tt.wantErr)
+				return
+			}
+		})
 	}
 }

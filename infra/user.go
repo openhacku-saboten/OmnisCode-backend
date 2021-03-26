@@ -81,7 +81,7 @@ func (r *UserRepository) Insert(ctx context.Context, user *entity.User) error {
 	}
 }
 
-// Update は該当ユーザーをDBに保存する
+// Update は該当ユーザーのデータを更新するDBに保存する
 func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
 	select {
 	case <-ctx.Done():
@@ -101,6 +101,35 @@ func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
 					return entity.NewErrorDuplicated("user TwitterID")
 				}
 			}
+			return err
+		}
+		return nil
+	}
+}
+
+// Delete は該当ユーザIDを満たすユーザをDBから削除します
+func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// 該当ユーザの存在確認
+		gotUser, err := r.FindByID(ctx, user.ID)
+		if err != nil {
+			return entity.NewErrorNotFound("user")
+		}
+
+		// IDとTwitterIDはユニークなので、それらを比較する
+		if user.TwitterID != gotUser.TwitterID {
+			return entity.ErrIsNotAuthor
+		}
+
+		userDTO := &UserDTO{
+			ID:        user.ID,
+			TwitterID: user.TwitterID,
+		}
+
+		if _, err := r.dbMap.Delete(userDTO); err != nil {
 			return err
 		}
 		return nil
