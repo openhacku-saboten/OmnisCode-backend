@@ -15,4 +15,5 @@ type Post interface {
 	FindByUserID(ctx context.Context, uid string) ([]*entity.Post, error)
 	Insert(ctx context.Context, post *entity.Post) error
 	Update(ctx context.Context, post *entity.Post) error
+	Delete(ctx context.Context, post *entity.Post) error
 }

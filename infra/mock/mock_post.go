@@ -35,6 +35,20 @@ func (m *MockPost) EXPECT() *MockPostMockRecorder {
 	return m.recorder
 }
 
+// Delete mocks base method.
+func (m *MockPost) Delete(ctx context.Context, post *entity.Post) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Delete", ctx, post)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete.
+func (mr *MockPostMockRecorder) Delete(ctx, post interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockPost)(nil).Delete), ctx, post)
+}
+
 // FindByID mocks base method.
 func (m *MockPost) FindByID(ctx context.Context, postID int) (*entity.Post, error) {
 	m.ctrl.T.Helper()

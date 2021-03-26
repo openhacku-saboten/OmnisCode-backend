@@ -97,7 +97,7 @@ func (ctrl *PostController) Create(c echo.Context) error {
 	return c.JSON(http.StatusCreated, post)
 }
 
-// Update は Post /post/{postID}のハンドラです
+// Update は PUT /post/{postID}のハンドラです
 func (ctrl *PostController) Update(c echo.Context) error {
 	logger := log.New()
 
@@ -132,7 +132,42 @@ func (ctrl *PostController) Update(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
 		}
 
-		logger.Errorf("error POST /post: %s", err.Error())
+		logger.Errorf("error PUT /post/{postID}: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
+// Delete は DELETE /post/{postID}のハンドラです
+func (ctrl *PostController) Delete(c echo.Context) error {
+	logger := log.New()
+
+	post := &entity.Post{}
+	var ok bool
+	if post.UserID, ok = c.Get("userID").(string); !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	var err error
+	if post.ID, err = strconv.Atoi(c.Param("postID")); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
+
+	ctx := c.Request().Context()
+	if err := ctrl.uc.Delete(ctx, post); err != nil {
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			logger.Errorf("forbidden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			logger.Errorf("forbidden update occurs: %s", err.Error())
+			return echo.NewHTTPError(http.StatusForbidden, errNF.Error())
+		}
+
+		logger.Errorf("error DELETE /post/{postID}: %s", err.Error())
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
