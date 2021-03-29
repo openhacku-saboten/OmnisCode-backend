@@ -97,8 +97,8 @@ func (u *UserUseCase) Delete(ctx context.Context, user *entity.User) error {
 	return nil
 }
 
-func (u *UserUseCase) deleteFlow(ctx context.Context, user *entity.User) func(context.Context, *entity.User) error {
-	return func(ctx context.Context, user *entity.User) error {
+func (u *UserUseCase) deleteFlow(ctx context.Context, user *entity.User) func(context.Context) error {
+	return func(ctx context.Context) error {
 		// DBから削除
 		if err := u.userRepo.Delete(ctx, user); err != nil {
 			return fmt.Errorf("failed Delete user in DB: %w", err)

@@ -149,7 +149,7 @@ func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context)
 	// トランザクションをctxに埋め込む
 	ctx = context.WithValue(ctx, &txKey, tx)
 	// 中身の処理を実行する
-	err := f(ctx)
+	err = f(ctx)
 	if err != nil {
 		_ = tx.Rollback()
 		return fmt.Errorf("rollbacked: %w", err)
