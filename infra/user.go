@@ -151,13 +151,17 @@ func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context)
 	// 中身の処理を実行する
 	err = f(ctx)
 	if err != nil {
-		_ = tx.Rollback()
+		if errRollback := tx.Rollback(); errRollback != nil {
+			return fmt.Errorf("failed rollback: %w", err)
+		}
 		return fmt.Errorf("rollbacked: %w", err)
 	}
 
 	// コミット時に失敗してもロールバック
 	if err := tx.Commit(); err != nil {
-		_ = tx.Rollback()
+		if errRollback := tx.Rollback(); errRollback != nil {
+			return fmt.Errorf("failed rollback: %w", err)
+		}
 		return fmt.Errorf("failed to commit: rollbacked: %w", err)
 	}
 	return nil
