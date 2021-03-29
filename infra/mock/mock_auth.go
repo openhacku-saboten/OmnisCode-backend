@@ -6,6 +6,7 @@ package mock
 import (
 	context "context"
 	gomock "github.com/golang/mock/gomock"
+	entity "github.com/openhacku-saboten/OmnisCode-backend/domain/entity"
 	reflect "reflect"
 )
 
@@ -56,4 +57,16 @@ func (_m *MockAuth) GetIconURL(ctx context.Context, uid string) (string, error) 
 // GetIconURL indicates an expected call of GetIconURL
 func (_mr *MockAuthMockRecorder) GetIconURL(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "GetIconURL", reflect.TypeOf((*MockAuth)(nil).GetIconURL), arg0, arg1)
+}
+
+// Delete mocks base method
+func (_m *MockAuth) Delete(ctx context.Context, user *entity.User) error {
+	ret := _m.ctrl.Call(_m, "Delete", ctx, user)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Delete indicates an expected call of Delete
+func (_mr *MockAuthMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCallWithMethodType(_mr.mock, "Delete", reflect.TypeOf((*MockAuth)(nil).Delete), arg0, arg1)
 }

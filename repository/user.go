@@ -16,5 +16,5 @@ type User interface {
 	Delete(ctx context.Context, user *entity.User) error
 	// FindByIDのときは返り値を持ってしまうので、全体のinfraのrepositoryを管理する
 	// 親みたいなものがあるとよかったかもしれない
-	DoInTx(ctx context.Context, f func(ctx context.Context) error) error
+	DoInTx(ctx context.Context, f func(ctx context.Context, user *entity.User) error) error
 }

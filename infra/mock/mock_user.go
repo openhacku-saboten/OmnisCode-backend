@@ -83,7 +83,7 @@ func (_mr *MockUserMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // DoInTx mocks base method
-func (_m *MockUser) DoInTx(ctx context.Context, f func(context.Context) error) error {
+func (_m *MockUser) DoInTx(ctx context.Context, f func(context.Context, *entity.User) error) error {
 	ret := _m.ctrl.Call(_m, "DoInTx", ctx, f)
 	ret0, _ := ret[0].(error)
 	return ret0
