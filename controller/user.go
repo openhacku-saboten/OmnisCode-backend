@@ -159,3 +159,34 @@ func (ctrl *UserController) Update(c echo.Context) error {
 
 	return c.NoContent(http.StatusOK)
 }
+
+// Delete は DELETE /user/{userID} のHandler
+func (ctrl *UserController) Delete(c echo.Context) error {
+	logger := log.New()
+
+	userID, ok := c.Get("userID").(string)
+	if !ok {
+		logger.Errorf("Failed type assertion of userID: %#v", c.Get("userID"))
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+
+	if err := ctrl.uc.Delete(
+		c.Request().Context(),
+		entity.NewUser(userID, "", "", "", ""),
+	); err != nil {
+		errEmpty := &entity.ErrEmpty{}
+		if errors.As(err, errEmpty) {
+			return echo.NewHTTPError(http.StatusBadRequest, errEmpty.Error())
+		}
+		errNF := &entity.ErrNotFound{}
+		if errors.As(err, errNF) {
+			return echo.NewHTTPError(http.StatusNotFound, errNF.Error())
+		}
+		if errors.Is(err, entity.ErrIsNotAuthor) {
+			return echo.NewHTTPError(http.StatusForbidden, err.Error())
+		}
+		logger.Errorf("Unexpected error PUT/user: %s", err.Error())
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.NoContent(http.StatusOK)
+}

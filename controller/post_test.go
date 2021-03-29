@@ -58,7 +58,7 @@ func TestPostController_GetAll(t *testing.T) {
 `,
 		},
 		{
-			name: "1つも投稿が存在しないならErrUserNotFound",
+			name: "1つも投稿が存在しないならErrNewErrorNotFound",
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
 				post.EXPECT().GetAll(ctx).Return(nil, entity.NewErrorNotFound("post"))
 			},
@@ -134,7 +134,7 @@ func TestPostController_Get(t *testing.T) {
 			wantCode: http.StatusOK,
 		},
 		{
-			name:   "存在しない投稿IDならErrUserNotFound",
+			name:   "存在しない投稿IDならErrNewErrorNotFound",
 			postID: "0",
 			prepareMockPost: func(ctx context.Context, post *mock.MockPost) {
 				post.EXPECT().FindByID(ctx, 0).Return(&entity.Post{

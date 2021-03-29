@@ -29,5 +29,6 @@ require (
 	google.golang.org/api v0.43.0
 	google.golang.org/genproto v0.0.0-20210324141432-3032e8ff099e // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
+	gopkg.in/gorp.v1 v1.7.2
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )

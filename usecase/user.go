@@ -88,3 +88,26 @@ func (u *UserUseCase) Update(ctx context.Context, user *entity.User) error {
 	}
 	return nil
 }
+
+// Delete は引数のuserエンティティをもとにユーザを削除します
+func (u *UserUseCase) Delete(ctx context.Context, user *entity.User) error {
+	if err := u.userRepo.DoInTx(ctx, u.deleteFlow(ctx, user)); err != nil {
+		return fmt.Errorf("failed userRepo.DoInTx: %w", err)
+	}
+	return nil
+}
+
+func (u *UserUseCase) deleteFlow(ctx context.Context, user *entity.User) func(context.Context) error {
+	return func(ctx context.Context) error {
+		// DBから削除
+		if err := u.userRepo.Delete(ctx, user); err != nil {
+			return fmt.Errorf("failed Delete user in DB: %w", err)
+		}
+
+		// Firebaseから削除
+		if err := u.authRepo.Delete(ctx, user); err != nil {
+			return fmt.Errorf("failed Delete user in firebase: %w", err)
+		}
+		return nil
+	}
+}

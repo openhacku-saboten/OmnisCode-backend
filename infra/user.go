@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/VividCortex/mysqlerr"
@@ -36,7 +37,7 @@ func (r *UserRepository) FindByID(ctx context.Context, uid string) (user *entity
 		err = r.dbMap.SelectOne(&userDTO, "SELECT * FROM users WHERE id = ?", uid)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				return nil, entity.ErrUserNotFound
+				return nil, entity.NewErrorNotFound("user")
 			}
 			return nil, err
 		}
@@ -81,7 +82,7 @@ func (r *UserRepository) Insert(ctx context.Context, user *entity.User) error {
 	}
 }
 
-// Update は該当ユーザーをDBに保存する
+// Update は該当ユーザーのデータを更新するDBに保存する
 func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
 	select {
 	case <-ctx.Done():
@@ -105,6 +106,65 @@ func (r *UserRepository) Update(ctx context.Context, user *entity.User) error {
 		}
 		return nil
 	}
+}
+
+// Delete は該当ユーザIDを満たすユーザをDBから削除します
+func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+		// ユーザの存在確認は参照のみなのでトランザクションには入れない
+		// 該当ユーザの存在確認
+		_, err := r.FindByID(ctx, user.ID)
+		if err != nil {
+			return entity.NewErrorNotFound("user")
+		}
+
+		userDTO := &UserDTO{
+			ID: user.ID,
+		}
+
+		// トランザクションオブジェクトをctxから取得する
+		dao, ok := getTx(ctx)
+		if !ok {
+			// 見つからなかったら、dbMapをそのまま設定する
+			dao = r.dbMap
+		}
+		if _, err := dao.Delete(userDTO); err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+// DoInTx はUserRepository内でトランザクションの中でDBにアクセスするためのラッパー関数です
+func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context) error) error {
+	tx, err := r.dbMap.Begin()
+	if err != nil {
+		return fmt.Errorf("failed dbMap.Begin(): %w", err)
+	}
+
+	// トランザクションをctxに埋め込む
+	ctx = context.WithValue(ctx, &txKey, tx)
+	// 中身の処理を実行する
+	err = f(ctx)
+	if err != nil {
+		if errRollback := tx.Rollback(); errRollback != nil {
+			return fmt.Errorf("failed rollback: %w", err)
+		}
+		return fmt.Errorf("rollbacked: %w", err)
+	}
+
+	// コミット時に失敗してもロールバック
+	if err := tx.Commit(); err != nil {
+		if errRollback := tx.Rollback(); errRollback != nil {
+			return fmt.Errorf("failed rollback: %w", err)
+		}
+		return fmt.Errorf("failed to commit: rollbacked: %w", err)
+	}
+	return nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject

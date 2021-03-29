@@ -62,6 +62,7 @@ func main() {
 	user.GET("/:userID", userController.Get)
 	user.POST("", userController.Create, authMiddleware.Authenticate)
 	user.PUT("", userController.Update, authMiddleware.Authenticate)
+	user.DELETE("", userController.Delete, authMiddleware.Authenticate)
 	user.GET("/:userID/post", userController.GetPosts)
 	user.GET("/:userID/comment", userController.GetComments)
 
