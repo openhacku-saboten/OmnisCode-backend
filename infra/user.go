@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/VividCortex/mysqlerr"
@@ -113,6 +114,7 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	default:
+		// ユーザの存在確認は参照のみなのでトランザクションには入れない
 		// 該当ユーザの存在確認
 		_, err := r.FindByID(ctx, user.ID)
 		if err != nil {
@@ -123,11 +125,42 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 			ID: user.ID,
 		}
 
-		if _, err := r.dbMap.Delete(userDTO); err != nil {
+		// トランザクションオブジェクトをctxから取得する
+		dao, ok := getTx(ctx)
+		if !ok {
+			// 見つからなかったら、dbMapをそのまま設定する
+			dao = r.dbMap
+		}
+		if _, err := dao.Delete(userDTO); err != nil {
 			return err
 		}
+
 		return nil
 	}
+}
+
+// DoInTx はトランザクションの中でDBにアクセスするためのラッパー関数です
+func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+	tx, err := r.dbMap.Begin()
+	if err != nil {
+		return nil, fmt.Errorf("failed dbMap.Begin(): %w", err)
+	}
+
+	// トランザクションをctxに埋め込む
+	ctx = context.WithValue(ctx, &txKey, tx)
+	// 中身の処理を実行する
+	v, err := f(ctx)
+	if err != nil {
+		_ = tx.Rollback()
+		return v, fmt.Errorf("rollbacked: %w", err)
+	}
+
+	// コミット時に失敗してもロールバック
+	if err := tx.Commit(); err != nil {
+		_ = tx.Rollback()
+		return v, fmt.Errorf("failed to commit: rollbacked: %w", err)
+	}
+	return v, nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject
