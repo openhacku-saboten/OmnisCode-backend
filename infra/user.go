@@ -139,28 +139,28 @@ func (r *UserRepository) Delete(ctx context.Context, user *entity.User) error {
 	}
 }
 
-// DoInTx はトランザクションの中でDBにアクセスするためのラッパー関数です
-func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context) (interface{}, error)) (interface{}, error) {
+// DoInTx はUserRepository内でトランザクションの中でDBにアクセスするためのラッパー関数です
+func (r *UserRepository) DoInTx(ctx context.Context, f func(ctx context.Context) error) error {
 	tx, err := r.dbMap.Begin()
 	if err != nil {
-		return nil, fmt.Errorf("failed dbMap.Begin(): %w", err)
+		return fmt.Errorf("failed dbMap.Begin(): %w", err)
 	}
 
 	// トランザクションをctxに埋め込む
 	ctx = context.WithValue(ctx, &txKey, tx)
 	// 中身の処理を実行する
-	v, err := f(ctx)
+	err := f(ctx)
 	if err != nil {
 		_ = tx.Rollback()
-		return v, fmt.Errorf("rollbacked: %w", err)
+		return fmt.Errorf("rollbacked: %w", err)
 	}
 
 	// コミット時に失敗してもロールバック
 	if err := tx.Commit(); err != nil {
 		_ = tx.Rollback()
-		return v, fmt.Errorf("failed to commit: rollbacked: %w", err)
+		return fmt.Errorf("failed to commit: rollbacked: %w", err)
 	}
-	return v, nil
+	return nil
 }
 
 // UserDTO はDBとやり取りするためのDataTransferObject

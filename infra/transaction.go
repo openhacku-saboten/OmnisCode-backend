@@ -10,7 +10,8 @@ import (
 var txKey = struct{}{}
 
 // TransactionDAO はTransactionに関するDataAccessObjectです
-// gorp.dbMapで利用するメソッドをここにインタフェースとして追加しておきます
+// gorp.dbMapで利用するメソッドをここにインタフェースとして定義することで、
+// infraではgorpに依存しないような設計となっています
 type TransactionDAO interface {
 	// ref: https://pkg.go.dev/github.com/go-gorp/gorp#DbMap.Delete
 	Delete(list ...interface{}) (int64, error)
