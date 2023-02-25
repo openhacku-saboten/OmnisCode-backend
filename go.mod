@@ -22,9 +22,7 @@ require (
 	github.com/poy/onpar v1.1.2 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/ziutek/mymysql v1.5.4 // indirect
-	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2 // indirect
-	golang.org/x/mod v0.4.2 // indirect
-	golang.org/x/net v0.0.0-20210324205630-d1beb07c2056 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210323180902-22b0adad7558 // indirect
 	google.golang.org/api v0.43.0
 	google.golang.org/genproto v0.0.0-20210324141432-3032e8ff099e // indirect
